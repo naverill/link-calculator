@@ -8,6 +8,7 @@ def calc_velocity(
 ) -> float:
     """
     Calculate the velocity of a satellite in orbit according to Kepler's second law
+
     Parameters
     ---------
         semi_major_axis (float, km): The semi-major axis of the orbit

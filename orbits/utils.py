@@ -3,7 +3,7 @@ from math import acos, atan, atan2, cos, degrees, pi, radians, sin, sqrt, tan
 from constants import EARTH_MU, EARTH_RADIUS
 
 
-def calc_velocity(
+def velocity(
     semi_major_axis: float, orbital_radius: float, mu: float = EARTH_MU
 ) -> float:
     """
@@ -22,9 +22,9 @@ def calc_velocity(
     return sqrt(mu * (2 / orbital_radius - 1 / semi_major_axis))
 
 
-def calc_velocity_circular(orbital_radius: float, mu: float = EARTH_MU) -> float:
+def velocity_circular(orbital_radius: float, mu: float = EARTH_MU) -> float:
     """
-    Special case of calc_velocity where r = a
+    Special case of velocity where r = a
 
     Parameters
     ---------
@@ -35,10 +35,10 @@ def calc_velocity_circular(orbital_radius: float, mu: float = EARTH_MU) -> float
     ------
         velocity (float, km/s): the orbit speed of the satellite
     """
-    return calc_velocity(orbital_radius, orbital_radius, mu)
+    return velocity(orbital_radius, orbital_radius, mu)
 
 
-def calc_period(semi_major_axis: float, mu: float = EARTH_MU) -> float:
+def period(semi_major_axis: float, mu: float = EARTH_MU) -> float:
     """
     Calculate the period of the satellite's orbit according to Kepler's third law
 
@@ -54,7 +54,7 @@ def calc_period(semi_major_axis: float, mu: float = EARTH_MU) -> float:
     return 2 * pi * sqrt(semi_major_axis ** 3 / mu)
 
 
-def calc_angle_sat_to_ground_station(
+def angle_sat_to_ground_station(
     ground_station_lat: float,
     ground_station_long: float,
     sat_lat: float,
@@ -86,7 +86,7 @@ def calc_angle_sat_to_ground_station(
     return degrees(gamma)
 
 
-def calc_angle_sat_to_gs_orbital_radius(
+def angle_sat_to_gs_orbital_radius(
     orbital_radius: float, planet_radius: float = EARTH_RADIUS, min_angle: float = 0
 ):
     """
@@ -108,7 +108,7 @@ def calc_angle_sat_to_gs_orbital_radius(
     return degrees(gamma)
 
 
-def calc_slant_range(
+def slant_range(
     orbital_radius: float, angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
 ) -> float:
     """
@@ -132,7 +132,7 @@ def calc_slant_range(
     )
 
 
-def calc_elevation_angle(
+def elevation_angle(
     orbital_radius: float, angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
 ) -> float:
     """
@@ -161,7 +161,7 @@ def calc_elevation_angle(
     return degrees(elev)
 
 
-def calc_area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS):
+def area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS):
     """
     Calculate the surface area coverage of the Earth from a satellite
 
@@ -178,7 +178,7 @@ def calc_area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_R
     return 2 * pi * planet_radius ** 2 * (1 - cos(angle_sat_to_gs))
 
 
-def calc_percentage_of_coverage(
+def percentage_of_coverage(
     angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
 ) -> float:
     """
@@ -196,13 +196,13 @@ def calc_percentage_of_coverage(
 
     """
     return (
-        calc_area_of_coverage(angle_sat_to_gs, planet_radius)
+        area_of_coverage(angle_sat_to_gs, planet_radius)
         / (4 * pi * planet_radius ** 2)
         * 100
     )
 
 
-def calc_percentage_of_coverage_gamma(angle_sat_to_gs: float) -> float:
+def percentage_of_coverage_gamma(angle_sat_to_gs: float) -> float:
     """
     Calculate the surface area coverage of the Earth from a satellite as a percentage of the total
         surface area
@@ -220,7 +220,7 @@ def calc_percentage_of_coverage_gamma(angle_sat_to_gs: float) -> float:
     return 50 * (1 - cos(gamma_rad))
 
 
-def calc_azimuth_intermediate(
+def azimuth_intermediate(
     ground_station_lat: float, ground_station_long: float, sat_long: float
 ) -> float:
     """
@@ -245,7 +245,7 @@ def calc_azimuth_intermediate(
     return degrees(az)
 
 
-def calc_max_visible_distance(
+def max_visible_distance(
     orbital_radius: float,
     ground_station_lat: float,
     min_angle: float = 0.0,
@@ -278,7 +278,7 @@ def calc_max_visible_distance(
     )
 
 
-def calc_azimuth(
+def azimuth(
     ground_station_lat: float,
     ground_station_long: float,
     sat_lat: float,

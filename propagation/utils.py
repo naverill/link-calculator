@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def calc_power_density(power: float, distance: float) -> float:
+def power_density(power: float, distance: float) -> float:
     """
     Calculate the power density of the wavefront
 
@@ -17,7 +17,7 @@ def calc_power_density(power: float, distance: float) -> float:
     return power / (4 * np.pi * distance ** 2)
 
 
-def calc_eirp(power: float, loss: float, gain: float) -> float:
+def eirp(power: float, loss: float, gain: float) -> float:
     """
     Calculate the Effetive Isotropic Radiated Power
 
@@ -38,7 +38,7 @@ def calc_eirp(power: float, loss: float, gain: float) -> float:
     return power * loss * gain
 
 
-def calc_power_density_eirp(
+def power_density_eirp(
     eirp: float, distance: float, atmospheric_loss: float
 ) -> float:
     """
@@ -57,7 +57,7 @@ def calc_power_density_eirp(
     return eirp / (4 * np.pi * distance ** 2)
 
 
-def calc_effective_aperture(gain: float, wavelength: float) -> float:
+def effective_aperture(gain: float, wavelength: float) -> float:
     """
     Calculate the effective area of the receiving antenna
 
@@ -73,7 +73,7 @@ def calc_effective_aperture(gain: float, wavelength: float) -> float:
     return gain * wavelength ** 2 / (4 * np.pi)
 
 
-def calc_receive_power(
+def receive_power(
     amp_power: float,
     transmit_loss: float,
     transmit_gain: float,
@@ -93,12 +93,12 @@ def calc_receive_power(
     -------
         receive_power (float, W): the total collected power at the receiver's terminals
     """
-    eirp = calc_eirp(amp_power, transmit_loss, transmit_gain)
-    pow_density = calc_power_density_eirp(eirp, distance, atmospheric_loss)
-    eff_aperture = calc_effective_aperture(receive_gain, wavelength)
+    eirp = eirp(amp_power, transmit_loss, transmit_gain)
+    pow_density = power_density_eirp(eirp, distance, atmospheric_loss)
+    eff_aperture = effective_aperture(receive_gain, wavelength)
 
     return pow_density * eff_aperture * receive_loss
 
 
-def calc_free_space_loss(distance: float, wavelength: float) -> float:
+def free_space_loss(distance: float, wavelength: float) -> float:
     return (wavelength / (4 * np.pi * distance)) ** 2

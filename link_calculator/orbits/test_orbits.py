@@ -1,7 +1,7 @@
 from math import isclose, radians
 
-from constants import EARTH_RADIUS
-from utils import (
+from link_calculator.constants import EARTH_RADIUS
+from link_calculator.orbits.utils import (
     angle_sat_to_ground_station,
     angle_sat_to_gs_orbital_radius,
     azimuth_intermediate,
@@ -13,10 +13,10 @@ from utils import (
 
 
 def test_period():
-    height = [250, 500, 1000, 10000]
-    period = [5370, 5677, 6307, 20860]
+    ht = [250, 500, 1000, 10000] # height
+    pd = [5370, 5677, 6307, 20860] # period
 
-    for h, T in zip(height, period):
+    for h, T in zip(ht, pd):
         assert isclose(period(h + EARTH_RADIUS), T, rel_tol=0.5)
 
 
@@ -26,7 +26,7 @@ def test_percentage_of_coverage():
     per = [1.89, 3.63, 6.78, 30.53, 26.66]
 
     for h, a, p in zip(height, angle, per):
-        gamma = angle_sat_to_gs_orbital_radius(h + EARTH_RADIUS, min_angle=a)
+        gamma = angle_sat_to_gs_orbital_radius(h + EARTH_RADIUS, elevation=a)
         assert isclose(percentage_of_coverage(gamma), p, rel_tol=0.5)
 
 
@@ -44,9 +44,8 @@ def test_azimuth_intermediate():
 def test_azimuth_intermediate_2():
     # southern hemisphere, sat to the west
     gs_lat = -30
-    gs_long = -30
+    gs_long = 360 - 30
     sat_long = 30
-    from math import degrees
 
     assert isclose(
         azimuth_intermediate(gs_lat, gs_long, sat_long), 73.9, rel_tol=0.1

@@ -1,6 +1,6 @@
 from math import acos, atan, atan2, cos, degrees, pi, radians, sin, sqrt, tan
 
-from constants import EARTH_MU, EARTH_RADIUS
+from link_calculator.constants import EARTH_MU, EARTH_RADIUS
 
 
 def velocity(
@@ -87,7 +87,7 @@ def angle_sat_to_ground_station(
 
 
 def angle_sat_to_gs_orbital_radius(
-    orbital_radius: float, planet_radius: float = EARTH_RADIUS, min_angle: float = 0
+    orbital_radius: float, planet_radius: float = EARTH_RADIUS, elevation: float = 0
 ):
     """
     Calculate angle gamma at the centre of the ground, between the Earth
@@ -97,14 +97,14 @@ def angle_sat_to_gs_orbital_radius(
     ---------
         orbital_radius (float, km): distance from the centre of mass to the satellite
         planet_radius (float, km, optional): radius of the planet
-        min_angle (float, deg): the minimum angle of visibility over the horizon
+        elevation (float, deg): the angle of elevation over the horizon
 
     Returns
     ------
         gamma (float, deg): angle between satellite and ground station
     """
-    min_angle_rad = radians(min_angle)
-    gamma = acos((planet_radius * cos(min_angle_rad)) / orbital_radius) - min_angle_rad
+    elevation_rad = radians(elevation)
+    gamma = acos((planet_radius * cos(elevation_rad)) / orbital_radius) - elevation_rad
     return degrees(gamma)
 
 
@@ -117,7 +117,7 @@ def slant_range(
     Parameters
     ----------
         orbital_radius (float, km): distance from the centre of mass to the satellite
-        angle_sat_to_gs (float, rad): angle from the satellite to the ground station, centred at the centre of mass
+        angle_sat_to_gs (float, deg): angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return
@@ -167,15 +167,16 @@ def area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
 
     Parameters
     ----------
-        angle_sat_to_gs (float, rad): angle from the satellite to the ground station, centred at the centre of mass
+        angle_sat_to_gs (float, deg): angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return
     ------
         area_coverage (float, km): the area of the Earth's surface visible from a satellite
 
-    """
-    return 2 * pi * planet_radius ** 2 * (1 - cos(angle_sat_to_gs))
+	"""
+    angle_sat_to_gs_rad = radians(angle_sat_to_gs)
+    return 2 * pi * (planet_radius ** 2) * (1 - cos(angle_sat_to_gs_rad))
 
 
 def percentage_of_coverage(

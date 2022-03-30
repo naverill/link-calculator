@@ -182,67 +182,43 @@ def slant_path(
         return (rain_altitude - station_altitude) / np.sin(elevation_angle_rad)
 
 
-k_h_const = {
-    "mk": -0.18961,
-    "ck": 0.71147,
-    "a": [-5.33980, -0.35351, -0.23789, -0.94158],
-    "b": [-0.10008, 1.26970, 0.86036, 0.64552],
-    "c": [1.13098, 0.45400, 0.15354, 0.16817],
-}
-alpha_h_const = {
-    "mk": 0.67849,
-    "ck": -1.95537,
-    "a": [-0.14318, 0.29591, 0.32177, -5.3761, 16.172],
-    "b": [1.82442, 0.77564, 0.63773, -0.9623, -3.2998],
-    "c": [-0.55187, 0.19822, 0.13164, 1.47828, 3.43990],
-}
-# Vertical 
-k_v_const = {
-    "mk": -0.16398, 
-    "ck": 0.63297,
-    "a": [-3.80595, -3.44965, -0.39902, 0.50167],
-    "b": [0.56934, -0.22911, 0.73042, 1.07319],
-    "c": [0.81061, 0.51059, 0.11899, 0.27195]
-}
-alpha_v_const = {
-    "mk": -0.053739,
-    "ck": 0.83433,
-    "a": [-0.07771, 0.56727, -0.20238, -48.2991, 48.5833],
-    "b": [2.33840, 0.95545, 1.14520, 0.791669, 0.791459],
-    "c": [-0.76284, 0.54039, 0.26809, 0.116226, 0.116479]
-}
-def specific_attenuation(frequency: float, rain_rate: float = 0.01, polarization: str = "vertical") -> float:
-    def calc(consts) -> float: 
-        return sum(
-            [
-                consts["a"][i] * np.exp(-(((np.log10(frequency) - consts["b"][i]) / consts["c"][i]) ** 2))
-                for i in range(len(consts["a"]))
-            ] 
-        ) + consts["mk"] * np.log10(frequency) + consts["ck"]
+def rain_specific_attenuation(frequency: float, rain_rate: float, polarization: str):
+    _f = [1, 2, 4, 6, 7, 8, 10, 12, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70,
+          80, 90, 100, 120, 150, 200, 300, 400]
 
-    if polarization == "vertical": 
-        k = 10 ** (
-            calc(k_v_const)
-        )
-        alpha = calc(alpha_v_const)
+    _kH = [0.0000387, 0.000154, 0.00065, 0.00175, 0.00301, 0.00454, 0.0101,
+           0.0188, 0.0367, 0.0751, 0.124, 0.187, 0.263, 0.35, 0.442, 0.536,
+           0.707, 0.851, 0.975, 1.06, 1.12, 1.18, 1.31, 1.45, 1.36, 1.32]
+
+    _kV = [0.0000352, 0.000138, 0.000591, 0.00155, 0.00265, 0.00395,
+           0.00887, 0.0168, 0.0335, 0.0691, 0.113, 0.167, 0.233, 0.31,
+           0.393, 0.479, 0.642, 0.784, 0.906, 0.999, 1.06, 1.13, 1.27,
+           1.42, 1.35, 1.31]
+
+    _alphaH = [0.912, 0.963, 1.121, 1.308, 1.332, 1.327, 1.276, 1.217,
+               1.154, 1.099, 1.061, 1.021, 0.979, 0.939, 0.903, 0.873,
+               0.826, 0.793, 0.769, 0.753, 0.743, 0.731, 0.71, 0.689,
+               0.688, 0.683]
+
+    _alphaV = [0.88, 0.923, 1.075, 1.265, 1.312, 1.31, 1.264, 1.2, 1.128,
+               1.065, 1.03, 1, 0.963, 0.929, 0.897, 0.868, 0.824, 0.793,
+               0.769, 0.754, 0.744, 0.732, 0.711, 0.69, 0.689, 0.684]
+
+    KH = np.exp(np.interp(np.log(frequency), np.log(_f), np.log(_kH)))
+    KV = np.exp(np.interp(np.log(frequency), np.log(_f), np.log(_kV)))
+
+    alphaH = np.interp(np.log(frequency), np.log(_f), _alphaH)
+    alphaV = np.interp(np.log(frequency), np.log(_f), _alphaV)
+
+    if polarization == "circular":
+        k = [KH + KV] / 2
+        alpha = [KH * alphaH + KV * alphaV] / 2*k
+    elif polarization == "vertical":
+        k = KV
+        alpha = alphaV
     elif polarization == "horizontal":
-        k = 10 ** (
-            calc(k_h_const)
-        )
-        alpha = calc(alpha_h_const)
-    elif polarization == "circular":
-        k_v = 10 ** (
-            calc(k_v_const)
-        )
-        alpha_v = calc(alpha_v_const)
-        
-        k_h = 10 ** (
-            calc(k_h_const)
-        )
-        alpha_h = calc(alpha_h_const)
-
-        k = (k_h + k_v) / 2
-        alpha = (k_h * alpha_h + k_v * alpha_v) / (2 * k)
+        k = KH
+        alpha = alphaH
     else:
         raise Exception("Invalid Polarization")
 
@@ -290,7 +266,7 @@ def rain_attenuation(
 
     horiz_reduction = horizontal_reduction(horiz_proj, specific_att, frequency)
 
-    zeta_ = zeta(rain_altitude, station_altitude, horizontal_projection, horizontal_reduction) 
+    zeta_ = zeta(rain_altitude, station_altitude, horiz_proj, horiz_reduction) 
 
     if zeta_ > elevation_angle:
         d_r = horiz_proj * horiz_reduction / np.cos(elevation_angle_rad)

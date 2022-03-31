@@ -5,20 +5,21 @@ import numpy as np
 from link_calculator.constants import EARTH_RADIUS
 
 
-def power_density(power: float, distance: float) -> float:
+def power_density(power: float, gain: float, distance: float) -> float:
     """
     Calculate the power density of the wavefront
 
     Parameters
     ---------
         power (float, W): the transmitted power
+        gain (float, W): the power gained  
         distance (float, m): the distance between the transmit and receive antennas
 
     Returns
     ------
         power_density (float, W/m^2): the power density at distance d
     """
-    return power / (4 * np.pi * distance**2)
+    return (power * gain) / (4 * np.pi * distance**2)
 
 
 def eirp(power: float, loss: float, gain: float) -> float:

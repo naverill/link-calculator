@@ -12,7 +12,9 @@ from link_calculator.propagation.utils import (
     rain_specific_attenuation,
     slant_path,
     zeta,
+    receive_power
 )
+from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
 
 
 def test_free_space_loss():
@@ -147,16 +149,38 @@ def test_rain_attenuation_2():
 
 
 def test_received_power():
-    sat_altitude = 40000  # km
-    # transmit_gain = 17  # dB
+    sat_altitude = 40000 * 1000 # km
+    transmit_gain = decibel_to_watt(17)  # dB
     transmit_power = 10  # W
-    # effective_app = 19  # m^2
+    effective_app = 10  # m^2
 
-    power_dens = power_density(transmit_power, sat_altitude)
-    assert isclose(power_dens, 2.49e-14)
+    power_dens = power_density(transmit_power, transmit_gain, sat_altitude)
+    assert isclose(power_dens, 2.49e-14, rel_tol=0.1)
+
+    receive_power = power_dens * effective_app 
+
+    assert isclose(receive_power, 2.49e-13, rel_tol=0.1)
 
 
 def test_received_power_2():
-    # frequency = 11  # GHz
-    # receive_gain = 52.3  # dB
-    return
+    sat_altitude = 40000 * 1000  # km
+    transmit_gain = decibel_to_watt(17)  # dB
+    transmit_power = 10  # W
+    effective_app = 10  # m^2
+    frequency = 11  # GHz
+    receive_gain = decibel_to_watt(52.3)  # dB
+
+    wavelength = np.sqrt((4* np.pi * effective_app) / receive_gain)
+    assert isclose(wavelength, 2.727e-2, rel_tol=0.01)
+
+    rec_power = receive_power(
+      transmit_power,
+      1,
+      transmit_gain,
+      sat_altitude,
+      receive_gain,
+      1, 
+      wavelength,
+      1
+    )
+    assert isclose(watt_to_decibel(rec_power), -126.0, rel_tol=0.1)

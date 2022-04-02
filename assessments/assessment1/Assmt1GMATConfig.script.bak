@@ -9,14 +9,14 @@
 Create Spacecraft GEOComms;
 GMAT GEOComms.DateFormat = TAIModJulian;
 GMAT GEOComms.Epoch = '21545';
-GMAT GEOComms.CoordinateSystem = EarthMJ2000Eq;
+GMAT GEOComms.CoordinateSystem = EarthFixed;
 GMAT GEOComms.DisplayStateType = Keplerian;
-GMAT GEOComms.SMA = 42163.99999999998;
-GMAT GEOComms.ECC = 0.00016440000000004;
+GMAT GEOComms.SMA = 42164.00000000003;
+GMAT GEOComms.ECC = 8.782700950797081e-16;
 GMAT GEOComms.INC = 0;
-GMAT GEOComms.RAAN = 229.51120;
-GMAT GEOComms.AOP = 138.8528;
-GMAT GEOComms.TA = 0.6931030628637403;
+GMAT GEOComms.RAAN = 226;
+GMAT GEOComms.AOP = 145;
+GMAT GEOComms.TA = 202.0000000000001;
 GMAT GEOComms.DryMass = 850;
 GMAT GEOComms.Cd = 2.2;
 GMAT GEOComms.Cr = 1.8;
@@ -247,6 +247,7 @@ GMAT NorfolkIsland.Temperature = 295.1;
 GMAT NorfolkIsland.Pressure = 1013.5;
 GMAT NorfolkIsland.Humidity = 55;
 GMAT NorfolkIsland.MinimumElevationAngle = 20;
+
 
 
 %----------------------------------------

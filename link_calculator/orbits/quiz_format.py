@@ -1,5 +1,5 @@
-from constants import EARTH_RADIUS
-from utils import (
+from link_calculator.constants import EARTH_RADIUS
+from link_calculator.orbits.utils import (
     angle_sat_to_ground_station,
     angle_sat_to_gs_orbital_radius,
     azimuth_intermediate,

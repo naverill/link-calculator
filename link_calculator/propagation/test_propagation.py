@@ -178,9 +178,9 @@ def test_received_power_2():
       1,
       transmit_gain,
       sat_altitude,
-      receive_gain,
       1, 
-      wavelength,
-      1
+      receive_gain,
+      1,
+      wavelength=wavelength,
     )
     assert isclose(watt_to_decibel(rec_power), -126.0, rel_tol=0.1)

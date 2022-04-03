@@ -81,10 +81,11 @@ def receive_power(
     transmit_loss: float,
     transmit_gain: float,
     distance: float,
-    receive_gain: float,
     receive_loss: float,
-    wavelength: float,
+    receive_gain: float,
     atmospheric_loss: float,
+    wavelength: float = None,
+    eff_aperture: float = None
 ) -> float:
     """
     Calculate the power collected by the receive antenna
@@ -102,6 +103,7 @@ def receive_power(
         receive_loss (float, ): coupling loss between receiver terminals and antenna
             in the range [0, 1]
         wavelength (float, m): the radiation wavelength
+        eff_aperture (float, m): effective aperture of the receive antenna
         atmospheric_loss (float, ): The loss due to the atmosphere
 
     Returns
@@ -110,7 +112,11 @@ def receive_power(
     """
     eirp_ = eirp(transmit_power, transmit_loss, transmit_gain)
     pow_density = power_density_eirp(eirp_, distance, atmospheric_loss)
-    eff_aperture = effective_aperture(receive_gain, wavelength)
+
+    if not eff_aperture and wavelength:
+      eff_aperture = effective_aperture(receive_gain, wavelength)
+    if not (eff_aperture or wavelength):
+        raise ValueError("No effective aperture or wavelength supplied")
 
     return pow_density * eff_aperture * receive_loss
 

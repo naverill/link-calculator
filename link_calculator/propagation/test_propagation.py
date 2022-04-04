@@ -184,3 +184,58 @@ def test_received_power_2():
       wavelength=wavelength,
     )
     assert isclose(watt_to_decibel(rec_power), -126.0, rel_tol=0.1)
+
+
+def test_receive_power_3():
+    transmit_power = 9 # W
+    transmit_gain = decibel_to_watt(16) # W
+    transmit_loss = decibel_to_watt(-3)  # W
+    distance = 24500 * 1000 # m
+
+    receive_loss = decibel_to_watt(-2) # W
+    receive_gain = decibel_to_watt(57) # W
+
+    atmospheric_loss = decibel_to_watt(-9) # W
+
+    eff_aperture = None # m^2
+    wavelength = frequency_to_wavelength(11) # m
+    power = receive_power(
+        transmit_power,
+        transmit_loss,
+        transmit_gain,
+        distance,
+        receive_loss,
+        receive_gain,
+        atmospheric_loss,
+        wavelength,
+        eff_aperture,
+    )
+    assert isclose(power, -133, rel_tol=0.01)
+
+
+def test_receive_power_4():
+    transmit_power = 6 # W
+    transmit_gain = decibel_to_watt(18) # W
+    transmit_loss = 1 # W
+    distance = 12000 * 1000 # m
+
+    receive_loss = 1 # W
+    receive_gain = 1 # W
+
+    atmospheric_loss = 1 # W
+
+    eff_aperture = 13 # m^2
+    wavelength = None # m
+
+    power = receive_power(
+        transmit_power,
+        transmit_loss,
+        transmit_gain,
+        distance,
+        receive_loss,
+        receive_gain,
+        atmospheric_loss,
+        wavelength,
+        eff_aperture,
+    )
+    assert isclose(power, -116, rel_tol=0.01)

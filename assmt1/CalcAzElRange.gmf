@@ -1,0 +1,7 @@
+% Calculate the Azimuth, Elevation and Slant Range for the geostationary satellites
+% from the:
+% 		- Cocos (Keeling) Islands (12°10'S 96°50'E)
+% 		- Mawson Station (67°36′S 62°52′E)
+% 		- Norfolk Island (29°02'S 167°57'E)
+
+function CalcAzElRange()

@@ -6,49 +6,145 @@
 %---------- Spacecraft
 %----------------------------------------
 
-Create Spacecraft GEOComms;
-GMAT GEOComms.DateFormat = TAIModJulian;
-GMAT GEOComms.Epoch = '21545';
-GMAT GEOComms.CoordinateSystem = EarthMJ2000Eq;
-GMAT GEOComms.DisplayStateType = Keplerian;
-GMAT GEOComms.SMA = 42165.00000000002;
-GMAT GEOComms.ECC = 3.758153696541331e-16;
-GMAT GEOComms.INC = 0;
-GMAT GEOComms.RAAN = 0;
-GMAT GEOComms.AOP = 0;
-GMAT GEOComms.TA = 0;
-GMAT GEOComms.DryMass = 850;
-GMAT GEOComms.Cd = 2.2;
-GMAT GEOComms.Cr = 1.8;
-GMAT GEOComms.DragArea = 15;
-GMAT GEOComms.SRPArea = 1;
-GMAT GEOComms.SPADDragScaleFactor = 1;
-GMAT GEOComms.SPADSRPScaleFactor = 1;
-GMAT GEOComms.NAIFId = -10001001;
-GMAT GEOComms.NAIFIdReferenceFrame = -9001001;
-GMAT GEOComms.OrbitColor = Red;
-GMAT GEOComms.TargetColor = Teal;
-GMAT GEOComms.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
-GMAT GEOComms.CdSigma = 1e+70;
-GMAT GEOComms.CrSigma = 1e+70;
-GMAT GEOComms.Id = 'SatId';
-GMAT GEOComms.Attitude = CoordinateSystemFixed;
-GMAT GEOComms.SPADSRPInterpolationMethod = Bilinear;
-GMAT GEOComms.SPADSRPScaleFactorSigma = 1e+70;
-GMAT GEOComms.SPADDragInterpolationMethod = Bilinear;
-GMAT GEOComms.SPADDragScaleFactorSigma = 1e+70;
-GMAT GEOComms.ModelFile = 'aura.3ds';
-GMAT GEOComms.ModelOffsetX = 0;
-GMAT GEOComms.ModelOffsetY = 0;
-GMAT GEOComms.ModelOffsetZ = 0;
-GMAT GEOComms.ModelRotationX = 0;
-GMAT GEOComms.ModelRotationY = 0;
-GMAT GEOComms.ModelRotationZ = 0;
-GMAT GEOComms.ModelScale = 1;
-GMAT GEOComms.AttitudeDisplayStateType = 'Quaternion';
-GMAT GEOComms.AttitudeRateDisplayStateType = 'AngularVelocity';
-GMAT GEOComms.AttitudeCoordinateSystem = EarthMJ2000Eq;
-GMAT GEOComms.EulerAngleSequence = '321';
+Create Spacecraft GEO1;
+GMAT GEO1.DateFormat = TAIModJulian;
+GMAT GEO1.Epoch = '21545';
+GMAT GEO1.CoordinateSystem = EarthMJ2000Eq;
+GMAT GEO1.DisplayStateType = Keplerian;
+GMAT GEO1.SMA = 42165.00000000002;
+GMAT GEO1.ECC = 9.395384241353323e-16;
+GMAT GEO1.INC = 27;
+GMAT GEO1.RAAN = 0;
+GMAT GEO1.AOP = 0;
+GMAT GEO1.TA = 0;
+GMAT GEO1.DryMass = 850;
+GMAT GEO1.Cd = 2.2;
+GMAT GEO1.Cr = 1.8;
+GMAT GEO1.DragArea = 15;
+GMAT GEO1.SRPArea = 1;
+GMAT GEO1.SPADDragScaleFactor = 1;
+GMAT GEO1.SPADSRPScaleFactor = 1;
+GMAT GEO1.NAIFId = -10001001;
+GMAT GEO1.NAIFIdReferenceFrame = -9001001;
+GMAT GEO1.OrbitColor = Red;
+GMAT GEO1.TargetColor = Teal;
+GMAT GEO1.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT GEO1.CdSigma = 1e+70;
+GMAT GEO1.CrSigma = 1e+70;
+GMAT GEO1.Id = 'SatId';
+GMAT GEO1.Attitude = CoordinateSystemFixed;
+GMAT GEO1.SPADSRPInterpolationMethod = Bilinear;
+GMAT GEO1.SPADSRPScaleFactorSigma = 1e+70;
+GMAT GEO1.SPADDragInterpolationMethod = Bilinear;
+GMAT GEO1.SPADDragScaleFactorSigma = 1e+70;
+GMAT GEO1.ModelFile = 'aura.3ds';
+GMAT GEO1.ModelOffsetX = 0;
+GMAT GEO1.ModelOffsetY = 0;
+GMAT GEO1.ModelOffsetZ = 0;
+GMAT GEO1.ModelRotationX = 0;
+GMAT GEO1.ModelRotationY = 0;
+GMAT GEO1.ModelRotationZ = 0;
+GMAT GEO1.ModelScale = 1;
+GMAT GEO1.AttitudeDisplayStateType = 'Quaternion';
+GMAT GEO1.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT GEO1.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT GEO1.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft GEO2;
+GMAT GEO2.DateFormat = TAIModJulian;
+GMAT GEO2.Epoch = '21545';
+GMAT GEO2.CoordinateSystem = EarthMJ2000Eq;
+GMAT GEO2.DisplayStateType = Keplerian;
+GMAT GEO2.SMA = 42165.00000000003;
+GMAT GEO2.ECC = 6.05178359332816e-16;
+GMAT GEO2.INC = 27;
+GMAT GEO2.RAAN = 120;
+GMAT GEO2.AOP = 0;
+GMAT GEO2.TA = 240;
+GMAT GEO2.DryMass = 850;
+GMAT GEO2.Cd = 2.2;
+GMAT GEO2.Cr = 1.8;
+GMAT GEO2.DragArea = 15;
+GMAT GEO2.SRPArea = 1;
+GMAT GEO2.SPADDragScaleFactor = 1;
+GMAT GEO2.SPADSRPScaleFactor = 1;
+GMAT GEO2.NAIFId = -10001001;
+GMAT GEO2.NAIFIdReferenceFrame = -9001001;
+GMAT GEO2.OrbitColor = Red;
+GMAT GEO2.TargetColor = Teal;
+GMAT GEO2.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT GEO2.CdSigma = 1e+70;
+GMAT GEO2.CrSigma = 1e+70;
+GMAT GEO2.Id = 'SatId';
+GMAT GEO2.Attitude = CoordinateSystemFixed;
+GMAT GEO2.SPADSRPInterpolationMethod = Bilinear;
+GMAT GEO2.SPADSRPScaleFactorSigma = 1e+70;
+GMAT GEO2.SPADDragInterpolationMethod = Bilinear;
+GMAT GEO2.SPADDragScaleFactorSigma = 1e+70;
+GMAT GEO2.ModelFile = 'aura.3ds';
+GMAT GEO2.ModelOffsetX = 0;
+GMAT GEO2.ModelOffsetY = 0;
+GMAT GEO2.ModelOffsetZ = 0;
+GMAT GEO2.ModelRotationX = 0;
+GMAT GEO2.ModelRotationY = 0;
+GMAT GEO2.ModelRotationZ = 0;
+GMAT GEO2.ModelScale = 1;
+GMAT GEO2.AttitudeDisplayStateType = 'Quaternion';
+GMAT GEO2.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT GEO2.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT GEO2.EulerAngleSequence = '321';
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft GEO3;
+GMAT GEO3.DateFormat = TAIModJulian;
+GMAT GEO3.Epoch = '21545';
+GMAT GEO3.CoordinateSystem = EarthMJ2000Eq;
+GMAT GEO3.DisplayStateType = Keplerian;
+GMAT GEO3.SMA = 42165.00000000001;
+GMAT GEO3.ECC = 7.296062955109464e-16;
+GMAT GEO3.INC = 27;
+GMAT GEO3.RAAN = 239.9999999999999;
+GMAT GEO3.AOP = 0;
+GMAT GEO3.TA = 120;
+GMAT GEO3.DryMass = 850;
+GMAT GEO3.Cd = 2.2;
+GMAT GEO3.Cr = 1.8;
+GMAT GEO3.DragArea = 15;
+GMAT GEO3.SRPArea = 1;
+GMAT GEO3.SPADDragScaleFactor = 1;
+GMAT GEO3.SPADSRPScaleFactor = 1;
+GMAT GEO3.NAIFId = -10001001;
+GMAT GEO3.NAIFIdReferenceFrame = -9001001;
+GMAT GEO3.OrbitColor = Red;
+GMAT GEO3.TargetColor = Teal;
+GMAT GEO3.OrbitErrorCovariance = [ 1e+70 0 0 0 0 0 ; 0 1e+70 0 0 0 0 ; 0 0 1e+70 0 0 0 ; 0 0 0 1e+70 0 0 ; 0 0 0 0 1e+70 0 ; 0 0 0 0 0 1e+70 ];
+GMAT GEO3.CdSigma = 1e+70;
+GMAT GEO3.CrSigma = 1e+70;
+GMAT GEO3.Id = 'SatId';
+GMAT GEO3.Attitude = CoordinateSystemFixed;
+GMAT GEO3.SPADSRPInterpolationMethod = Bilinear;
+GMAT GEO3.SPADSRPScaleFactorSigma = 1e+70;
+GMAT GEO3.SPADDragInterpolationMethod = Bilinear;
+GMAT GEO3.SPADDragScaleFactorSigma = 1e+70;
+GMAT GEO3.ModelFile = 'aura.3ds';
+GMAT GEO3.ModelOffsetX = 0;
+GMAT GEO3.ModelOffsetY = 0;
+GMAT GEO3.ModelOffsetZ = 0;
+GMAT GEO3.ModelRotationX = 0;
+GMAT GEO3.ModelRotationY = 0;
+GMAT GEO3.ModelRotationZ = 0;
+GMAT GEO3.ModelScale = 1;
+GMAT GEO3.AttitudeDisplayStateType = 'Quaternion';
+GMAT GEO3.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT GEO3.AttitudeCoordinateSystem = EarthMJ2000Eq;
+GMAT GEO3.EulerAngleSequence = '321';
 
 %----------------------------------------
 %---------- GroundStations
@@ -258,6 +354,7 @@ GMAT NorfolkIsland.MinimumElevationAngle = 20;
 
 
 
+
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -294,7 +391,7 @@ GMAT DefaultProp.StopIfAccuracyIsViolated = true;
 %----------------------------------------
 
 Create ContactLocator ContactLocator1;
-GMAT ContactLocator1.Target = GEOComms;
+GMAT ContactLocator1.Target = GEO1;
 GMAT ContactLocator1.Filename = 'ContactLocator1.txt';
 GMAT ContactLocator1.InputEpochFormat = 'TAIModJulian';
 GMAT ContactLocator1.InitialEpoch = '21545';
@@ -308,19 +405,49 @@ GMAT ContactLocator1.UseEntireInterval = true;
 GMAT ContactLocator1.Observers = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
 GMAT ContactLocator1.LightTimeDirection = Transmit;
 
+Create ContactLocator ContactLocator2;
+GMAT ContactLocator2.Target = GEO2;
+GMAT ContactLocator2.Filename = 'ContactLocator2.txt';
+GMAT ContactLocator2.InputEpochFormat = 'TAIModJulian';
+GMAT ContactLocator2.InitialEpoch = '21545';
+GMAT ContactLocator2.StepSize = 10;
+GMAT ContactLocator2.FinalEpoch = '21545.138';
+GMAT ContactLocator2.UseLightTimeDelay = true;
+GMAT ContactLocator2.UseStellarAberration = true;
+GMAT ContactLocator2.WriteReport = true;
+GMAT ContactLocator2.RunMode = Automatic;
+GMAT ContactLocator2.UseEntireInterval = true;
+GMAT ContactLocator2.Observers = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
+GMAT ContactLocator2.LightTimeDirection = Transmit;
+
+Create ContactLocator ContactLocator3;
+GMAT ContactLocator3.Target = GEO3;
+GMAT ContactLocator3.Filename = 'ContactLocator3.txt';
+GMAT ContactLocator3.InputEpochFormat = 'TAIModJulian';
+GMAT ContactLocator3.InitialEpoch = '21545';
+GMAT ContactLocator3.StepSize = 10;
+GMAT ContactLocator3.FinalEpoch = '21545.138';
+GMAT ContactLocator3.UseLightTimeDelay = true;
+GMAT ContactLocator3.UseStellarAberration = true;
+GMAT ContactLocator3.WriteReport = true;
+GMAT ContactLocator3.RunMode = Automatic;
+GMAT ContactLocator3.UseEntireInterval = true;
+GMAT ContactLocator3.Observers = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
+GMAT ContactLocator3.LightTimeDirection = Transmit;
+
 %----------------------------------------
 %---------- Subscribers
 %----------------------------------------
 
 Create OrbitView DefaultOrbitView;
 GMAT DefaultOrbitView.SolverIterations = Current;
-GMAT DefaultOrbitView.UpperLeft = [ 0.1639566395663957 0.05330882352941176 ];
-GMAT DefaultOrbitView.Size = [ 0.997289972899729 0.9430147058823529 ];
-GMAT DefaultOrbitView.RelativeZOrder = 153;
-GMAT DefaultOrbitView.Maximized = true;
-GMAT DefaultOrbitView.Add = {GEOComms, Earth};
+GMAT DefaultOrbitView.UpperLeft = [ 0.04107142857142857 0.02380952380952381 ];
+GMAT DefaultOrbitView.Size = [ 0.9886904761904762 0.9295238095238095 ];
+GMAT DefaultOrbitView.RelativeZOrder = 361;
+GMAT DefaultOrbitView.Maximized = false;
+GMAT DefaultOrbitView.Add = {GEO1, GEO2, GEO3, Earth};
 GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
-GMAT DefaultOrbitView.DrawObject = [ true true ];
+GMAT DefaultOrbitView.DrawObject = [ true true true true ];
 GMAT DefaultOrbitView.DataCollectFrequency = 1;
 GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
 GMAT DefaultOrbitView.NumPointsToRedraw = 0;
@@ -346,11 +473,11 @@ GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create GroundTrackPlot DefaultGroundTrackPlot;
 GMAT DefaultGroundTrackPlot.SolverIterations = Current;
-GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.1639566395663957 0.05330882352941176 ];
-GMAT DefaultGroundTrackPlot.Size = [ 0.997289972899729 0.9430147058823529 ];
-GMAT DefaultGroundTrackPlot.RelativeZOrder = 157;
-GMAT DefaultGroundTrackPlot.Maximized = true;
-GMAT DefaultGroundTrackPlot.Add = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, GEOComms, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
+GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.2702380952380952 0.06571428571428571 ];
+GMAT DefaultGroundTrackPlot.Size = [ 0.5107142857142857 0.9304761904761905 ];
+GMAT DefaultGroundTrackPlot.RelativeZOrder = 365;
+GMAT DefaultGroundTrackPlot.Maximized = false;
+GMAT DefaultGroundTrackPlot.Add = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, GEO1, GEO2, GEO3, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
 GMAT DefaultGroundTrackPlot.DataCollectFrequency = 1;
 GMAT DefaultGroundTrackPlot.UpdatePlotFrequency = 50;
 GMAT DefaultGroundTrackPlot.NumPointsToRedraw = 0;
@@ -359,10 +486,42 @@ GMAT DefaultGroundTrackPlot.MaxPlotPoints = 20000;
 GMAT DefaultGroundTrackPlot.CentralBody = Earth;
 GMAT DefaultGroundTrackPlot.TextureMap = 'ModifiedBlueMarble.jpg';
 
+Create ReportFile ReportFile1;
+GMAT ReportFile1.SolverIterations = Current;
+GMAT ReportFile1.UpperLeft = [ 0 0 ];
+GMAT ReportFile1.Size = [ 0 0 ];
+GMAT ReportFile1.RelativeZOrder = 0;
+GMAT ReportFile1.Maximized = false;
+GMAT ReportFile1.Filename = 'AzElRange.txt';
+GMAT ReportFile1.Precision = 16;
+GMAT ReportFile1.WriteHeaders = true;
+GMAT ReportFile1.LeftJustify = On;
+GMAT ReportFile1.ZeroFill = Off;
+GMAT ReportFile1.FixedWidth = true;
+GMAT ReportFile1.Delimiter = ' ';
+GMAT ReportFile1.ColumnWidth = 23;
+GMAT ReportFile1.WriteReport = true;
+
+%----------------------------------------
+%---------- Functions
+%----------------------------------------
+
+Create GmatFunction CalcAzElRange;
+GMAT CalcAzElRange.FunctionPath = '/Users/ninaaverill/Downloads/CalcAzElRange.gmf';
+
+Create GmatFunction CalcAZEL;
+GMAT CalcAZEL.FunctionPath = '/Users/ninaaverill/Downloads/CalcAZEL.gmf';
+
 
 %----------------------------------------
 %---------- Mission Sequence
 %----------------------------------------
 
 BeginMissionSequence;
-Propagate DefaultProp(GEOComms) {GEOComms.ElapsedDays = 1};
+While GEO1.ElapsedSecs < 86400
+   Propagate DefaultProp(GEO1) DefaultProp(GEO2) DefaultProp(GEO3) {GEO1.ElapsedSecs = 300};
+   GMAT 'CalcAzElForGEO1' CalcAzElRange(GEO1.EarthMJ2000Eq.X, GEO1.EarthMJ2000Eq.Y, GEO1.EarthMJ2000Eq.Z);
+   GMAT 'CalcAzElForGEO2' CalcAzElRange(GEO2.EarthMJ2000Eq.X, GEO2.EarthMJ2000Eq.Y, GEO2.EarthMJ2000Eq.Z);
+   GMAT 'CalcAzELForGEO3' CalcAzElRange(GEO1.EarthMJ2000Eq.X, GEO1.EarthMJ2000Eq.Y, GEO1.EarthMJ2000Eq.Z);
+   Report ReportFile1 GEO1.A1ModJulian;
+EndWhile;

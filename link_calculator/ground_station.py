@@ -22,5 +22,6 @@ class GroundStation:
 
 
 class Satellite:
-    def __init__(self):
-        return
+    def __init__(self, name: str, antenna: Antenna):
+        self.name = name
+        self.antenna = antenna

@@ -1,5 +1,5 @@
 %General Mission Analysis Tool(GMAT) Script
-%Created: 2022-04-02 15:31:59
+%Created: 2022-04-07 12:29:17
 
 
 %----------------------------------------
@@ -59,12 +59,12 @@ GMAT GEO2.DateFormat = TAIModJulian;
 GMAT GEO2.Epoch = '21545';
 GMAT GEO2.CoordinateSystem = EarthMJ2000Eq;
 GMAT GEO2.DisplayStateType = Keplerian;
-GMAT GEO2.SMA = 42165.00000000003;
-GMAT GEO2.ECC = 6.05178359332816e-16;
+GMAT GEO2.SMA = 42165.00000000001;
+GMAT GEO2.ECC = 8.755223766513167e-16;
 GMAT GEO2.INC = 27;
 GMAT GEO2.RAAN = 120;
 GMAT GEO2.AOP = 0;
-GMAT GEO2.TA = 240;
+GMAT GEO2.TA = 239.9999999999999;
 GMAT GEO2.DryMass = 850;
 GMAT GEO2.Cd = 2.2;
 GMAT GEO2.Cr = 1.8;
@@ -107,10 +107,10 @@ GMAT GEO3.DateFormat = TAIModJulian;
 GMAT GEO3.Epoch = '21545';
 GMAT GEO3.CoordinateSystem = EarthMJ2000Eq;
 GMAT GEO3.DisplayStateType = Keplerian;
-GMAT GEO3.SMA = 42165.00000000001;
-GMAT GEO3.ECC = 7.296062955109464e-16;
+GMAT GEO3.SMA = 42165;
+GMAT GEO3.ECC = 8.782725519892957e-16;
 GMAT GEO3.INC = 27;
-GMAT GEO3.RAAN = 239.9999999999999;
+GMAT GEO3.RAAN = 239.9999999999998;
 GMAT GEO3.AOP = 0;
 GMAT GEO3.TA = 120;
 GMAT GEO3.DryMass = 850;
@@ -355,6 +355,7 @@ GMAT NorfolkIsland.MinimumElevationAngle = 20;
 
 
 
+
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -441,12 +442,12 @@ GMAT ContactLocator3.LightTimeDirection = Transmit;
 
 Create OrbitView DefaultOrbitView;
 GMAT DefaultOrbitView.SolverIterations = Current;
-GMAT DefaultOrbitView.UpperLeft = [ 0.04107142857142857 0.02380952380952381 ];
-GMAT DefaultOrbitView.Size = [ 0.9886904761904762 0.9295238095238095 ];
-GMAT DefaultOrbitView.RelativeZOrder = 361;
-GMAT DefaultOrbitView.Maximized = false;
+GMAT DefaultOrbitView.UpperLeft = [ 0.1665533650577838 0.03785900783289817 ];
+GMAT DefaultOrbitView.Size = [ 0.9932019034670292 0.9595300261096605 ];
+GMAT DefaultOrbitView.RelativeZOrder = 100;
+GMAT DefaultOrbitView.Maximized = true;
 GMAT DefaultOrbitView.Add = {GEO1, GEO2, GEO3, Earth};
-GMAT DefaultOrbitView.CoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultOrbitView.CoordinateSystem = EarthFixed;
 GMAT DefaultOrbitView.DrawObject = [ true true true true ];
 GMAT DefaultOrbitView.DataCollectFrequency = 1;
 GMAT DefaultOrbitView.UpdatePlotFrequency = 50;
@@ -473,10 +474,10 @@ GMAT DefaultOrbitView.EnableConstellations = On;
 
 Create GroundTrackPlot DefaultGroundTrackPlot;
 GMAT DefaultGroundTrackPlot.SolverIterations = Current;
-GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.2702380952380952 0.06571428571428571 ];
-GMAT DefaultGroundTrackPlot.Size = [ 0.5107142857142857 0.9304761904761905 ];
-GMAT DefaultGroundTrackPlot.RelativeZOrder = 365;
-GMAT DefaultGroundTrackPlot.Maximized = false;
+GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.1665533650577838 0.03785900783289817 ];
+GMAT DefaultGroundTrackPlot.Size = [ 0.9932019034670292 0.9595300261096605 ];
+GMAT DefaultGroundTrackPlot.RelativeZOrder = 92;
+GMAT DefaultGroundTrackPlot.Maximized = true;
 GMAT DefaultGroundTrackPlot.Add = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, GEO1, GEO2, GEO3, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
 GMAT DefaultGroundTrackPlot.DataCollectFrequency = 1;
 GMAT DefaultGroundTrackPlot.UpdatePlotFrequency = 50;
@@ -488,12 +489,13 @@ GMAT DefaultGroundTrackPlot.TextureMap = 'ModifiedBlueMarble.jpg';
 
 Create ReportFile ReportFile1;
 GMAT ReportFile1.SolverIterations = Current;
-GMAT ReportFile1.UpperLeft = [ 0 0 ];
-GMAT ReportFile1.Size = [ 0 0 ];
-GMAT ReportFile1.RelativeZOrder = 0;
-GMAT ReportFile1.Maximized = false;
-GMAT ReportFile1.Filename = 'AzElRange.txt';
+GMAT ReportFile1.UpperLeft = [ 0.1665533650577838 0.03785900783289817 ];
+GMAT ReportFile1.Size = [ 0.9932019034670292 0.9595300261096605 ];
+GMAT ReportFile1.RelativeZOrder = 43;
+GMAT ReportFile1.Maximized = true;
+GMAT ReportFile1.Filename = 'OrbitParams.txt';
 GMAT ReportFile1.Precision = 16;
+GMAT ReportFile1.Add = {GEO1.Earth.Latitude, GEO1.Earth.Longitude, GEO1.Earth.RMAG, GEO2.Earth.Latitude, GEO2.Earth.Longitude, GEO2.Earth.RMAG, GEO3.Earth.Latitude, GEO3.Earth.Longitude, GEO3.Earth.RMAG};
 GMAT ReportFile1.WriteHeaders = true;
 GMAT ReportFile1.LeftJustify = On;
 GMAT ReportFile1.ZeroFill = Off;
@@ -502,15 +504,44 @@ GMAT ReportFile1.Delimiter = ' ';
 GMAT ReportFile1.ColumnWidth = 23;
 GMAT ReportFile1.WriteReport = true;
 
+Create OrbitView OrbitView1;
+GMAT OrbitView1.SolverIterations = Current;
+GMAT OrbitView1.UpperLeft = [ 0.1665533650577838 0.03785900783289817 ];
+GMAT OrbitView1.Size = [ 0.9932019034670292 0.9595300261096605 ];
+GMAT OrbitView1.RelativeZOrder = 96;
+GMAT OrbitView1.Maximized = true;
+GMAT OrbitView1.Add = {GEO1, GEO2, GEO3, Earth};
+GMAT OrbitView1.CoordinateSystem = EarthMJ2000Eq;
+GMAT OrbitView1.DrawObject = [ true true true true ];
+GMAT OrbitView1.DataCollectFrequency = 1;
+GMAT OrbitView1.UpdatePlotFrequency = 50;
+GMAT OrbitView1.NumPointsToRedraw = 0;
+GMAT OrbitView1.ShowPlot = true;
+GMAT OrbitView1.MaxPlotPoints = 20000;
+GMAT OrbitView1.ShowLabels = true;
+GMAT OrbitView1.ViewPointReference = Earth;
+GMAT OrbitView1.ViewPointVector = [ 0 0 30000 ];
+GMAT OrbitView1.ViewDirection = Earth;
+GMAT OrbitView1.ViewScaleFactor = 1;
+GMAT OrbitView1.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT OrbitView1.ViewUpAxis = Z;
+GMAT OrbitView1.EclipticPlane = Off;
+GMAT OrbitView1.XYPlane = On;
+GMAT OrbitView1.WireFrame = Off;
+GMAT OrbitView1.Axes = On;
+GMAT OrbitView1.Grid = Off;
+GMAT OrbitView1.SunLine = Off;
+GMAT OrbitView1.UseInitialView = On;
+GMAT OrbitView1.StarCount = 7000;
+GMAT OrbitView1.EnableStars = On;
+GMAT OrbitView1.EnableConstellations = On;
+
 %----------------------------------------
 %---------- Functions
 %----------------------------------------
 
 Create GmatFunction CalcAzElRange;
-GMAT CalcAzElRange.FunctionPath = '/Users/ninaaverill/Downloads/CalcAzElRange.gmf';
-
-Create GmatFunction CalcAZEL;
-GMAT CalcAZEL.FunctionPath = '/Users/ninaaverill/Downloads/CalcAZEL.gmf';
+GMAT CalcAzElRange.FunctionPath = '/home/naverill/unispace/sat_comms/ZEIT8219-Satellite-Communications/assmt1/CalcAzElRange.gmf';
 
 
 %----------------------------------------
@@ -520,8 +551,5 @@ GMAT CalcAZEL.FunctionPath = '/Users/ninaaverill/Downloads/CalcAZEL.gmf';
 BeginMissionSequence;
 While GEO1.ElapsedSecs < 86400
    Propagate DefaultProp(GEO1) DefaultProp(GEO2) DefaultProp(GEO3) {GEO1.ElapsedSecs = 300};
-   GMAT 'CalcAzElForGEO1' CalcAzElRange(GEO1.EarthMJ2000Eq.X, GEO1.EarthMJ2000Eq.Y, GEO1.EarthMJ2000Eq.Z);
-   GMAT 'CalcAzElForGEO2' CalcAzElRange(GEO2.EarthMJ2000Eq.X, GEO2.EarthMJ2000Eq.Y, GEO2.EarthMJ2000Eq.Z);
-   GMAT 'CalcAzELForGEO3' CalcAzElRange(GEO1.EarthMJ2000Eq.X, GEO1.EarthMJ2000Eq.Y, GEO1.EarthMJ2000Eq.Z);
-   Report ReportFile1 GEO1.A1ModJulian;
+   Report ReportFile1 GEO1.Earth.Latitude GEO1.Earth.Longitude GEO1.Earth.RMAG GEO2.Earth.Latitude GEO2.Earth.Longitude GEO2.Earth.RMAG GEO3.Earth.Latitude GEO3.Earth.Longitude GEO3.Earth.RMAG;
 EndWhile;

@@ -13,8 +13,8 @@ from link_calculator.orbits.utils import (
 
 
 def test_period():
-    ht = [250, 500, 1000, 10000] # height
-    pd = [5370, 5677, 6307, 20860] # period
+    ht = [250, 500, 1000, 10000]  # height
+    pd = [5370, 5677, 6307, 20860]  # period
 
     for h, T in zip(ht, pd):
         assert isclose(period(h + EARTH_RADIUS), T, rel_tol=0.5)
@@ -30,50 +30,42 @@ def test_percentage_of_coverage():
         assert isclose(percentage_of_coverage(gamma), p, rel_tol=0.5)
 
 
-def test_azimuth_intermediate():
+def test_azimuth_intermediate_NE():
     # nothern hemisphere, sat to the east
     gs_lat = 30
     gs_long = -120
     sat_long = -90
 
-    assert isclose(
-        azimuth_intermediate(gs_lat, gs_long, sat_long), 49.11, rel_tol=0.1
-    )
+    assert isclose(azimuth_intermediate(gs_lat, gs_long, sat_long), 49.11, rel_tol=0.1)
 
 
-def test_azimuth_intermediate_2():
+def test_azimuth_intermediate_NW():
+    # northern hemisphere, sat the to west
+    gs_lat = 52
+    gs_long = 0
+    sat_long = 66
+    from math import degrees
+
+    assert isclose(azimuth_intermediate(gs_lat, gs_long, sat_long), 70.7, rel_tol=0.1)
+
+
+def test_azimuth_intermediate_SW():
     # southern hemisphere, sat to the west
     gs_lat = -30
     gs_long = 360 - 30
     sat_long = 30
 
-    assert isclose(
-        azimuth_intermediate(gs_lat, gs_long, sat_long), 73.9, rel_tol=0.1
-    )
+    assert isclose(azimuth_intermediate(gs_lat, gs_long, sat_long), 73.9, rel_tol=0.1)
 
 
-def test_azimuth_intermediate_3():
+def test_azimuth_intermediate_SE():
     # northern hemisphere, sat the to west
     gs_lat = 52
     gs_long = 0
     sat_long = 66
     from math import degrees
 
-    assert isclose(
-        azimuth_intermediate(gs_lat, gs_long, sat_long), 70.7, rel_tol=0.1
-    )
-
-
-def test_azimuth_intermediate_4():
-    # northern hemisphere, sat the to west
-    gs_lat = 52
-    gs_long = 0
-    sat_long = 66
-    from math import degrees
-
-    assert isclose(
-        azimuth_intermediate(gs_lat, gs_long, sat_long), 70.7, rel_tol=0.1
-    )
+    assert isclose(azimuth_intermediate(gs_lat, gs_long, sat_long), 70.7, rel_tol=0.1)
 
 
 def test_elevation_angle():

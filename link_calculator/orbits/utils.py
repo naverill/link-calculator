@@ -51,7 +51,7 @@ def period(semi_major_axis: float, mu: float = EARTH_MU) -> float:
     ------
         period (float, s): the time taken for the satellite to complete a revolution
     """
-    return 2 * pi * sqrt(semi_major_axis ** 3 / mu)
+    return 2 * pi * sqrt(semi_major_axis**3 / mu)
 
 
 def angle_sat_to_ground_station(
@@ -126,8 +126,8 @@ def slant_range(
 
     """
     return sqrt(
-        planet_radius ** 2
-        + orbital_radius ** 2
+        planet_radius**2
+        + orbital_radius**2
         - 2 * planet_radius * orbital_radius * cos(radians(angle_sat_to_gs))
     )
 
@@ -174,9 +174,9 @@ def area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
     ------
         area_coverage (float, km): the area of the Earth's surface visible from a satellite
 
-	"""
+    """
     angle_sat_to_gs_rad = radians(angle_sat_to_gs)
-    return 2 * pi * (planet_radius ** 2) * (1 - cos(angle_sat_to_gs_rad))
+    return 2 * pi * (planet_radius**2) * (1 - cos(angle_sat_to_gs_rad))
 
 
 def percentage_of_coverage(
@@ -198,7 +198,7 @@ def percentage_of_coverage(
     """
     return (
         area_of_coverage(angle_sat_to_gs, planet_radius)
-        / (4 * pi * planet_radius ** 2)
+        / (4 * pi * planet_radius**2)
         * 100
     )
 
@@ -301,16 +301,15 @@ def azimuth(
             the satellite. The azimuth angle is usually measured in clockwise direction
             in degrees from true north.
     """
-    #    # Ground station is in northern hemisphere
-    #    if 90 > gs_long_rad > 0:
+    # Ground station is in northern hemisphere
+    # rel_pos = ground_station_long - sat_long
     #
-    # At the equator
-    #    elif gs_long_rad == 0:
-    #        return azimuth_geo(ground_station_lat, ground_station_long, sat_long)
-    #    # In the southern hemisphere
-    #    elif 0 > gs_long_rad >= 90:
-    #        if (sat_lat - ground_station_lat)
+    # if 90 > gs_long_rad > 0:
+    #
+    ## At the equator
+    ## In the southern hemisphere
+    # elif 0 > gs_long_rad >= -`90:
+    #    if (sat_lat - ground_station_lat)
     #        return pi / 2
     #    else:
-    #        raise ValueError("Invalid value for the ground station's longitude: must be in range -90 < L < 90")
-    return NotImplementedError
+    # raise ValueError("Invalid value for the ground station's longitude: must be in range -90 < L < 90")

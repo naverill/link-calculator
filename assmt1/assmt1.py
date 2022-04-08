@@ -1,17 +1,21 @@
 import numpy as np
 import pandas as pd
 
-from link_calculator.ground_station import Antenna, GroundStation, Satellite
+from link_calculator.components import Antenna, GroundStation, Satellite
 from link_calculator.orbits.utils import (
     angle_sat_to_ground_station,
     elevation_angle,
     slant_range,
 )
-from link_calculator.propagation.conversions import decibel_to_watt
+from link_calculator.propagation.conversions import (
+    decibel_to_watt,
+    frequency_to_wavelength,
+)
+from link_calculator.propagation.utils import receive_power
 
 
 def load_gmat_report(file_path):
-    return pd.read_csv(file_path, sep="\s{1,}")
+    return pd.read_csv(file_path, sep="\s{1,}", engine="python")
 
 
 def q2(
@@ -19,24 +23,26 @@ def q2(
 ):
     for sat in satellites:
         for gs in ground_stations:
-            report[f"{sat.name}.Gamma.{gs.name}"] = report.apply(
+            report[f"{sat.name}.Earth.Gamma.{gs.name}"] = report.apply(
                 lambda row: angle_sat_to_ground_station(
                     gs.latitude,
                     gs.longitude,
-                    row[f"{sat.name}.Latitude"],
-                    row[f"{sat.name}.Longitude"],
+                    row[f"{sat.name}.Earth.Latitude"],
+                    row[f"{sat.name}.Earth.Longitude"],
                 ),
                 axis=1,
             )
-            report[f"{sat.name}.SlantRange.{gs.name}"] = report.apply(
+            report[f"{sat.name}.Earth.SlantRange.{gs.name}"] = report.apply(
                 lambda row: slant_range(
-                    row[f"{sat.name}.RMAG"], row[f"{sat.name}.Gamma.{gs.name}"]
+                    row[f"{sat.name}.Earth.RMAG"],
+                    row[f"{sat.name}.Earth.Gamma.{gs.name}"],
                 ),
                 axis=1,
             )
-            report[f"{sat.name}.Elevation.{gs.name}"] = report.apply(
+            report[f"{sat.name}.Earth.Elevation.{gs.name}"] = report.apply(
                 lambda row: elevation_angle(
-                    row[f"{sat.name}.RMAG"], row[f"{sat.name}.Gamma.{gs.name}"]
+                    row[f"{sat.name}.Earth.RMAG"],
+                    row[f"{sat.name}.Earth.Gamma.{gs.name}"],
                 ),
                 axis=1,
             )
@@ -45,10 +51,10 @@ def q2(
     for gs in ground_stations:
         assert all(
             np.logical_or.reduce(
-                (
-                    report[f"{sat.name}.Elevation.{gs.name}"] > min_elevation
+                [
+                    report[f"{sat.name}.Earth.Elevation.{gs.name}"] > min_elevation
                     for sat in satellites
-                )
+                ]
             )
         )
     return report
@@ -56,36 +62,69 @@ def q2(
 
 def q3(
     report: pd.DataFrame,
-    Antenna,
     satellites: list[str],
     ground_stations: list[GroundStation],
 ):
-    return
+    for gs in ground_stations:
+        for sat in satellites:
+            report[f"{sat.name}.Earth.ReceivePower.{gs.name}"] = report.apply(
+                lambda row: receive_power(
+                    sat.antenna.power,
+                    sat.antenna.loss,
+                    sat.antenna.gain,
+                    row[f"{sat.name}.Earth.SlantRange.{gs.name}"],
+                    gs.antenna.loss,
+                    gs.antenna.gain,
+                    1,
+                    wavelength=frequency_to_wavelength(sat.antenna.frequency),
+                )
+                if row[f"{sat.name}.Earth.Elevation.{gs.name}"] > 20
+                else None,
+                axis=1,
+            )
+    return report
 
 
 if __name__ == "__main__":
+    # ka_band = 26.5–40 GHz
+    frequency = 40
     ground_stations = [
         GroundStation(
-            "CocosIsland", -12.167, 96.833, 0, Antenna(0, decibel_to_watt(18), 1)
+            "CocosIsland",
+            -12.167,
+            96.833,
+            0,
+            Antenna("CocosReceive", 0, decibel_to_watt(18), 1, frequency),
         ),
         GroundStation(
             "MawsonResearchStation",
             -67.6,
             62.867,
             0,
-            Antenna(0, decibel_to_watt(18), 1),
+            Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, frequency),
         ),
         GroundStation(
-            "NorfolkIsland", -29.033, 167.95, 0, Antenna(0, decibel_to_watt(18), 1)
+            "NorfolkIsland",
+            -29.033,
+            167.95,
+            0,
+            Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, frequency),
         ),
     ]
 
     satellites = [
-        Satellite("GEO1.Earth", Antenna(5, decibel_to_watt(30), 1)),
-        Satellite("GEO2.Earth", Antenna(5, decibel_to_watt(30), 1)),
-        Satellite("GEO3.Earth", Antenna(5, decibel_to_watt(30), 1)),
+        Satellite(
+            "GEO1", Antenna("GEO1Transmit", 5, decibel_to_watt(30), 1, frequency)
+        ),
+        Satellite(
+            "GEO2", Antenna("GEO2Transmit", 5, decibel_to_watt(30), 1, frequency)
+        ),
+        Satellite(
+            "GEO3", Antenna("GEO3Transmit", 5, decibel_to_watt(30), 1, frequency)
+        ),
     ]
 
     report = load_gmat_report("data/OrbitParams.txt")
     report = q2(report, satellites, ground_stations)
     report = q3(report, satellites, ground_stations)
+    report.to_csv("output/report.csv")

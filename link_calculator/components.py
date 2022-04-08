@@ -1,8 +1,11 @@
 class Antenna:
-    def __init__(self, name: str, power: float, gain: float, loss: float):
+    def __init__(
+        self, name: str, power: float, gain: float, loss: float, frequency: float
+    ):
         self.power = power
         self.gain = gain
         self.loss = loss
+        self.frequency = frequency
 
 
 class GroundStation:

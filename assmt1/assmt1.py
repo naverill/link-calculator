@@ -87,40 +87,41 @@ def q3(
 
 if __name__ == "__main__":
     # ka_band = 26.5–40 GHz
-    frequency = 40
+    sat_frequency = 20
+    gs_frequency = 30
     ground_stations = [
         GroundStation(
             "CocosIsland",
             -12.167,
             96.833,
             0,
-            Antenna("CocosReceive", 0, decibel_to_watt(18), 1, frequency),
+            Antenna("CocosReceive", 0, decibel_to_watt(18), 1, gs_frequency),
         ),
         GroundStation(
             "MawsonResearchStation",
             -67.6,
             62.867,
             0,
-            Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, frequency),
+            Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, gs_frequency),
         ),
         GroundStation(
             "NorfolkIsland",
             -29.033,
             167.95,
             0,
-            Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, frequency),
+            Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, gs_frequency),
         ),
     ]
 
     satellites = [
         Satellite(
-            "GEO1", Antenna("GEO1Transmit", 5, decibel_to_watt(30), 1, frequency)
+            "GEO1", Antenna("GEO1Transmit", 5, decibel_to_watt(30), 1, sat_frequency)
         ),
         Satellite(
-            "GEO2", Antenna("GEO2Transmit", 5, decibel_to_watt(30), 1, frequency)
+            "GEO2", Antenna("GEO2Transmit", 5, decibel_to_watt(30), 1, sat_frequency)
         ),
         Satellite(
-            "GEO3", Antenna("GEO3Transmit", 5, decibel_to_watt(30), 1, frequency)
+            "GEO3", Antenna("GEO3Transmit", 5, decibel_to_watt(30), 1, sat_frequency)
         ),
     ]
 

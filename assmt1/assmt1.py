@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import plotly.express as px
 
 from link_calculator.components import Antenna, GroundStation, Satellite
 from link_calculator.orbits.utils import (
@@ -10,12 +11,13 @@ from link_calculator.orbits.utils import (
 from link_calculator.propagation.conversions import (
     decibel_to_watt,
     frequency_to_wavelength,
+    watt_to_decibel,
 )
 from link_calculator.propagation.utils import receive_power
 
 
 def load_gmat_report(file_path):
-    return pd.read_csv(file_path, sep="\s{1,}", engine="python")
+    return pd.read_csv(file_path, sep="\s{2,}", engine="python")
 
 
 def q2(
@@ -57,6 +59,8 @@ def q2(
                 ]
             )
         )
+
+    plot_elevation(report, satellites, ground_stations)
     return report
 
 
@@ -68,21 +72,53 @@ def q3(
     for gs in ground_stations:
         for sat in satellites:
             report[f"{sat.name}.Earth.ReceivePower.{gs.name}"] = report.apply(
-                lambda row: receive_power(
-                    sat.antenna.power,
-                    sat.antenna.loss,
-                    sat.antenna.gain,
-                    row[f"{sat.name}.Earth.SlantRange.{gs.name}"],
-                    gs.antenna.loss,
-                    gs.antenna.gain,
-                    1,
-                    wavelength=frequency_to_wavelength(sat.antenna.frequency),
+                lambda row: watt_to_decibel(
+                    receive_power(
+                        sat.antenna.power,
+                        sat.antenna.loss,
+                        sat.antenna.gain,
+                        row[f"{sat.name}.Earth.SlantRange.{gs.name}"],
+                        gs.antenna.loss,
+                        gs.antenna.gain,
+                        1,
+                        wavelength=frequency_to_wavelength(sat.antenna.frequency),
+                    )
                 )
                 if row[f"{sat.name}.Earth.Elevation.{gs.name}"] > 20
                 else None,
                 axis=1,
             )
+    plot_receive_power(report, satellites, ground_stations)
     return report
+
+
+def plot_receive_power(report, satellites, ground_stations):
+    for gs in ground_stations:
+        fig = px.line(
+            report,
+            x="UTC Gregorian",
+            y=[f"{sat.name}.Earth.ReceivePower.{gs.name}" for sat in satellites],
+            labels={"value": "Receive Power (dBW)"},
+            title=f"Power received by {gs.name} over 24 hours",
+        )
+        fig.show()
+
+
+def plot_elevation(report, satellites, ground_stations):
+    for gs in ground_stations:
+        cols = [f"{sat.name}.Earth.Elevation.{gs.name}" for sat in satellites]
+        elevation = report[cols]
+        elevation = elevation[elevation > 20]
+        elevation["UTC Gregorian"] = report["UTC Gregorian"]
+
+        fig = px.line(
+            elevation,
+            x="UTC Gregorian",
+            y=cols,
+            labels={"value": "Elevation (deg)"},
+            title=f"Elevation above {gs.name} over 24 hours",
+        )
+        fig.show()
 
 
 if __name__ == "__main__":
@@ -111,21 +147,32 @@ if __name__ == "__main__":
             0,
             Antenna("MawsonReceive", 0, decibel_to_watt(18), 1, gs_frequency),
         ),
+        GroundStation(
+            "MacquarieResearchStation",
+            -54.5,
+            158.95,
+            0,
+            Antenna("MacquarieReceive", 0, decibel_to_watt(18), 1, gs_frequency),
+        ),
     ]
 
     satellites = [
         Satellite(
-            "GEO1", Antenna("GEO1Transmit", 5, decibel_to_watt(30), 1, sat_frequency)
+            "COMMSAT1",
+            Antenna("COMMSAT1Transmit", 5, decibel_to_watt(30), 1, sat_frequency),
         ),
         Satellite(
-            "GEO2", Antenna("GEO2Transmit", 5, decibel_to_watt(30), 1, sat_frequency)
+            "COMMSAT2",
+            Antenna("COMMSAT2Transmit", 5, decibel_to_watt(30), 1, sat_frequency),
         ),
         Satellite(
-            "GEO3", Antenna("GEO3Transmit", 5, decibel_to_watt(30), 1, sat_frequency)
+            "COMMSAT3",
+            Antenna("COMMSAT3Transmit", 5, decibel_to_watt(30), 1, sat_frequency),
         ),
     ]
 
-    report = load_gmat_report("data/OrbitParams.txt")
+    report = load_gmat_report("input/OrbitParams.txt")
+    report["UTC Gregorian"] = pd.to_datetime(report["COMMSAT1.UTCGregorian"])
     report = q2(report, satellites, ground_stations)
     report = q3(report, satellites, ground_stations)
     report.to_csv("output/report.csv")

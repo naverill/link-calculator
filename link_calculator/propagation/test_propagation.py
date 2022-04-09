@@ -4,17 +4,21 @@ import numpy as np
 
 from link_calculator.constants import EARTH_RADIUS
 from link_calculator.orbits.utils import angle_sat_to_gs_orbital_radius, slant_range
+from link_calculator.propagation.conversions import (
+    decibel_to_watt,
+    frequency_to_wavelength,
+    watt_to_decibel,
+)
 from link_calculator.propagation.utils import (
     free_space_loss_db,
     horizontal_reduction,
     power_density,
     rain_attenuation,
     rain_specific_attenuation,
+    receive_power,
     slant_path,
     zeta,
-    receive_power
 )
-from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
 
 
 def test_free_space_loss():
@@ -149,7 +153,7 @@ def test_rain_attenuation_2():
 
 
 def test_received_power():
-    sat_altitude = 40000 * 1000 # km
+    sat_altitude = 40000 * 1000  # km
     transmit_gain = decibel_to_watt(17)  # dB
     transmit_power = 10  # W
     effective_app = 10  # m^2
@@ -157,7 +161,7 @@ def test_received_power():
     power_dens = power_density(transmit_power, transmit_gain, sat_altitude)
     assert isclose(power_dens, 2.49e-14, rel_tol=0.1)
 
-    receive_power = power_dens * effective_app 
+    receive_power = power_dens * effective_app
 
     assert isclose(receive_power, 2.49e-13, rel_tol=0.1)
 
@@ -167,38 +171,38 @@ def test_received_power_2():
     transmit_gain = decibel_to_watt(17)  # dB
     transmit_power = 10  # W
     effective_app = 10  # m^2
-    frequency = 11  # GHz
+    # frequency = 11  # GHz
     receive_gain = decibel_to_watt(52.3)  # dB
 
-    wavelength = np.sqrt((4* np.pi * effective_app) / receive_gain)
+    wavelength = np.sqrt((4 * np.pi * effective_app) / receive_gain)
     assert isclose(wavelength, 2.727e-2, rel_tol=0.01)
 
     rec_power = receive_power(
-      transmit_power,
-      1,
-      transmit_gain,
-      sat_altitude,
-      1, 
-      receive_gain,
-      1,
-      wavelength=wavelength,
+        transmit_power,
+        1,
+        transmit_gain,
+        sat_altitude,
+        1,
+        receive_gain,
+        1,
+        wavelength=wavelength,
     )
     assert isclose(watt_to_decibel(rec_power), -126.0, rel_tol=0.1)
 
 
 def test_receive_power_3():
-    transmit_power = 9 # W
-    transmit_gain = decibel_to_watt(16) # W
+    transmit_power = 9  # W
+    transmit_gain = decibel_to_watt(16)  # W
     transmit_loss = decibel_to_watt(-3)  # W
-    distance = 24500 * 1000 # m
+    distance = 24500 * 1000  # m
 
-    receive_loss = decibel_to_watt(-2) # W
-    receive_gain = decibel_to_watt(57) # W
+    receive_loss = decibel_to_watt(-2)  # W
+    receive_gain = decibel_to_watt(57)  # W
 
-    atmospheric_loss = decibel_to_watt(-9) # W
+    atmospheric_loss = decibel_to_watt(-9)  # W
 
-    eff_aperture = None # m^2
-    wavelength = frequency_to_wavelength(11) # m
+    eff_aperture = None  # m^2
+    wavelength = frequency_to_wavelength(11)  # m
     power = receive_power(
         transmit_power,
         transmit_loss,
@@ -214,18 +218,18 @@ def test_receive_power_3():
 
 
 def test_receive_power_4():
-    transmit_power = 6 # W
-    transmit_gain = decibel_to_watt(18) # W
-    transmit_loss = 1 # W
-    distance = 12000 * 1000 # m
+    transmit_power = 6  # W
+    transmit_gain = decibel_to_watt(18)  # W
+    transmit_loss = 1  # W
+    distance = 12000 * 1000  # m
 
-    receive_loss = 1 # W
-    receive_gain = 1 # W
+    receive_loss = 1  # W
+    receive_gain = 1  # W
 
-    atmospheric_loss = 1 # W
+    atmospheric_loss = 1  # W
 
-    eff_aperture = 13 # m^2
-    wavelength = None # m
+    eff_aperture = 13  # m^2
+    wavelength = None  # m
 
     power = receive_power(
         transmit_power,

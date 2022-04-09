@@ -94,18 +94,39 @@ def q3(
 
 def plot_receive_power(report, satellites, ground_stations):
     for gs in ground_stations:
+        min_slant = report.iloc[
+            report[f"{satellites[0].name}.Earth.SlantRange.{gs.name}"].idxmin()
+        ]
+
         fig = px.line(
             report,
             x="UTC Gregorian",
             y=[f"{sat.name}.Earth.ReceivePower.{gs.name}" for sat in satellites],
             labels={"value": "Receive Power (dBW)"},
-            title=f"Power received by {gs.name} over 24 hours",
+        )
+        fig.add_vline(x=min_slant["UTC Gregorian"], line_dash="dash")
+        fig.add_annotation(
+            x=min_slant["UTC Gregorian"],
+            y=min_slant[f"{satellites[0].name}.Earth.ReceivePower.{gs.name}"],
+            text=f"Slant range = {min_slant[f'{satellites[0].name}.Earth.SlantRange.{gs.name}']:.2f}",
+        )
+        fig.update_layout(
+            title={
+                "text": f"Power received by {gs.name}",
+                "x": 0.5,
+                "xanchor": "center",
+                "yanchor": "top",
+            }
         )
         fig.show()
 
 
 def plot_elevation(report, satellites, ground_stations):
     for gs in ground_stations:
+        min_slant = report.iloc[
+            report[f"{satellites[0].name}.Earth.SlantRange.{gs.name}"].idxmin()
+        ]
+
         cols = [f"{sat.name}.Earth.Elevation.{gs.name}" for sat in satellites]
         elevation = report[cols]
         elevation = elevation[elevation > 20]
@@ -116,7 +137,20 @@ def plot_elevation(report, satellites, ground_stations):
             x="UTC Gregorian",
             y=cols,
             labels={"value": "Elevation (deg)"},
-            title=f"Elevation above {gs.name} over 24 hours",
+        )
+        fig.add_vline(x=min_slant["UTC Gregorian"], line_dash="dash")
+        fig.add_annotation(
+            x=min_slant["UTC Gregorian"],
+            y=min_slant[f"{satellites[0].name}.Earth.Elevation.{gs.name}"],
+            text=f"Slant range = {min_slant[f'{satellites[0].name}.Earth.SlantRange.{gs.name}']:.2f}",
+        )
+        fig.update_layout(
+            title={
+                "text": f"Elevation above {gs.name}",
+                "x": 0.5,
+                "xanchor": "center",
+                "yanchor": "top",
+            }
         )
         fig.show()
 

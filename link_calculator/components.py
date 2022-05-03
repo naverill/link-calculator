@@ -1,6 +1,7 @@
 from math import cos, degrees, exp, pi, radians, sin
 
 import numpy as np
+from scipy.special import j1
 
 from link_calculator.propagation.conversions import (
     frequency_to_wavelength,
@@ -122,6 +123,12 @@ class Antenna:
         """
         return self.gain * self.wavelength**2 / (4 * np.pi)
 
+    def directivity(self) -> float:
+        """
+        TODO
+        """
+        return 4 * pi * self.cross_sect_area / self.wavelength**2
+
 
 class HalfWaveDipole(Antenna):
     """
@@ -205,7 +212,28 @@ class SquarePyramidalHornAntenna(Antenna):
             cross_sect_diameter=cross_sect_diameter,
         )
 
+    def gain(self):
+        """
+        TODO
+        """
+        return self.gain if self.gain is not None else self._gain()
+
+    def _gain(self) -> float:
+        """
+        TODO
+        """
+        return (
+            self.efficiency
+            * 4
+            * pi
+            * self.cross_sect_diameter**2
+            / self.wavelength**2
+        )
+
     def half_beamwidth(self):
+        """
+        TODO
+        """
         return degrees(0.88 * self.wavelength / self.cross_sect_diameter)
 
 
@@ -234,17 +262,95 @@ class ParabolicReflectorAntenna(Antenna):
             cross_sect_diameter=circular_diameter,
         )
 
-    def gain(self):
+    @property
+    def gain(self) -> float:
+        """
+        TODO
+        """
+        return self.gain if self.gain is not None else self._gain()
+
+    def _gain(self) -> float:
+        """
+        TODO
+        """
         return self.efficiency * (pi * self.cross_sect_diameter / self.wavelength) ** 2
 
     def half_power_beamwidth(self, k: float):
+        """
+        TODO
+        """
+        return (
+            self.half_beamwidth
+            if self.half_beamwidth is None
+            else self._half_beamwidth(k)
+        )
+
+    def _half_beamwidth(self, k: float) -> float:
+        """
+        TODO
+        """
         return k * (self.wavelength / self.cross_sect_diameter)
 
     def off_sight_gain(self, k: float, theta: float):
+        """
+        TODO
+        """
+        return self.gain * self.pointing_loss(k, theta)
+
+    def pointing_loss(self, k: float, theta: float) -> float:
+        """
+        TODO
+        """
+        return exp(-2.26 * (radians(theta) / self.half_power_beamwidth(k)) ** 2)
+
+
+class HelicalAntenna(Antenna):
+    def __init__(
+        self,
+        name: str,
+        circular_diameter: float,
+        n_helix_turns: float,
+        turn_spacing: float,
+        power: float = None,
+        gain: float = None,
+        loss: float = None,
+        frequency: float = None,
+        effective_aperture: float = None,
+        efficiency: float = None,
+        impedance: float = None,  # Omega
+        half_beamwidth: float = 20,  # deg
+    ):
+        self.n_helix_turns = n_helix_turns
+        self.turn_spacing = n_helix_turns
+        super().__init__(
+            name=name,
+            power=power,
+            gain=gain,
+            loss=loss,
+            frequency=frequency,
+            effective_aperture=effective_aperture,
+            half_beamwidth=half_beamwidth,
+            cross_sect_diameter=circular_diameter,
+        )
+
+    @property
+    def gain(self) -> float:
+        """
+        TODO
+        """
+        return self.gain if self.gain is not None else self._gain()
+
+    def _gain(self) -> float:
+        """
+        TODO
+        """
         return (
-            self.efficiency
-            * (pi * self.cross_sect_diameter / self.wavelength)
-            * exp(-2.26 * (radians(theta) / self.half_power_beamwidth(k)) ** 2)
+            15
+            * self.n_helix_turns
+            * self.turn_spacing
+            * (pi**2)
+            * (self.cross_sect_diameter**2)
+            / self.wavelength**3
         )
 
 

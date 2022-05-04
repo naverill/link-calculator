@@ -1,12 +1,13 @@
 from math import cos, degrees, exp, pi, radians, sin
 
 import numpy as np
-from scipy.special import j1
 
 from link_calculator.propagation.conversions import (
     frequency_to_wavelength,
     wavelength_to_frequency,
 )
+
+# from scipy.special import j1
 
 
 class Antenna:
@@ -20,6 +21,8 @@ class Antenna:
         wavelength: float = None,
         effective_aperture: float = None,
         cross_sect_area: float = None,
+        cross_sect_diameter: float = None,
+        half_beamwidth: float = None,
         efficiency: float = None,
     ):
         """
@@ -34,27 +37,25 @@ class Antenna:
             cross_sect_area (float, m^2): cross sectional area of the antenna aperture
             frequency (float, GHz): the transmit frequency of the antenna
         """
-        self.power = power
-        self.gain = gain
-        self.loss = loss
-        self.efficiency = efficiency
-        self.frequency = frequency if frequency else wavelength_to_frequency(wavelength)
-        self.wavelength = (
-            wavelength if wavelength else frequency_to_wavelength(frequency)
-        )
-        self.effective_aperture = (
-            effective_aperture if effective_aperture else self.effective_aperture()
-        )
-        self.cross_sect_area = cross_sect_area
+        self._power = power
+        self._gain = gain
+        self._loss = loss
+        self._efficiency = efficiency
+        self._half_beamwidth = half_beamwidth
+        self._cross_sect_area = cross_sect_area
+        self._cross_sect_diameter = cross_sect_diameter
+        self._frequency = frequency
+        self._wavelength = wavelength
+        self._effective_aperture = effective_aperture
 
     def max_gain(self, cross_sect_area: float = None) -> float:
-        cross_sect_area = cross_sect_area if cross_sect_area else self.cross_sect_area
-        wavelength = frequency_to_wavelength(self.frequency)
-        return self.efficiency * 4 * np.pi * self.cross_sect_area / wavelength**2
+        cross_sect_area = cross_sect_area if cross_sect_area else self._cross_sect_area
+        wavelength = frequency_to_wavelength(self._frequency)
+        return self._efficiency * 4 * np.pi * self._cross_sect_area / wavelength**2
 
     def half_power_beamwidth(self, cross_sect_diameter: float) -> float:
         wavelength = frequency_to_wavelength(self.frequency)
-        return wavelength / (cross_sect_diameter * np.sqrt(self.efficiency))
+        return wavelength / (cross_sect_diameter * np.sqrt(self._efficiency))
 
     def power_density(self, distance: float) -> float:
         """
@@ -70,8 +71,9 @@ class Antenna:
         ------
             power_density (float, W/m^2): the power density at distance d
         """
-        return (self.power * self.gain) / (4 * np.pi * distance**2)
+        return (self._power * self._gain) / (4 * np.pi * distance**2)
 
+    @property
     def eirp(self) -> float:
         """
         Calculate the Effetive Isotropic Radiated Power
@@ -90,7 +92,7 @@ class Antenna:
                 from an isotropic antenna to achieve the same power incident at the
                 receiver  as that of a transmitter with a specific antenna gain
         """
-        return self.power * self.loss * self.gain
+        return self._power * self._loss * self._gain
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float) -> float:
         """
@@ -108,6 +110,7 @@ class Antenna:
         """
         return self.eirp() / (4 * np.pi * distance**2) * atmospheric_loss
 
+    @property
     def effective_aperture(self) -> float:
         """
         Calculate the effective area of the receiving antenna
@@ -121,13 +124,57 @@ class Antenna:
         -------
             effective_aperture (float, m^2): the effive aperture of the receive antenna
         """
-        return self.gain * self.wavelength**2 / (4 * np.pi)
+        return (
+            self._effective_aperture
+            if self._effective_aperture is not None
+            else self.__effective_aperture()
+        )
 
+    @effective_aperture.setter
+    def effective_aperture(self, value):
+        self._effective_aperture = value
+
+    def __effective_aperture(self) -> float:
+        return self.gain * self._wavelength**2 / (4 * np.pi)
+
+    @property
     def directivity(self) -> float:
         """
         TODO
         """
-        return 4 * pi * self.cross_sect_area / self.wavelength**2
+        return 4 * pi * self._cross_sect_area / self._wavelength**2
+
+    @property
+    def gain(self):
+        return self._gain
+
+    @gain.setter
+    def gain(self, value):
+        self._gain = value
+
+    @property
+    def frequency(self):
+        return (
+            self._frequency
+            if self._frequency is not None
+            else wavelength_to_frequency(self.wavelength)
+        )
+
+    @frequency.setter
+    def frequency(self, value):
+        self.frequency = value
+
+    @property
+    def wavelength(self):
+        return (
+            self._wavelength
+            if self._wavelength is not None
+            else frequency_to_wavelength(self.frequency)
+        )
+
+    @wavelength.setter
+    def wavelength(self, value):
+        self._wavelength = value
 
 
 class HalfWaveDipole(Antenna):
@@ -186,7 +233,7 @@ class ConicalHornAntenna(Antenna):
         )
 
 
-class SquarePyramidalHornAntenna(Antenna):
+class SquareHornAntenna(Antenna):
     def __init__(
         self,
         name: str,
@@ -212,6 +259,7 @@ class SquarePyramidalHornAntenna(Antenna):
             cross_sect_diameter=cross_sect_diameter,
         )
 
+    @property
     def gain(self):
         """
         TODO
@@ -237,7 +285,7 @@ class SquarePyramidalHornAntenna(Antenna):
         return degrees(0.88 * self.wavelength / self.cross_sect_diameter)
 
 
-class ParabolicReflectorAntenna(Antenna):
+class ParabolicAntenna(Antenna):
     def __init__(
         self,
         name: str,
@@ -257,6 +305,7 @@ class ParabolicReflectorAntenna(Antenna):
             gain=gain,
             loss=loss,
             frequency=frequency,
+            efficiency=efficiency,
             effective_aperture=effective_aperture,
             half_beamwidth=half_beamwidth,
             cross_sect_diameter=circular_diameter,
@@ -267,13 +316,15 @@ class ParabolicReflectorAntenna(Antenna):
         """
         TODO
         """
-        return self.gain if self.gain is not None else self._gain()
+        return self.gain if self._gain is not None else self.__gain()
 
-    def _gain(self) -> float:
+    def __gain(self) -> float:
         """
         TODO
         """
-        return self.efficiency * (pi * self.cross_sect_diameter / self.wavelength) ** 2
+        return (
+            self._efficiency * (pi * self._cross_sect_diameter / self._wavelength) ** 2
+        )
 
     def half_power_beamwidth(self, k: float):
         """
@@ -338,9 +389,9 @@ class HelicalAntenna(Antenna):
         """
         TODO
         """
-        return self.gain if self.gain is not None else self._gain()
+        return self.gain if self._gain is not None else self.__gain()
 
-    def _gain(self) -> float:
+    def __gain(self) -> float:
         """
         TODO
         """
@@ -352,34 +403,3 @@ class HelicalAntenna(Antenna):
             * (self.cross_sect_diameter**2)
             / self.wavelength**3
         )
-
-
-class GroundStation:
-    def __init__(
-        self,
-        name: str,
-        latitude: float,
-        longitude: float,
-        altitude: float,
-        antenna: Antenna,
-    ):
-        """
-
-        Parameters
-        ----------
-            name (str,): name of the ground station
-            latitude (str, deg): the latitude of the groundstation
-            longitude (str, deg): the longitude of the groundstation
-            altitude (str, km): the altitude of the groundstation above sea level
-        """
-        self.name = name
-        self.latitude = latitude
-        self.longitude = longitude
-        self.altitude = altitude
-        self.antenna = antenna
-
-
-class Satellite:
-    def __init__(self, name: str, antenna: Antenna):
-        self.name = name
-        self.antenna = antenna

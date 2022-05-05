@@ -214,7 +214,7 @@ def test_receive_power_3():
         wavelength,
         eff_aperture,
     )
-    assert isclose(power, -133, rel_tol=0.01)
+    assert isclose(watt_to_decibel(power), -133, rel_tol=0.01)
 
 
 def test_receive_power_4():
@@ -242,4 +242,4 @@ def test_receive_power_4():
         wavelength,
         eff_aperture,
     )
-    assert isclose(power, -116, rel_tol=0.01)
+    assert isclose(watt_to_decibel(power), -116, rel_tol=0.01)

@@ -77,7 +77,7 @@ def q3(
                         sat.antenna.power,
                         sat.antenna.loss,
                         sat.antenna.gain,
-                        row[f"{sat.name}.Earth.SlantRange.{gs.name}"],
+                        row[f"{sat.name}.Earth.SlantRange.{gs.name}"] * 1000,
                         gs.antenna.loss,
                         gs.antenna.gain,
                         1,
@@ -119,6 +119,11 @@ def plot_receive_power(report, satellites, ground_stations):
             }
         )
         fig.show()
+        print(
+            gs.name,
+            min_slant[f"{satellites[0].name}.Earth.ReceivePower.{gs.name}"],
+            "dBW",
+        )
 
 
 def plot_elevation(report, satellites, ground_stations):
@@ -153,6 +158,7 @@ def plot_elevation(report, satellites, ground_stations):
             }
         )
         fig.show()
+        print(gs.name, min_slant[f"{satellites[0].name}.Earth.Altitude"], "km")
 
 
 if __name__ == "__main__":

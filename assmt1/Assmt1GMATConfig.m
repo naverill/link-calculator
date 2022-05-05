@@ -11,10 +11,10 @@ GMAT COMMSAT1.DateFormat = TAIModJulian;
 GMAT COMMSAT1.Epoch = '21545';
 GMAT COMMSAT1.CoordinateSystem = EarthMJ2000Eq;
 GMAT COMMSAT1.DisplayStateType = Keplerian;
-GMAT COMMSAT1.SMA = 42165.00000000001;
-GMAT COMMSAT1.ECC = 7.594381058920915e-16;
-GMAT COMMSAT1.INC = 29.99999999999999;
-GMAT COMMSAT1.RAAN = 29.99999999999999;
+GMAT COMMSAT1.SMA = 42164.99999999999;
+GMAT COMMSAT1.ECC = 3.794636528864267e-16;
+GMAT COMMSAT1.INC = 29.99999999999998;
+GMAT COMMSAT1.RAAN = 30;
 GMAT COMMSAT1.AOP = 0;
 GMAT COMMSAT1.TA = 1.207418269725733e-06;
 GMAT COMMSAT1.DryMass = 850;
@@ -61,7 +61,7 @@ GMAT COMMSAT2.CoordinateSystem = EarthMJ2000Eq;
 GMAT COMMSAT2.DisplayStateType = Keplerian;
 GMAT COMMSAT2.SMA = 42164.99999999999;
 GMAT COMMSAT2.ECC = 1.192684599010012e-15;
-GMAT COMMSAT2.INC = 29.99999999999999;
+GMAT COMMSAT2.INC = 30;
 GMAT COMMSAT2.RAAN = 150;
 GMAT COMMSAT2.AOP = 0;
 GMAT COMMSAT2.TA = 239.9999999999998;
@@ -108,8 +108,8 @@ GMAT COMMSAT3.Epoch = '21545';
 GMAT COMMSAT3.CoordinateSystem = EarthMJ2000Eq;
 GMAT COMMSAT3.DisplayStateType = Keplerian;
 GMAT COMMSAT3.SMA = 42164.99999999999;
-GMAT COMMSAT3.ECC = 1.160305759773672e-15;
-GMAT COMMSAT3.INC = 29.99999999999998;
+GMAT COMMSAT3.ECC = 1.293181873398937e-15;
+GMAT COMMSAT3.INC = 29.99999999999997;
 GMAT COMMSAT3.RAAN = 270;
 GMAT COMMSAT3.AOP = 0;
 GMAT COMMSAT3.TA = 120;
@@ -359,6 +359,7 @@ GMAT NorfolkIsland.MinimumElevationAngle = 20;
 
 
 
+
 %----------------------------------------
 %---------- ForceModels
 %----------------------------------------
@@ -490,10 +491,10 @@ GMAT EclipseLocator3.EclipseTypes = {'Umbra', 'Penumbra', 'Antumbra'};
 
 Create OrbitView EarthFixedEcliptic;
 GMAT EarthFixedEcliptic.SolverIterations = None;
-GMAT EarthFixedEcliptic.UpperLeft = [ 0.1458333333333333 0.03656998738965952 ];
-GMAT EarthFixedEcliptic.Size = [ 0.9940476190476191 0.9609079445145019 ];
-GMAT EarthFixedEcliptic.RelativeZOrder = 208;
-GMAT EarthFixedEcliptic.Maximized = true;
+GMAT EarthFixedEcliptic.UpperLeft = [ 0.09761904761904762 0.08190476190476191 ];
+GMAT EarthFixedEcliptic.Size = [ 0.6976190476190476 0.7342857142857143 ];
+GMAT EarthFixedEcliptic.RelativeZOrder = 388;
+GMAT EarthFixedEcliptic.Maximized = false;
 GMAT EarthFixedEcliptic.Add = {COMMSAT1, COMMSAT2, COMMSAT3, Earth};
 GMAT EarthFixedEcliptic.CoordinateSystem = EarthFixed;
 GMAT EarthFixedEcliptic.DrawObject = [ true true true true ];
@@ -504,9 +505,9 @@ GMAT EarthFixedEcliptic.ShowPlot = true;
 GMAT EarthFixedEcliptic.MaxPlotPoints = 20000;
 GMAT EarthFixedEcliptic.ShowLabels = true;
 GMAT EarthFixedEcliptic.ViewPointReference = Earth;
-GMAT EarthFixedEcliptic.ViewPointVector = [ 50000 0 0 ];
+GMAT EarthFixedEcliptic.ViewPointVector = COMMSAT1;
 GMAT EarthFixedEcliptic.ViewDirection = Earth;
-GMAT EarthFixedEcliptic.ViewScaleFactor = 1;
+GMAT EarthFixedEcliptic.ViewScaleFactor = 2.5;
 GMAT EarthFixedEcliptic.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthFixedEcliptic.ViewUpAxis = Z;
 GMAT EarthFixedEcliptic.EclipticPlane = On;
@@ -522,10 +523,10 @@ GMAT EarthFixedEcliptic.EnableConstellations = On;
 
 Create GroundTrackPlot DefaultGroundTrackPlot;
 GMAT DefaultGroundTrackPlot.SolverIterations = Current;
-GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.1458333333333333 0.03656998738965952 ];
-GMAT DefaultGroundTrackPlot.Size = [ 0.9940476190476191 0.9609079445145019 ];
-GMAT DefaultGroundTrackPlot.RelativeZOrder = 216;
-GMAT DefaultGroundTrackPlot.Maximized = true;
+GMAT DefaultGroundTrackPlot.UpperLeft = [ 0.05773809523809524 0.03142857142857143 ];
+GMAT DefaultGroundTrackPlot.Size = [ 0.9898809523809524 0.9533333333333334 ];
+GMAT DefaultGroundTrackPlot.RelativeZOrder = 408;
+GMAT DefaultGroundTrackPlot.Maximized = false;
 GMAT DefaultGroundTrackPlot.Add = {AshmoreIslands, CartierIsland, CaseyStation, ChristmasIsland, CocosIslands, CoralSeaIslands, DavisStation, COMMSAT1, COMMSAT2, COMMSAT3, HeardMcDonaldIslands, MacquarieStation, MawsonStation, NorfolkIsland};
 GMAT DefaultGroundTrackPlot.DataCollectFrequency = 1;
 GMAT DefaultGroundTrackPlot.UpdatePlotFrequency = 50;
@@ -543,7 +544,7 @@ GMAT ReportFile1.RelativeZOrder = 121;
 GMAT ReportFile1.Maximized = true;
 GMAT ReportFile1.Filename = 'OrbitParams.txt';
 GMAT ReportFile1.Precision = 16;
-GMAT ReportFile1.Add = {COMMSAT1.UTCGregorian, COMMSAT1.Earth.TA, COMMSAT1.Earth.Latitude, COMMSAT1.Earth.Longitude, COMMSAT1.Earth.RMAG, COMMSAT2.Earth.TA, COMMSAT2.Earth.Latitude, COMMSAT2.Earth.Longitude, COMMSAT2.Earth.RMAG, COMMSAT3.Earth.TA, COMMSAT3.Earth.Latitude, COMMSAT3.Earth.Longitude, COMMSAT3.Earth.RMAG};
+GMAT ReportFile1.Add = {COMMSAT1.UTCGregorian, COMMSAT1.Earth.TA, COMMSAT1.Earth.Latitude, COMMSAT1.Earth.Longitude, COMMSAT1.Earth.RMAG, COMMSAT1.Earth.Altitude, COMMSAT2.Earth.TA, COMMSAT2.Earth.Latitude, COMMSAT2.Earth.Longitude, COMMSAT2.Earth.RMAG, COMMSAT3.Earth.TA, COMMSAT3.Earth.Latitude, COMMSAT3.Earth.Longitude, COMMSAT3.Earth.RMAG};
 GMAT ReportFile1.WriteHeaders = true;
 GMAT ReportFile1.LeftJustify = On;
 GMAT ReportFile1.ZeroFill = Off;
@@ -554,10 +555,10 @@ GMAT ReportFile1.WriteReport = true;
 
 Create OrbitView J2000Ecliptic;
 GMAT J2000Ecliptic.SolverIterations = None;
-GMAT J2000Ecliptic.UpperLeft = [ 0.1458333333333333 0.03656998738965952 ];
-GMAT J2000Ecliptic.Size = [ 0.9940476190476191 0.9609079445145019 ];
-GMAT J2000Ecliptic.RelativeZOrder = 214;
-GMAT J2000Ecliptic.Maximized = true;
+GMAT J2000Ecliptic.UpperLeft = [ 0.1035714285714286 0.04571428571428571 ];
+GMAT J2000Ecliptic.Size = [ 0.8101190476190476 0.8504761904761905 ];
+GMAT J2000Ecliptic.RelativeZOrder = 406;
+GMAT J2000Ecliptic.Maximized = false;
 GMAT J2000Ecliptic.Add = {COMMSAT1, COMMSAT2, COMMSAT3, Earth};
 GMAT J2000Ecliptic.CoordinateSystem = EarthMJ2000Eq;
 GMAT J2000Ecliptic.DrawObject = [ true true true true ];
@@ -568,9 +569,9 @@ GMAT J2000Ecliptic.ShowPlot = true;
 GMAT J2000Ecliptic.MaxPlotPoints = 20000;
 GMAT J2000Ecliptic.ShowLabels = true;
 GMAT J2000Ecliptic.ViewPointReference = Earth;
-GMAT J2000Ecliptic.ViewPointVector = [ 0 0 30000 ];
+GMAT J2000Ecliptic.ViewPointVector = COMMSAT1;
 GMAT J2000Ecliptic.ViewDirection = Earth;
-GMAT J2000Ecliptic.ViewScaleFactor = 1;
+GMAT J2000Ecliptic.ViewScaleFactor = 2.5;
 GMAT J2000Ecliptic.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT J2000Ecliptic.ViewUpAxis = Z;
 GMAT J2000Ecliptic.EclipticPlane = On;
@@ -590,10 +591,10 @@ GMAT J2000Ecliptic.EnableConstellations = On;
 
 Create OrbitView EarthFixedXY;
 GMAT EarthFixedXY.SolverIterations = None;
-GMAT EarthFixedXY.UpperLeft = [ 0.1458333333333333 0.03656998738965952 ];
-GMAT EarthFixedXY.Size = [ 0.9940476190476191 0.9609079445145019 ];
-GMAT EarthFixedXY.RelativeZOrder = 210;
-GMAT EarthFixedXY.Maximized = true;
+GMAT EarthFixedXY.UpperLeft = [ 0.09345238095238095 0.03619047619047619 ];
+GMAT EarthFixedXY.Size = [ 0.7738095238095238 0.820952380952381 ];
+GMAT EarthFixedXY.RelativeZOrder = 400;
+GMAT EarthFixedXY.Maximized = false;
 GMAT EarthFixedXY.Add = {COMMSAT1, COMMSAT2, COMMSAT3, Earth};
 GMAT EarthFixedXY.CoordinateSystem = EarthFixed;
 GMAT EarthFixedXY.DrawObject = [ true true true true ];
@@ -604,9 +605,9 @@ GMAT EarthFixedXY.ShowPlot = true;
 GMAT EarthFixedXY.MaxPlotPoints = 20000;
 GMAT EarthFixedXY.ShowLabels = true;
 GMAT EarthFixedXY.ViewPointReference = Earth;
-GMAT EarthFixedXY.ViewPointVector = [ 50000 0 0 ];
+GMAT EarthFixedXY.ViewPointVector = COMMSAT1;
 GMAT EarthFixedXY.ViewDirection = Earth;
-GMAT EarthFixedXY.ViewScaleFactor = 1;
+GMAT EarthFixedXY.ViewScaleFactor = 2.5;
 GMAT EarthFixedXY.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT EarthFixedXY.ViewUpAxis = Z;
 GMAT EarthFixedXY.EclipticPlane = Off;
@@ -622,10 +623,10 @@ GMAT EarthFixedXY.EnableConstellations = On;
 
 Create OrbitView J2000XY;
 GMAT J2000XY.SolverIterations = None;
-GMAT J2000XY.UpperLeft = [ 0.1458333333333333 0.03656998738965952 ];
-GMAT J2000XY.Size = [ 0.9940476190476191 0.9609079445145019 ];
-GMAT J2000XY.RelativeZOrder = 212;
-GMAT J2000XY.Maximized = true;
+GMAT J2000XY.UpperLeft = [ 0.1571428571428571 0.08476190476190476 ];
+GMAT J2000XY.Size = [ 0.7053571428571429 0.7495238095238095 ];
+GMAT J2000XY.RelativeZOrder = 394;
+GMAT J2000XY.Maximized = false;
 GMAT J2000XY.Add = {COMMSAT1, COMMSAT2, COMMSAT3, Earth};
 GMAT J2000XY.CoordinateSystem = EarthMJ2000Eq;
 GMAT J2000XY.DrawObject = [ true true true true ];
@@ -636,9 +637,9 @@ GMAT J2000XY.ShowPlot = true;
 GMAT J2000XY.MaxPlotPoints = 20000;
 GMAT J2000XY.ShowLabels = true;
 GMAT J2000XY.ViewPointReference = Earth;
-GMAT J2000XY.ViewPointVector = [ 0 0 30000 ];
+GMAT J2000XY.ViewPointVector = COMMSAT1;
 GMAT J2000XY.ViewDirection = Earth;
-GMAT J2000XY.ViewScaleFactor = 1;
+GMAT J2000XY.ViewScaleFactor = 2.5;
 GMAT J2000XY.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT J2000XY.ViewUpAxis = Z;
 GMAT J2000XY.EclipticPlane = Off;
@@ -657,7 +658,14 @@ GMAT J2000XY.EnableConstellations = On;
 %----------------------------------------
 
 Create GmatFunction CalcAzElRange;
-GMAT CalcAzElRange.FunctionPath = '/home/naverill/unispace/sat_comms/ZEIT8219-Satellite-Communications/assmt1/CalcAzElRange.gmf';
+GMAT CalcAzElRange.FunctionPath = '/Users/ninaaverill/unispace/2022/zeit8219-Satellite-Communications/assmt1/CalcAzElRange.gmf';
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+Create Variable EarthRad;
+GMAT EarthRad = 6371;
+
 
 
 %----------------------------------------
@@ -667,5 +675,5 @@ GMAT CalcAzElRange.FunctionPath = '/home/naverill/unispace/sat_comms/ZEIT8219-Sa
 BeginMissionSequence;
 While COMMSAT1.ElapsedSecs < 86400
    Propagate DefaultProp(COMMSAT1) DefaultProp(COMMSAT2) DefaultProp(COMMSAT3) {COMMSAT1.ElapsedSecs = 300};
-   Report ReportFile1 COMMSAT1.UTCGregorian COMMSAT1.Earth.TA COMMSAT1.Earth.Latitude COMMSAT1.Earth.Longitude COMMSAT1.Earth.RMAG COMMSAT2.Earth.TA COMMSAT2.Earth.Latitude COMMSAT2.Earth.Longitude COMMSAT2.Earth.RMAG COMMSAT3.Earth.TA COMMSAT3.Earth.Latitude COMMSAT3.Earth.Longitude COMMSAT3.Earth.RMAG;
+   Report ReportFile1 COMMSAT1.UTCGregorian COMMSAT1.Earth.TA COMMSAT1.Earth.Latitude COMMSAT1.Earth.Longitude COMMSAT1.Earth.RMAG COMMSAT1.Earth.Altitude COMMSAT2.Earth.TA COMMSAT2.Earth.Latitude COMMSAT2.Earth.Longitude COMMSAT2.Earth.RMAG COMMSAT3.Earth.TA COMMSAT3.Earth.Latitude COMMSAT3.Earth.Longitude COMMSAT3.Earth.RMAG;
 EndWhile;

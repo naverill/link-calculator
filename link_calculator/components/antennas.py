@@ -14,7 +14,7 @@ class Antenna:
         name: str,
         power: float = None,
         gain: float = None,
-        loss: float = None,
+        loss: float = 1,
         frequency: float = None,
         wavelength: float = None,
         effective_aperture: float = None,
@@ -30,8 +30,8 @@ class Antenna:
         ----------
             name (str): Name of antenna
             power (float, W): the total output amplifier power
-            gain (float, ): transmitter gain in the direction of the
-                receiving antenna
+            gain (float, ): ratio of maximum power densiry to that of an isotropic radiatior
+                at the same distance in the direction of the receiving antenna
             loss (float, ): coupling loss between transmitter and antenna
                 in the range [0, 1]
             frequency (float, GHz): the transmit frequency of the antenna
@@ -41,6 +41,8 @@ class Antenna:
             effective_aperture (float, m^2): The effective collecting area of a receiving antenna
             half_beamwidth (float, deg): The angle between the directions providing half maximum power
                 on either side of the maximum power direction.
+            efficiency (float, ): the efficiency with which the antenna radiates all
+              energy fed into it
         """
         self._power = power
         self._gain = gain
@@ -53,7 +55,7 @@ class Antenna:
         self._wavelength = wavelength
         self._effective_aperture = effective_aperture
 
-    def power_density_eirp(self, distance: float, atmospheric_loss: float) -> float:
+    def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
         """
         Calculate the power density of the wavefront using EIRP
 
@@ -67,7 +69,7 @@ class Antenna:
         ------
             power_density (float, W/m^2): the power density at distance d
         """
-        return self.eirp() / (4 * np.pi * distance**2) * atmospheric_loss
+        return self.eirp / (4 * np.pi * distance**2) * atmospheric_loss
 
     def power_density(self, distance: float) -> float:
         """
@@ -84,12 +86,6 @@ class Antenna:
             power_density (float, W/m^2): the power density at distance d
         """
         return (self._power * self._gain) / (4 * np.pi * distance**2)
-
-    @property
-    def max_gain(self) -> float:
-        return (
-            self.efficiency * 4 * np.pi * self._cross_sect_area / self.wavelength**2
-        )
 
     @property
     def eirp(self) -> float:
@@ -142,6 +138,10 @@ class Antenna:
         return self.gain * self.wavelength**2 / (4 * np.pi)
 
     @property
+    def directive_gain(self) -> float:
+        return self.gain / self.efficiency
+
+    @property
     def directivity(self) -> float:
         """
         TODO
@@ -165,7 +165,14 @@ class Antenna:
 
     @property
     def gain(self):
+        if self._gain is None:
+            self._gain = self.__gain()
         return self._gain
+
+    def __gain(self) -> float:
+        return (
+            self.efficiency * 4 * np.pi * self._cross_sect_area / self.wavelength**2
+        )
 
     @gain.setter
     def gain(self, value):
@@ -174,7 +181,7 @@ class Antenna:
     @property
     def frequency(self):
         if self._frequency is None:
-            self._frequency = wavelength_to_frequency(self.wavelength)
+            self._frequency = wavelength_to_frequency(self._wavelength)
         return self._frequency
 
     @frequency.setter
@@ -184,7 +191,7 @@ class Antenna:
     @property
     def wavelength(self):
         if self._wavelength is None:
-            self._wavelength = frequency_to_wavelength(self.frequency)
+            self._wavelength = frequency_to_wavelength(self._frequency)
         return self._wavelength
 
     @wavelength.setter
@@ -207,6 +214,14 @@ class Antenna:
     def cross_sect_diameter(self, value):
         self._cross_sect_diameter = value
 
+    @property
+    def loss(self):
+        return self._loss
+
+    @loss.setter
+    def loss(self, value):
+        self._loss = value
+
 
 class HalfWaveDipole(Antenna):
     """
@@ -220,7 +235,6 @@ class HalfWaveDipole(Antenna):
         gain: float = 1.64,
         loss: float = None,
         frequency: float = None,
-        impedance: float = 73,  # Omega
         half_beamwidth: float = 78,  # deg
     ):
         effective_aperture = 0.13 * frequency_to_wavelength(frequency)
@@ -250,7 +264,6 @@ class ConicalHornAntenna(Antenna):
         loss: float = None,
         frequency: float = None,
         effective_aperture: float = None,
-        impedance: float = None,  # Omega
         half_beamwidth: float = 20,  # deg
     ):
         super().__init__(
@@ -276,7 +289,6 @@ class SquareHornAntenna(Antenna):
         loss: float = 1,
         frequency: float = None,
         effective_aperture: float = None,
-        impedance: float = None,  # Omega
     ):
         effective_aperture = efficiency * cross_sect_diameter**2
         super().__init__(
@@ -337,7 +349,6 @@ class ParabolicAntenna(Antenna):
         effective_aperture: float = None,
         efficiency: float = None,
         beamwidth_scale_factor: float = None,
-        impedance: float = None,  # Omega
         half_beamwidth: float = 20,  # deg
     ):
         self._beamwidth_scale_factor = beamwidth_scale_factor
@@ -402,7 +413,6 @@ class HelicalAntenna(Antenna):
         frequency: float = None,
         effective_aperture: float = None,
         efficiency: float = None,
-        impedance: float = None,  # Omega
         half_beamwidth: float = 20,  # deg
     ):
         self.n_helix_turns = n_helix_turns

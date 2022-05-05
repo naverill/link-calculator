@@ -2,6 +2,7 @@ from math import isclose, radians
 
 import numpy as np
 
+from link_calculator.components.antennas import Antenna
 from link_calculator.constants import EARTH_RADIUS
 from link_calculator.orbits.utils import angle_sat_to_gs_orbital_radius, slant_range
 from link_calculator.propagation.conversions import (
@@ -12,7 +13,6 @@ from link_calculator.propagation.conversions import (
 from link_calculator.propagation.utils import (
     free_space_loss_db,
     horizontal_reduction,
-    power_density,
     rain_attenuation,
     rain_specific_attenuation,
     receive_power,
@@ -158,7 +158,8 @@ def test_received_power():
     transmit_power = 10  # W
     effective_app = 10  # m^2
 
-    power_dens = power_density(transmit_power, transmit_gain, sat_altitude)
+    ant = Antenna(name="test", power=transmit_power, gain=transmit_gain)
+    power_dens = ant.power_density(sat_altitude)
     assert isclose(power_dens, 2.49e-14, rel_tol=0.1)
 
     receive_power = power_dens * effective_app
@@ -168,78 +169,60 @@ def test_received_power():
 
 def test_received_power_2():
     sat_altitude = 40000 * 1000  # km
-    transmit_gain = decibel_to_watt(17)  # dB
-    transmit_power = 10  # W
-    effective_app = 10  # m^2
-    # frequency = 11  # GHz
-    receive_gain = decibel_to_watt(52.3)  # dB
 
-    wavelength = np.sqrt((4 * np.pi * effective_app) / receive_gain)
+    receive_ant = Antenna(
+        name="test", gain=decibel_to_watt(52.3), effective_aperture=10
+    )
+    wavelength = np.sqrt(
+        (4 * np.pi * receive_ant.effective_aperture) / receive_ant.gain
+    )
+    transmit_ant = Antenna(
+        name="test", power=10, gain=decibel_to_watt(17), wavelength=wavelength
+    )
     assert isclose(wavelength, 2.727e-2, rel_tol=0.01)
-
     rec_power = receive_power(
-        transmit_power,
-        1,
-        transmit_gain,
+        transmit_ant,
+        receive_ant,
         sat_altitude,
-        1,
-        receive_gain,
-        1,
-        wavelength=wavelength,
     )
     assert isclose(watt_to_decibel(rec_power), -126.0, rel_tol=0.1)
 
 
 def test_receive_power_3():
-    transmit_power = 9  # W
-    transmit_gain = decibel_to_watt(16)  # W
-    transmit_loss = decibel_to_watt(-3)  # W
+    transmit_ant = Antenna(
+        name="test",
+        power=9,
+        gain=decibel_to_watt(16),
+        loss=decibel_to_watt(-3),
+    )
     distance = 24500 * 1000  # m
 
-    receive_loss = decibel_to_watt(-2)  # W
-    receive_gain = decibel_to_watt(57)  # W
-
+    receive_ant = Antenna(
+        name="test",
+        gain=decibel_to_watt(57),
+        loss=decibel_to_watt(-2),
+        wavelength=frequency_to_wavelength(11),
+    )
     atmospheric_loss = decibel_to_watt(-9)  # W
 
-    eff_aperture = None  # m^2
-    wavelength = frequency_to_wavelength(11)  # m
     power = receive_power(
-        transmit_power,
-        transmit_loss,
-        transmit_gain,
+        transmit_ant,
+        receive_ant,
         distance,
-        receive_loss,
-        receive_gain,
         atmospheric_loss,
-        wavelength,
-        eff_aperture,
     )
     assert isclose(watt_to_decibel(power), -133, rel_tol=0.01)
 
 
 def test_receive_power_4():
-    transmit_power = 6  # W
-    transmit_gain = decibel_to_watt(18)  # W
-    transmit_loss = 1  # W
+    transmit_ant = Antenna(name="test", power=6, gain=decibel_to_watt(18), loss=1)
     distance = 12000 * 1000  # m
 
-    receive_loss = 1  # W
-    receive_gain = 1  # W
-
-    atmospheric_loss = 1  # W
-
-    eff_aperture = 13  # m^2
-    wavelength = None  # m
+    receive_ant = Antenna(name="test", gain=1, effective_aperture=13)
 
     power = receive_power(
-        transmit_power,
-        transmit_loss,
-        transmit_gain,
+        transmit_ant,
+        receive_ant,
         distance,
-        receive_loss,
-        receive_gain,
-        atmospheric_loss,
-        wavelength,
-        eff_aperture,
     )
     assert isclose(watt_to_decibel(power), -116, rel_tol=0.01)

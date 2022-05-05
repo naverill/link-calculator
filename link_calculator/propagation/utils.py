@@ -2,90 +2,15 @@ from math import atan2, cos, degrees, radians
 
 import numpy as np
 
+from link_calculator.components.antennas import Antenna
 from link_calculator.constants import EARTH_RADIUS
 
 
-def power_density(power: float, gain: float, distance: float) -> float:
-    """
-    Calculate the power density of the wavefront
-
-    Parameters
-    ---------
-        power (float, W): the transmitted power
-        gain (float, W): the power gained  
-        distance (float, m): the distance between the transmit and receive antennas
-
-    Returns
-    ------
-        power_density (float, W/m^2): the power density at distance d
-    """
-    return (power * gain) / (4 * np.pi * distance**2)
-
-
-def eirp(power: float, loss: float, gain: float) -> float:
-    """
-    Calculate the Effetive Isotropic Radiated Power
-
-    Parameters
-    ----------
-        power (float, W): the total output amplifier power
-        loss (float, ): coupling loss between transmitter and antenna
-            in the range [0, 1]
-        gain (float, ): transmitter gain in the direction of the
-            receiving antenna
-
-    Returns
-    -------
-        eirp (float, dB): power incident at the receiver that would have had to be radiated
-            from an isotropic antenna to achieve the same power incident at the
-            receiver  as that of a transmitter with a specific antenna gain
-    """
-    return power * loss * gain
-
-
-def power_density_eirp(eirp: float, distance: float, atmospheric_loss: float) -> float:
-    """
-    Calculate the power density of the wavefront using EIRP
-
-    Parameters
-    ---------
-        eirp (float, dB)
-        distance (float, m): the distance between the transmit and receive antennas
-        atmospheric_loss (float, ): the total losses due to the atmosphere
-
-    Returns
-    ------
-        power_density (float, W/m^2): the power density at distance d
-    """
-    return eirp / (4 * np.pi * distance**2) * atmospheric_loss
-
-
-def effective_aperture(gain: float, wavelength: float) -> float:
-    """
-    Calculate the effective area of the receiving antenna
-
-    Parameters
-    ----------
-        gain (float, ): gain of the receive antenna
-        wavelength (float, m): the radiation wavelength
-
-    Returns
-    -------
-        effective_aperture (float, m^2): the effive aperture of the receive antenna
-    """
-    return gain * wavelength**2 / (4 * np.pi)
-
-
 def receive_power(
-    transmit_power: float,
-    transmit_loss: float,
-    transmit_gain: float,
+    transmit_antenna: Antenna,
+    receive_antenna: Antenna,
     distance: float,
-    receive_loss: float,
-    receive_gain: float,
-    atmospheric_loss: float,
-    wavelength: float = None,
-    eff_aperture: float = None
+    atmospheric_loss: float = 1,
 ) -> float:
     """
     Calculate the power collected by the receive antenna
@@ -110,15 +35,8 @@ def receive_power(
     -------
         receive_power (float, W): the total collected power at the receiver's terminals
     """
-    eirp_ = eirp(transmit_power, transmit_loss, transmit_gain)
-    pow_density = power_density_eirp(eirp_, distance, atmospheric_loss)
-
-    if not eff_aperture and wavelength:
-      eff_aperture = effective_aperture(receive_gain, wavelength)
-    if not (eff_aperture or wavelength):
-        raise ValueError("No effective aperture or wavelength supplied")
-
-    return pow_density * eff_aperture * receive_loss
+    pow_density = transmit_antenna.power_density_eirp(distance, atmospheric_loss)
+    return pow_density * receive_antenna.effective_aperture * receive_antenna.loss
 
 
 def free_space_loss(distance: float, wavelength: float) -> float:

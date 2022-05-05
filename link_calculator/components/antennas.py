@@ -62,13 +62,14 @@ class Antenna:
         Parameters
         ---------
             eirp (float, dB)
-            distance (float, m): the distance between the transmit and receive antennas
+            distance (float, km): the distance between the transmit and receive antennas
             atmospheric_loss (float, ): the total losses due to the atmosphere
 
         Returns
         ------
             power_density (float, W/m^2): the power density at distance d
         """
+        distance = distance * 1000  # convert to m
         return self.eirp / (4 * np.pi * distance**2) * atmospheric_loss
 
     def power_density(self, distance: float) -> float:
@@ -79,12 +80,13 @@ class Antenna:
         ---------
             power (float, W): the transmitted power
             gain (float, W): the power gained
-            distance (float, m): the distance between the transmit and receive antennas
+            distance (float, km): the distance between the transmit and receive antennas
 
         Returns
         ------
             power_density (float, W/m^2): the power density at distance d
         """
+        distance = distance * 1000  # convert to m
         return (self._power * self._gain) / (4 * np.pi * distance**2)
 
     @property
@@ -221,6 +223,27 @@ class Antenna:
     @loss.setter
     def loss(self, value):
         self._loss = value
+
+    def receive_power(
+        self,
+        transmit_antenna: "Antenna",
+        distance: float,
+        atmospheric_loss: float = 1,
+    ) -> float:
+        """
+        Calculate the power collected by the receive antenna
+
+        Parameters
+        ----------
+            distance (float, km): the distance between the transmit and receive antennas
+            atmospheric_loss (float, ): The loss due to the atmosphere
+
+        Returns
+        -------
+            receive_power (float, W): the total collected power at the receiver's terminals
+        """
+        pow_density = transmit_antenna.power_density_eirp(distance, atmospheric_loss)
+        return pow_density * self.effective_aperture * self.loss
 
 
 class HalfWaveDipole(Antenna):

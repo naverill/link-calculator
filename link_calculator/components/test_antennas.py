@@ -1,4 +1,4 @@
-from math import degrees
+from math import degrees, isclose
 
 import numpy as np
 
@@ -7,7 +7,12 @@ from link_calculator.components.antennas import (
     ParabolicAntenna,
     SquareHornAntenna,
 )
-from link_calculator.propagation.conversions import watt_to_decibel
+from link_calculator.propagation.conversions import (
+    decibel_to_watt,
+    frequency_to_wavelength,
+    watt_to_decibel,
+    wavelength_to_frequency,
+)
 
 
 def test_parabolic_antenna():
@@ -60,3 +65,76 @@ def test_pointing_loss_1():
     assert np.isclose(
         -watt_to_decibel(ant.pointing_loss(pointing_error)), 0.246, rtol=0.1
     )
+
+
+def test_received_power():
+    sat_altitude = 40000  # km
+    transmit_gain = decibel_to_watt(17)  # dB
+    transmit_power = 10  # W
+    effective_app = 10  # m^2
+
+    ant = Antenna(name="test", power=transmit_power, gain=transmit_gain)
+    power_dens = ant.power_density(sat_altitude)
+    assert isclose(power_dens, 2.49e-14, rel_tol=0.1)
+
+    receive_power = power_dens * effective_app
+
+    assert isclose(receive_power, 2.49e-13, rel_tol=0.1)
+
+
+def test_received_power_2():
+    sat_altitude = 40000  # km
+
+    receive_ant = Antenna(
+        name="test", gain=decibel_to_watt(52.3), effective_aperture=10
+    )
+    wavelength = np.sqrt(
+        (4 * np.pi * receive_ant.effective_aperture) / receive_ant.gain
+    )
+    transmit_ant = Antenna(
+        name="test", power=10, gain=decibel_to_watt(17), wavelength=wavelength
+    )
+    assert isclose(wavelength, 2.727e-2, rel_tol=0.01)
+    rec_power = receive_ant.receive_power(
+        transmit_ant,
+        sat_altitude,
+    )
+    assert isclose(watt_to_decibel(rec_power), -126.0, rel_tol=0.1)
+
+
+def test_receive_power_3():
+    transmit_ant = Antenna(
+        name="test",
+        power=9,
+        gain=decibel_to_watt(16),
+        loss=decibel_to_watt(-3),
+    )
+    distance = 24500  # km
+
+    receive_ant = Antenna(
+        name="test",
+        gain=decibel_to_watt(57),
+        loss=decibel_to_watt(-2),
+        wavelength=frequency_to_wavelength(11),
+    )
+    atmospheric_loss = decibel_to_watt(-9)  # W
+
+    power = receive_ant.receive_power(
+        transmit_ant,
+        distance,
+        atmospheric_loss,
+    )
+    assert isclose(watt_to_decibel(power), -133, rel_tol=0.01)
+
+
+def test_receive_power_4():
+    transmit_ant = Antenna(name="test", power=6, gain=decibel_to_watt(18), loss=1)
+    distance = 12000  # km
+
+    receive_ant = Antenna(name="test", gain=1, effective_aperture=13)
+
+    power = receive_ant.receive_power(
+        transmit_ant,
+        distance,
+    )
+    assert isclose(watt_to_decibel(power), -116, rel_tol=0.01)

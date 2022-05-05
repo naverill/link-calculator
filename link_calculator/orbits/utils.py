@@ -306,8 +306,8 @@ def azimuth(
     #
     # if 90 > gs_long_rad > 0:
     #
-    ## At the equator
-    ## In the southern hemisphere
+    # At the equator
+    # In the southern hemisphere
     # elif 0 > gs_long_rad >= -`90:
     #    if (sat_lat - ground_station_lat)
     #        return pi / 2

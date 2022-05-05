@@ -6,39 +6,6 @@ from link_calculator.components.antennas import Antenna
 from link_calculator.constants import EARTH_RADIUS
 
 
-def receive_power(
-    transmit_antenna: Antenna,
-    receive_antenna: Antenna,
-    distance: float,
-    atmospheric_loss: float = 1,
-) -> float:
-    """
-    Calculate the power collected by the receive antenna
-
-    Parameters
-    ----------
-        amp_power (float, W): the total output amplifier power
-        power_density (float, W/m^2): the power density at distance d
-        transmit_loss (float, ): coupling loss between transmitter and antenna
-            in the range [0, 1]
-        transmit_gain (float, ): transmitter gain in the direction of the
-            receiving antenna
-        distance (float, m): the distance between the transmit and receive antennas
-        receive_gain (float, ): the gain at the recieve antenna
-        receive_loss (float, ): coupling loss between receiver terminals and antenna
-            in the range [0, 1]
-        wavelength (float, m): the radiation wavelength
-        eff_aperture (float, m): effective aperture of the receive antenna
-        atmospheric_loss (float, ): The loss due to the atmosphere
-
-    Returns
-    -------
-        receive_power (float, W): the total collected power at the receiver's terminals
-    """
-    pow_density = transmit_antenna.power_density_eirp(distance, atmospheric_loss)
-    return pow_density * receive_antenna.effective_aperture * receive_antenna.loss
-
-
 def free_space_loss(distance: float, wavelength: float) -> float:
     """
     Calculate the free space loss between two antennas

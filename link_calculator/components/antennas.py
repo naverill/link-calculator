@@ -22,6 +22,7 @@ class Antenna:
         cross_sect_diameter: float = None,
         half_beamwidth: float = None,
         efficiency: float = None,
+        roughness_factor: float = None,
     ):
         """
         Instantiate an Antenna object
@@ -43,6 +44,7 @@ class Antenna:
                 on either side of the maximum power direction.
             efficiency (float, ): the efficiency with which the antenna radiates all
               energy fed into it
+            roughness_factor (float, m): rms roughness of the antenna dish surface
         """
         self._power = power
         self._gain = gain
@@ -54,6 +56,7 @@ class Antenna:
         self._frequency = frequency
         self._wavelength = wavelength
         self._effective_aperture = effective_aperture
+        self._roughness_factor = roughness_factor
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
         """
@@ -85,7 +88,7 @@ class Antenna:
         ------
             power_density (float, W/m^2): the power density at distance d
         """
-        return (self._power * self._gain) / (4 * np.pi * distance**2)
+        return (self.power * self.gain) / (4 * np.pi * distance**2)
 
     @property
     def eirp(self) -> float:
@@ -99,16 +102,15 @@ class Antenna:
                 from an isotropic antenna to achieve the same power incident at the
                 receiver  as that of a transmitter with a specific antenna gain
         """
-        return self._power * self._loss * self._gain
+        return self.power * self.loss * self.gain
 
     @property
     def half_beamwidth(self) -> float:
         if self._half_beamwidth is None:
-            self._half_beamwidth = self.__half_beamwidth()
+            self._half_beamwidth = self.wavelength / (
+                self.cross_sect_diameter * np.sqrt(self.efficiency)
+            )
         return self._half_beamwidth
-
-    def __half_beamwidth(self) -> float:
-        return self.wavelength / (self._cross_sect_diameter * np.sqrt(self.efficiency))
 
     @half_beamwidth.setter
     def half_beamwidth(self, value):
@@ -127,15 +129,12 @@ class Antenna:
             effective_aperture (float, m^2): the effective aperture of the receive antenna
         """
         if self._effective_aperture is None:
-            self._effective_aperture = self.__effective_aperture()
+            self._effective_aperture = self.gain * self.wavelength**2 / (4 * np.pi)
         return self._effective_aperture
 
     @effective_aperture.setter
     def effective_aperture(self, value):
         self._effective_aperture = value
-
-    def __effective_aperture(self) -> float:
-        return self.gain * self.wavelength**2 / (4 * np.pi)
 
     @property
     def directive_gain(self) -> float:
@@ -146,7 +145,7 @@ class Antenna:
         """
         TODO
         """
-        return 4 * pi * self._cross_sect_area / self.wavelength**2
+        return 4 * pi * self.cross_sect_area / self.wavelength**2
 
     def pointing_loss(self, pointing_error: float) -> float:
         """
@@ -163,64 +162,141 @@ class Antenna:
             -2.76 * (radians(pointing_error) / radians(self.half_beamwidth)) ** 2
         )
 
+    def surface_roughness_loss(self) -> float:
+        """
+        TODO
+        Parameters
+        ---------
+
+        Returns
+        ------
+          pointing_loss (float, ??):
+        """
+        return exp(-(4 * pi * self.roughness_factor / self.wavelength))
+
     @property
     def gain(self):
+        """
+        TODO
+        """
         if self._gain is None:
-            self._gain = self.__gain()
+            self._gain = (
+                self.efficiency
+                * 4
+                * np.pi
+                * self.cross_sect_area
+                / self.wavelength**2
+            )
         return self._gain
-
-    def __gain(self) -> float:
-        return (
-            self.efficiency * 4 * np.pi * self._cross_sect_area / self.wavelength**2
-        )
 
     @gain.setter
     def gain(self, value):
+        """
+        TODO
+        """
         self._gain = value
 
     @property
     def frequency(self):
+        """
+        TODO
+        """
         if self._frequency is None:
             self._frequency = wavelength_to_frequency(self._wavelength)
         return self._frequency
 
     @frequency.setter
     def frequency(self, value):
+        """
+        TODO
+        """
         self.frequency = value
 
     @property
     def wavelength(self):
+        """
+        TODO
+        """
         if self._wavelength is None:
             self._wavelength = frequency_to_wavelength(self._frequency)
         return self._wavelength
 
     @wavelength.setter
     def wavelength(self, value):
+        """
+        TODO
+        """
         self._wavelength = value
 
     @property
     def efficiency(self):
+        """
+        TODO
+        """
         return self._efficiency
 
     @efficiency.setter
     def efficiency(self, value):
+        """
+        TODO
+        """
         self._efficiency = value
 
     @property
     def cross_sect_diameter(self):
+        """
+        TODO
+        """
         return self._cross_sect_diameter
 
     @cross_sect_diameter.setter
     def cross_sect_diameter(self, value):
+        """
+        TODO
+        """
         self._cross_sect_diameter = value
 
     @property
+    def cross_sect_area(self):
+        """
+        TODO
+        """
+        return self._cross_sect_area
+
+    @cross_sect_area.setter
+    def cross_sect_area(self, value):
+        """
+        TODO
+        """
+        self._cross_sect_area = value
+
+    @property
     def loss(self):
+        """
+        TODO
+        """
         return self._loss
 
     @loss.setter
     def loss(self, value):
+        """
+        TODO
+        """
         self._loss = value
+
+    @property
+    def roughness_factor(self):
+        """
+        TODO
+        """
+        return self._roughness_factor
+
+    @roughness_factor.setter
+    def roughness_factor(self, value):
+        """
+        TODO
+        """
+        self._roughness_factor = value
 
 
 class HalfWaveDipole(Antenna):
@@ -232,12 +308,12 @@ class HalfWaveDipole(Antenna):
         self,
         name: str,
         power: float = None,
-        gain: float = 1.64,
+        gain: float = None,
         loss: float = None,
         frequency: float = None,
-        half_beamwidth: float = 78,  # deg
+        effective_aperture: float = None,
+        half_beamwidth: float = None,  # deg
     ):
-        effective_aperture = 0.13 * frequency_to_wavelength(frequency)
         super().__init__(
             name=name,
             power=power,
@@ -247,6 +323,12 @@ class HalfWaveDipole(Antenna):
             effective_aperture=effective_aperture,
             half_beamwidth=half_beamwidth,
         )
+
+    @property
+    def effective_aperture(self) -> float:
+        if self._effective_aperture is None:
+            self._effective_aperture = 0.13 * self.wavelength
+        return self._effective_aperture
 
     def off_sight_gain(self, theta: float) -> float:
         """
@@ -309,32 +391,25 @@ class SquareHornAntenna(Antenna):
         TODO
         """
         if self._gain is None:
-            self._gain = self.__gain()
+            self._gain = (
+                self.efficiency
+                * 4
+                * pi
+                * self.cross_sect_diameter**2
+                / self.wavelength**2
+            )
         return self._gain
-
-    def __gain(self) -> float:
-        """
-        TODO
-        """
-        return (
-            self.efficiency
-            * 4
-            * pi
-            * self.cross_sect_diameter**2
-            / self.wavelength**2
-        )
 
     @property
     def half_beamwidth(self) -> float:
-        if self._half_beamwidth is None:
-            self._half_beamwidth = self.__half_beamwidth()
-        return self._half_beamwidth
-
-    def __half_beamwidth(self):
         """
         TODO
         """
-        return degrees(0.88 * self.wavelength / self.cross_sect_diameter)
+        if self._half_beamwidth is None:
+            self._half_beamwidth = degrees(
+                0.88 * self.wavelength / self.cross_sect_diameter
+            )
+        return self._half_beamwidth
 
 
 class ParabolicAntenna(Antenna):
@@ -370,28 +445,37 @@ class ParabolicAntenna(Antenna):
         TODO
         """
         if self._gain is None:
-            self._gain = self.__gain()
+            self._gain = (
+                self.efficiency * (pi * self.cross_sect_diameter / self.wavelength) ** 2
+            )
         return self._gain
 
-    def __gain(self) -> float:
+    @property
+    def cross_sect_area(self):
         """
         TODO
         """
-        return self.efficiency * (pi * self._cross_sect_diameter / self.wavelength) ** 2
+        if self._cross_sect_area is None:
+            self._cross_sect_area = pi / 4 * self.circular_diameter**2
+        return self._cross_sect_area
+
+    @cross_sect_area.setter
+    def cross_sect_area(self, value) -> float:
+        """
+        TODO
+        """
+        self._cross_sect_area = value
 
     @property
     def half_beamwidth(self) -> float:
-        if self._half_beamwidth is None:
-            self._half_beamwidth = self.__half_beamwidth()
-        return self._half_beamwidth
-
-    def __half_beamwidth(self) -> float:
         """
         TODO
         """
-        return self._beamwidth_scale_factor * (
-            self.wavelength / self.cross_sect_diameter
-        )
+        if self._half_beamwidth is None:
+            self._half_beamwidth = self._beamwidth_scale_factor * (
+                self.wavelength / self.cross_sect_diameter
+            )
+        return self._half_beamwidth
 
     def off_sight_gain(self, k: float, theta: float):
         """
@@ -434,18 +518,12 @@ class HelicalAntenna(Antenna):
         TODO
         """
         if self._gain is None:
-            self._gain = self.__gain()
+            self._gain = (
+                15
+                * self.n_helix_turns
+                * self.turn_spacing
+                * (pi**2)
+                * (self.cross_sect_diameter**2)
+                / self.wavelength**3
+            )
         return self._gain
-
-    def __gain(self) -> float:
-        """
-        TODO
-        """
-        return (
-            15
-            * self.n_helix_turns
-            * self.turn_spacing
-            * (pi**2)
-            * (self.cross_sect_diameter**2)
-            / self.wavelength**3
-        )

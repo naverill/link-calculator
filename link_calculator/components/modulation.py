@@ -19,6 +19,11 @@ class PhaseShiftKeying:
         self._bits_per_symbol = bits_per_symbol
 
     @property
+    def frequency_deviation(self) -> float:
+        if self._frequency_deviation is None:
+            self._frequency_deviation = None
+
+    @property
     def carrier_to_noise(self) -> float:
         if self._carrier_noise is None:
             self._carrier_noise = self.carrier_power / (

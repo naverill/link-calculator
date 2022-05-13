@@ -274,7 +274,6 @@ class MPhaseShiftKeying:
     @property
     def frequency_range(self) -> float:
         if self._frequency_range is None:
-            print(self.bandwidth)
             self._frequency_range = [
                 self.carrier_signal.frequency - self.bandwidth / 2,
                 self.carrier_signal.frequency + self.bandwidth / 2,

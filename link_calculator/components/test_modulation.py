@@ -25,7 +25,7 @@ def test_energy_per_bit():
     )
 
 
-def test_frequency_modulation():
+def test_fm_signal_to_noise():
     fm = FrequencyModulation(
         bandwidth=30 * 0.001,
         baseband_bandwidth=4.2 * 0.001,
@@ -36,7 +36,7 @@ def test_frequency_modulation():
     assert np.isclose(watt_to_decibel(fm.signal_to_noise), 50.5, rtol=0.1)
 
 
-def test_frequency_modulation_1():
+def test_fm_link_margin():
     fm = FrequencyModulation(
         bandwidth=45 * 1e-6,
         baseband_bandwidth=3.4 * 1e-6,
@@ -48,6 +48,12 @@ def test_frequency_modulation_1():
     assert np.isclose(fm.frequency_deviation, 19.1 * 1e-6, rtol=0.1)
     assert np.isclose(watt_to_decibel(fm.signal_to_noise), 50.5, rtol=0.1)
     assert np.isclose(watt_to_decibel(fm.link_margin), 7, rtol=0.1)
+
+
+def test_fm_test_frequency_deviation():
+    fm = FrequencyModulation(bandwidth=25 * 1e-3, baseband_bandwidth=2 * 1e-3)
+    assert np.isclose(fm.frequency_deviation * 1e3, 10.5)
+    assert np.isclose(fm.deviation_ratio, 5.25)
 
 
 def test_roll_off_factor():
@@ -75,6 +81,16 @@ def test_bandwidth():
     assert np.isclose(fr[1], 14.135)
 
 
+def test_bandwidth_1():
+    bit_rate = 45 * 0.001
+    bits_per_symbol = 3
+    levels = 2**bits_per_symbol
+    rolloff_rate = 0.3
+
+    mod = MPhaseShiftKeying(levels=levels, bit_rate=bit_rate, rolloff_rate=rolloff_rate)
+    assert np.isclose(mod.bandwidth * 1000, 19.5)
+
+
 def test_max_bit_rate():
     bandwidth = 36 * 0.001
     rolloff_rate = 0.4
@@ -82,3 +98,15 @@ def test_max_bit_rate():
     assert np.isclose(bmod.bit_rate, 25.7 * 1e-3, rtol=0.01)
     qmod = QuadraturePhaseShiftKeying(bandwidth=bandwidth, rolloff_rate=rolloff_rate)
     assert np.isclose(qmod.bit_rate, 51.4 * 1e-3, rtol=0.01)
+
+
+def test_max_bit_rate_1():
+    bandwidth = 45 * 1e-3
+    bits_per_symbol = 2
+    levels = 2**bits_per_symbol
+    rolloff_factor = 0.4
+
+    mod = MPhaseShiftKeying(
+        levels=levels, bandwidth=bandwidth, rolloff_rate=rolloff_factor
+    )
+    assert np.isclose(mod.bit_rate * 1000, 64.3, rtol=0.01)

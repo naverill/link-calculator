@@ -199,6 +199,14 @@ class Antenna:
         self._gain = value
 
     @property
+    def power(self) -> float:
+        return self._power
+
+    @power.setter
+    def power(self, value) -> float:
+        self._power = value
+
+    @property
     def frequency(self):
         """
         TODO

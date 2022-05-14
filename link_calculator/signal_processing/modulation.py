@@ -3,7 +3,35 @@ from math import log2, log10, pi, sin, sqrt
 from scipy.special import erfc
 
 
-class FrequencyModulation:
+class Modulation:
+    def __init__(
+        self,
+        bandwidth: float = None,
+        carrier_to_noise: float = None,
+    ):
+        self._bandwidth = bandwidth
+        self._carrier_to_noise = carrier_to_noise
+
+    @property
+    def channel_capacity(self) -> float:
+        return self.bandwidth * log2(1 + self.carrier_to_noise)
+
+    @property
+    def channel_capacity_to_bandwidth_ideal(self) -> float:
+        return log2(1 + self.eb_no * self.channel_capacity / self.bandwidth)
+
+    @property
+    def channel_capacity_to_bandwidth(self) -> float:
+        return log2(1 + self.eb_no * self.bit_rate / self.bandwidth)
+
+    @property
+    def eb_no(self) -> float:
+        return (2 ** (self.channel_capacity / self.bandwidth) - 1) / (
+            self.channel_capacity / self.bandwidth
+        )
+
+
+class FrequencyModulation(Modulation):
     def __init__(
         self,
         bandwidth: float = None,
@@ -103,7 +131,7 @@ class Waveform:
         self.phase = phase
 
 
-class MPhaseShiftKeying:
+class MPhaseShiftKeying(Modulation):
     def __init__(
         self,
         levels: int,
@@ -115,12 +143,15 @@ class MPhaseShiftKeying:
         symbol_rate: float = None,
         symbol_period: float = None,
         bit_rate: float = None,
+        bit_error_rate: float = None,
         bit_period: float = None,
         bits_per_symbol: int = None,
         carrier_power: float = None,
         carrier_to_noise: float = None,
+        eb_no: float = None,
         rolloff_rate: float = 0,
         frequency_range: list = None,
+        noise_probability: float = None,
     ):
         """
         Parameters
@@ -143,13 +174,16 @@ class MPhaseShiftKeying:
         self._symbol_period = symbol_period
         self._bits_per_symbol = bits_per_symbol
         self._bit_rate = bit_rate
+        self._bit_error_rate = bit_error_rate
         self._bit_period = bit_period
         self._carrier_power = carrier_power
         self._carrier_to_noise = carrier_to_noise
+        self._eb_no = eb_no
         self._rolloff_rate = rolloff_rate
         self._carrier_signal = carrier_signal
         self._modulating_signal = modulating_signal
         self._frequency_range = frequency_range
+        self._noise_probability = noise_probability
 
     @property
     def frequency_deviation(self) -> float:
@@ -158,20 +192,16 @@ class MPhaseShiftKeying:
 
     @property
     def carrier_to_noise(self) -> float:
-        if self._carrier_noise is None:
-            self._carrier_noise = self.carrier_power / (
+        if self._carrier_to_noise is None:
+            self._carrier_to_noise = self.carrier_power / (
                 self.noise_power * self.bandwidth
             )
-        return self._carrier_noise
+        return self._carrier_to_noise
 
     @property
     def eb_no(self) -> float:
         if self._eb_no is None:
-            self._eb_no = (
-                self.carrier_power
-                * self.bandwidth
-                / (self.noise_power * self.symbol_rate)
-            )
+            self._eb_no = self.carrier_to_noise * self.bandwidth / self.bit_rate
         return self._eb_no
 
     @property
@@ -202,7 +232,7 @@ class MPhaseShiftKeying:
     def symbol_rate(self) -> float:
         if self._symbol_rate is None:
             if self._bandwidth is not None:
-                self._symbol_rate = self._bandwidth / (1 + self.rolloff_rate)
+                self._symbol_rate = (self._bandwidth) / (1 + self.rolloff_rate)
             else:
                 self._symbol_rate = self.bit_rate / self.bits_per_symbol
         return self._symbol_rate
@@ -216,10 +246,8 @@ class MPhaseShiftKeying:
     @property
     def spectral_efficiency(self) -> float:
         if self._spectral_efficiency is None:
-            self._spectral_efficiency = (
-                self.bit_rate
-                * log2(self.levels)
-                / (self.bandwidth * self.symbol_period)
+            self._spectral_efficiency = log2(self.levels) / (
+                self.bandwidth * self.symbol_period
             )
 
     @property

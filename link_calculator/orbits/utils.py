@@ -54,7 +54,7 @@ def period(semi_major_axis: float, mu: float = EARTH_MU) -> float:
     return 2 * pi * sqrt(semi_major_axis**3 / mu)
 
 
-def angle_sat_to_ground_station(
+def central_angle(
     ground_station_lat: float,
     ground_station_long: float,
     sat_lat: float,
@@ -86,7 +86,7 @@ def angle_sat_to_ground_station(
     return degrees(gamma)
 
 
-def angle_sat_to_gs_orbital_radius(
+def central_angle_orbital_radius(
     orbital_radius: float, planet_radius: float = EARTH_RADIUS, elevation: float = 0
 ):
     """
@@ -109,7 +109,7 @@ def angle_sat_to_gs_orbital_radius(
 
 
 def slant_range(
-    orbital_radius: float, angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
+    orbital_radius: float, central_angle: float, planet_radius: float = EARTH_RADIUS
 ) -> float:
     """
     Calculate the slant range from the ground station to the satellite
@@ -117,7 +117,7 @@ def slant_range(
     Parameters
     ----------
         orbital_radius (float, km): distance from the centre of mass to the satellite
-        angle_sat_to_gs (float, deg): angle from the satellite to the ground station, centred at the centre of mass
+        central_angle (float, deg): angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return
@@ -128,12 +128,12 @@ def slant_range(
     return sqrt(
         planet_radius**2
         + orbital_radius**2
-        - 2 * planet_radius * orbital_radius * cos(radians(angle_sat_to_gs))
+        - 2 * planet_radius * orbital_radius * cos(radians(central_angle))
     )
 
 
 def elevation_angle(
-    orbital_radius: float, angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
+    orbital_radius: float, central_angle: float, planet_radius: float = EARTH_RADIUS
 ) -> float:
     """
     Calculate the elevation angle from the ground station to the satellite
@@ -141,7 +141,7 @@ def elevation_angle(
     Parameters
     ----------
         orbital_radius (float, km): distance from the centre of mass to the satellite
-        angle_sat_to_gs (float, rad): angle from the satellite to the ground station, centred at the centre of mass
+        central_angle (float, rad): angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return
@@ -149,7 +149,7 @@ def elevation_angle(
         elevation_angle (float, rad): the distance from the ground station to the satellite
 
     """
-    gamma_rad = radians(angle_sat_to_gs)
+    gamma_rad = radians(central_angle)
     elev = acos(
         sin(gamma_rad)
         / sqrt(
@@ -161,13 +161,13 @@ def elevation_angle(
     return degrees(elev)
 
 
-def area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS):
+def area_of_coverage(central_angle: float, planet_radius: float = EARTH_RADIUS):
     """
     Calculate the surface area coverage of the Earth from a satellite
 
     Parameters
     ----------
-        angle_sat_to_gs (float, deg): angle from the satellite to the ground station, centred at the centre of mass
+        central_angle (float, deg): angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return
@@ -175,12 +175,11 @@ def area_of_coverage(angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
         area_coverage (float, km): the area of the Earth's surface visible from a satellite
 
     """
-    angle_sat_to_gs_rad = radians(angle_sat_to_gs)
-    return 2 * pi * (planet_radius**2) * (1 - cos(angle_sat_to_gs_rad))
+    return 2 * pi * (planet_radius**2) * (1 - cos(radians(central_angle)))
 
 
 def percentage_of_coverage(
-    angle_sat_to_gs: float, planet_radius: float = EARTH_RADIUS
+    central_angle: float, planet_radius: float = EARTH_RADIUS
 ) -> float:
     """
     Calculate the surface area coverage of the Earth from a satellite as a percentage of the total
@@ -188,7 +187,7 @@ def percentage_of_coverage(
 
     Parameters
     ----------
-        angle_sat_to_gs (float, rad): angle from the satellite to the ground station, centred at the centre of mass
+        central_angle (float, rad): angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return
@@ -197,27 +196,27 @@ def percentage_of_coverage(
 
     """
     return (
-        area_of_coverage(angle_sat_to_gs, planet_radius)
+        area_of_coverage(central_angle, planet_radius)
         / (4 * pi * planet_radius**2)
         * 100
     )
 
 
-def percentage_of_coverage_gamma(angle_sat_to_gs: float) -> float:
+def percentage_of_coverage_gamma(central_angle: float) -> float:
     """
     Calculate the surface area coverage of the Earth from a satellite as a percentage of the total
         surface area
 
     Parameters
     ----------
-        angle_sat_to_gs (float, rad): angle from the satellite to the ground station, centred at the centre of mass
+        central_angle (float, rad): angle from the satellite to the ground station, centred at the centre of mass
 
     Return
     ------
         area_coverage (float, %): the percentage of the Earth's surface visible from a satellite
 
     """
-    gamma_rad = radians(angle_sat_to_gs)
+    gamma_rad = radians(central_angle)
     return 50 * (1 - cos(gamma_rad))
 
 

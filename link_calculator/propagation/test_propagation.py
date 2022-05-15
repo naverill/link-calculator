@@ -4,7 +4,7 @@ import numpy as np
 
 from link_calculator.components.antennas import Antenna
 from link_calculator.constants import EARTH_RADIUS
-from link_calculator.orbits.utils import angle_sat_to_gs_orbital_radius, slant_range
+from link_calculator.orbits.utils import central_angle_orbital_radius, slant_range
 from link_calculator.propagation.conversions import (
     decibel_to_watt,
     frequency_to_wavelength,
@@ -28,9 +28,7 @@ def test_free_space_loss():
     path_loss = [200.17, 199.08]
 
     for angle, loss in zip(elevation_angles, path_loss):
-        angle_sat_to_gs = angle_sat_to_gs_orbital_radius(
-            orbital_radius, elevation=angle
-        )
+        angle_sat_to_gs = central_angle_orbital_radius(orbital_radius, elevation=angle)
 
         srange = slant_range(orbital_radius, angle_sat_to_gs)
         loss_calc = abs(free_space_loss_db(srange, frequency))

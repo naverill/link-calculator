@@ -2,6 +2,7 @@ from math import cos, degrees, exp, pi, radians, sin
 
 import numpy as np
 
+from link_calculator.constants import BOLTZMANN_CONSTANT
 from link_calculator.propagation.conversions import (
     frequency_to_wavelength,
     wavelength_to_frequency,
@@ -23,6 +24,7 @@ class Antenna:
         half_beamwidth: float = None,
         efficiency: float = None,
         roughness_factor: float = None,
+        environ_temp: float = None,
     ):
         """
         Instantiate an Antenna object
@@ -45,6 +47,7 @@ class Antenna:
             efficiency (float, ): the efficiency with which the antenna radiates all
               energy fed into it
             roughness_factor (float, m): rms roughness of the antenna dish surface
+            temperature (float, Kelvin): the temperature of the environment
         """
         self._power = power
         self._gain = gain
@@ -57,6 +60,7 @@ class Antenna:
         self._wavelength = wavelength
         self._effective_aperture = effective_aperture
         self._roughness_factor = roughness_factor
+        self._environ_temp = environ_temp
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
         """
@@ -91,6 +95,27 @@ class Antenna:
         """
         distance = distance * 1000  # convert to m
         return (self.power * self.gain) / (4 * np.pi * distance**2)
+
+    @property
+    def noise_power(self) -> float:
+        """
+        Parameters
+        ----------
+            temperature (float, Kelvin): the temperature of the environment
+        """
+        if self._noise_power is None:
+            self._noise_power = self.noise_density * self.bandwidth * 1e9
+        return self._noise_power
+
+    @property
+    def noise_density(self) -> float:
+        """
+        Parameters
+        ----------
+        """
+        if self._noise_density is None:
+            self._noise_density = BOLTZMANN_CONSTANT * self.environ_temp
+        return self.noise_density
 
     @property
     def eirp(self) -> float:

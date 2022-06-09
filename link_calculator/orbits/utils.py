@@ -108,7 +108,7 @@ def slant_range(
     Parameters
     ----------
         orbital_radius (float, km): distance from the centre of mass to the satellite
-        central_angle (float, deg): angle from the satellite to the ground station, centred at the centre of mass
+        gamma (float, deg): central_angle; angle from the satellite to the ground station, centred at the centre of mass
         planet_radius (float, km, optional): radius of the planet
 
     Return

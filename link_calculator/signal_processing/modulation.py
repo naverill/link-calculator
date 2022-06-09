@@ -149,7 +149,8 @@ class MPhaseShiftKeying(Modulation):
         carrier_power: float = None,
         carrier_to_noise: float = None,
         eb_no: float = None,
-        rolloff_rate: float = 0,
+        es_no: float = None,
+        rolloff_rate: float = None,
         frequency_range: list = None,
         noise_probability: float = None,
     ):
@@ -179,6 +180,7 @@ class MPhaseShiftKeying(Modulation):
         self._carrier_power = carrier_power
         self._carrier_to_noise = carrier_to_noise
         self._eb_no = eb_no
+        self._es_no = es_no
         self._rolloff_rate = rolloff_rate
         self._carrier_signal = carrier_signal
         self._modulating_signal = modulating_signal
@@ -191,9 +193,23 @@ class MPhaseShiftKeying(Modulation):
             self._frequency_deviation = None
 
     @property
+    def carrier_to_noise(self) -> float:
+        if self._carrier_to_noise is None:
+            self._carrier_to_noise = self.carrier_power / (
+                self.noise_power_density * self.bandwidth
+            )
+        return self._carrier_to_noise
+
+    @property
+    def es_no(self) -> float:
+        if self._es_no is None:
+            self._es_no = self.carrier_to_noise * self.bandwidth / self.symbol_rate
+        return self._es_no
+
+    @property
     def eb_no(self) -> float:
         if self._eb_no is None:
-            self._eb_no = self.carrier_to_noise * self.bandwidth / self.bit_rate
+            self._eb_no = self.es_no / self.bits_per_symbol
         return self._eb_no
 
     @property
@@ -215,7 +231,7 @@ class MPhaseShiftKeying(Modulation):
     @property
     def symbol_rate(self) -> float:
         if self._symbol_rate is None:
-            if self._bandwidth is not None:
+            if self._bandwidth is not None and self._rolloff_rate is not None:
                 self._symbol_rate = (self._bandwidth) / (1 + self.rolloff_rate)
             else:
                 self._symbol_rate = self.bit_rate / self.bits_per_symbol
@@ -233,6 +249,7 @@ class MPhaseShiftKeying(Modulation):
             self._spectral_efficiency = log2(self.levels) / (
                 self.bandwidth * self.symbol_period
             )
+        return self._spectral_efficiency
 
     @property
     def energy_per_symbol(self) -> float:
@@ -251,11 +268,18 @@ class MPhaseShiftKeying(Modulation):
         return self._energy_per_bit
 
     @property
+    def noise_power_density(self) -> float:
+        if self._noise_power_density is None:
+            self._noise_power_density = self.symbol_rate / (
+                self.bandwidth * self.carrier_to_noise * self.energy_per_symbol
+            )
+        return self._noise_power_density
+
+    @property
     def noise_probability(self) -> float:
         if self._noise_probability is None:
             self._noise_probability = erfc(
-                sqrt(self.bits_per_symbol * self.energy_per_bit / self.noise_power)
-                * sin(pi / self.levels)
+                sqrt(self.bits_per_symbol * self.eb_no) * sin(pi / self.levels)
             )
         return self._noise_probability
 

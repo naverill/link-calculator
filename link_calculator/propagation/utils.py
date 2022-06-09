@@ -13,14 +13,14 @@ def free_space_loss(distance: float, wavelength: float) -> float:
     Parameters
     ----------
         distance (float, km): distance between the transmit and receive antennas
-        frequency (float, GHz): frequency of the transmitter
+        wavelength (float, m): frequency of the transmitter
 
     Returns
     -------
         path_loss (float, )
 
     """
-    return (wavelength / (4 * np.pi * distance)) ** 2
+    return (wavelength / (4 * np.pi * distance * 1000)) ** 2
 
 
 def free_space_loss_db(slant_range: float, frequency: float):

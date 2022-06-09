@@ -191,14 +191,6 @@ class MPhaseShiftKeying(Modulation):
             self._frequency_deviation = None
 
     @property
-    def carrier_to_noise(self) -> float:
-        if self._carrier_to_noise is None:
-            self._carrier_to_noise = self.carrier_power / (
-                self.noise_power * self.bandwidth
-            )
-        return self._carrier_to_noise
-
-    @property
     def eb_no(self) -> float:
         if self._eb_no is None:
             self._eb_no = self.carrier_to_noise * self.bandwidth / self.bit_rate
@@ -206,15 +198,7 @@ class MPhaseShiftKeying(Modulation):
 
     @property
     def carrier_power(self) -> float:
-        if self._carrier_power is None:
-            self._carrier_power = self.energy_per_symbol * self.symbol_rate
         return self._carrier_power
-
-    @property
-    def bits_per_symbol(self):
-        if self._bits_per_symbol is None:
-            self._bits_per_symbol = log2(self.levels)
-        return self._bits_per_symbol
 
     @property
     def bit_rate(self) -> float:

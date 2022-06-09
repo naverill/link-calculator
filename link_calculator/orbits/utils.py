@@ -1,57 +1,48 @@
-from math import acos, atan, atan2, cos, degrees, pi, radians, sin, sqrt, tan
+from math import acos, atan, cos, degrees, pi, radians, sin, sqrt, tan
 
 from link_calculator.constants import EARTH_MU, EARTH_RADIUS
 
 
-def velocity(
-    semi_major_axis: float, orbital_radius: float, mu: float = EARTH_MU
-) -> float:
-    """
-    Calculate the velocity of a satellite in orbit according to Kepler's second law
+class KeplerianElements:
+    def __init__(
+        self,
+        semi_major_axis: float,
+        eccentricity,
+        inclination: float,
+        raan: float,
+        arg_of_perigee: float,
+        true_anomaly: float,
+    ):
+        """
 
-    Parameters
-    ---------
-        semi_major_axis (float, km): The semi-major axis of the orbit
-            orbital_radius (float, km): distance from the centre of mass to the satellite
-        mu (float, optional): Kepler's gravitational constant
+        Parameters
+        ---------
+            semi_major_axis (float, km): The semi-major axis of the orbit
+        """
+        self._semi_major_axis = semi_major_axis
+        self._eccentricity = eccentricity
+        self._inclination = inclination
+        self._raan = raan
+        self._arg_of_perigee = arg_of_perigee
+        self._true_anomaly = true_anomaly
 
-    Returns
-    ------
-        velocity (float, km/s): the orbit speed of the satellite
-    """
-    return sqrt(mu * (2 / orbital_radius - 1 / semi_major_axis))
+    def period(self, mu: float = EARTH_MU) -> float:
+        """
+        Calculate the period of the satellite's orbit according to Kepler's third law
 
+            mu (float, km^3/s^-2, optional): Kepler's gravitational constant
 
-def velocity_circular(orbital_radius: float, mu: float = EARTH_MU) -> float:
-    """
-    Special case of velocity where r = a
+        Returns
+        ------
+            period (float, s): the time taken for the satellite to complete a revolution
+        """
+        if self._period is None:
+            self._period = 2 * pi * sqrt(self.semi_major_axis**3 / mu)
+        return self._period
 
-    Parameters
-    ---------
-        orbital_radius (float, km): distance from the centre of mass to the satellite
-        mu (float, optional): Kepler's gravitational constant
-
-    Returns
-    ------
-        velocity (float, km/s): the orbit speed of the satellite
-    """
-    return velocity(orbital_radius, orbital_radius, mu)
-
-
-def period(semi_major_axis: float, mu: float = EARTH_MU) -> float:
-    """
-    Calculate the period of the satellite's orbit according to Kepler's third law
-
-    Parameters
-    ---------
-        semi_major_axis (float, km): The semi-major axis of the orbit
-        mu (float, km^3/s^-2, optional): Kepler's gravitational constant
-
-    Returns
-    ------
-        period (float, s): the time taken for the satellite to complete a revolution
-    """
-    return 2 * pi * sqrt(semi_major_axis**3 / mu)
+    @property
+    def semi_major_axis(self) -> float:
+        return self._semi_major_axis
 
 
 def central_angle(

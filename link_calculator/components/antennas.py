@@ -24,7 +24,14 @@ class Antenna:
         half_beamwidth: float = None,
         efficiency: float = None,
         roughness_factor: float = None,
-        environ_temp: float = None,
+        noise_temperature: float = None,
+        equiv_noise_temp: float = None,
+        low_noise_amp_gain: float = None,
+        combined_gain: float = None,
+        carrier_to_noise: float = None,
+        carrier_power: float = None,
+        receive_carrier_power: float = None,
+        gain_to_equiv_noise_temp: float = None,
     ):
         """
         Instantiate an Antenna object
@@ -47,7 +54,7 @@ class Antenna:
             efficiency (float, ): the efficiency with which the antenna radiates all
               energy fed into it
             roughness_factor (float, m): rms roughness of the antenna dish surface
-            temperature (float, Kelvin): the temperature of the environment
+            noise_temperature (float, Kelvin): the temperature of the environment
         """
         self._power = power
         self._gain = gain
@@ -60,7 +67,13 @@ class Antenna:
         self._wavelength = wavelength
         self._effective_aperture = effective_aperture
         self._roughness_factor = roughness_factor
-        self._environ_temp = environ_temp
+        self._noise_temperature = noise_temperature
+        self._equiv_noise_temp = equiv_noise_temp
+        self._low_noise_amp_gain = low_noise_amp_gain
+        self._combined_gain = combined_gain
+        self._carrier_to_noise = carrier_to_noise
+        self._gain_to_equiv_noise_temp = gain_to_equiv_noise_temp
+        self._carrier_power = carrier_power
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
         """
@@ -86,7 +99,6 @@ class Antenna:
         Parameters
         ---------
             power (float, W): the transmitted power
-            gain (float, W): the power gained
             distance (float, km): the distance between the transmit and receive antennas
 
         Returns
@@ -99,9 +111,10 @@ class Antenna:
     @property
     def noise_power(self) -> float:
         """
-        Parameters
+        Returns
         ----------
-            temperature (float, Kelvin): the temperature of the environment
+            noise_power (float, ): sum of the input noise power and the noise power
+                added by the amplifier
         """
         if self._noise_power is None:
             self._noise_power = self.noise_density * self.bandwidth * 1e9
@@ -110,12 +123,44 @@ class Antenna:
     @property
     def noise_density(self) -> float:
         """
-        Parameters
-        ----------
+        Calculate the noise density of the system
+
+        Returns
+        -------
+            noise_density (float, W/Hz): the total noise power, normalised to a 1-Hz bandwidth
         """
         if self._noise_density is None:
-            self._noise_density = BOLTZMANN_CONSTANT * self.environ_temp
+            self._noise_density = BOLTZMANN_CONSTANT * self.noise_temperature
         return self.noise_density
+
+    @property
+    def noise_temperature(self) -> float:
+        """
+
+        Returns
+        -------
+            noise_temperature (float, K): ambient temperature of the environment
+        """
+        if self._noise_temperature is None:
+            self._noise_temperature = (
+                self.noise_power / (self.bandwidth * 1e9)
+            ) / BOLTZMANN_CONSTANT
+        return self._noise_temperature
+
+    @property
+    def noise_figure(self) -> float:
+        """
+        Calculate the noise figure of the device
+
+        Returns
+        -------
+            noise_figure (float, ):  the ratio of the S/N ratio at the input to the
+                S/N ratio at the output. Measure of the relative increase in noise
+                power compared to increase in signal power
+        """
+        if self._noise_figure is None:
+            self._noise_figure = 1 + (self.equiv_noise_temp / self.noise_temperature)
+        return self._noise_figure
 
     @property
     def eirp(self) -> float:
@@ -142,6 +187,20 @@ class Antenna:
     @half_beamwidth.setter
     def half_beamwidth(self, value):
         self.half_beamwidth = value
+
+    @property
+    def carrier_to_noise(self) -> float:
+        if self._carrier_to_noise is None:
+            self._carrier_to_noise = self.carrier_power / self.noise_density
+        return self._carrier_to_noise
+
+    @property
+    def gain_to_noise_temp(self) -> float:
+        if self._gain_to_noise_temp is None:
+            self._gain_to_noise_temp = (self.carrier_power * BOLTZMANN_CONSTANT) / (
+                self.noise_density * self.receive_carrier_power
+            )
+        return self._gain_to_noise_ratio
 
     @property
     def effective_aperture(self) -> float:
@@ -199,12 +258,20 @@ class Antenna:
         ------
           pointing_loss (float, ??):
         """
-        return exp(-(4 * pi * self.roughness_factor / self.wavelength))
+        if self._surface_roughness_loss is None:
+            self._surface_roughness_loss = exp(
+                -(4 * pi * self.roughness_factor / self.wavelength)
+            )
+        return self._surface_roughness_loss
 
     @property
     def gain(self):
         """
         TODO
+        Returns
+        -------
+            gain (float, ): ratio of maximum power densiry to that of an isotropic radiatior
+                at the same distance in the direction of the receiving antenna
         """
         if self._gain is None:
             self._gain = (
@@ -224,7 +291,29 @@ class Antenna:
         self._gain = value
 
     @property
+    def low_noise_amp_gain(self) -> float:
+        if self.low_noise_amp_gain is None:
+            self._low_noise_amp_gain = self.combined_gain / self.gain
+        return self._low_noise_amp_gain
+
+    @property
+    def combined_gain(self) -> float:
+        if self._combined_gain is None:
+            self._combined_gain = self.low_noise_amp_gain * self.gain
+        return self._combined_gain
+
+    @property
+    def carrier_power(self) -> float:
+        return self._carrier_power
+
+    @property
     def power(self) -> float:
+        """
+        TODO
+        Returns
+        -------
+            power (float, W): the total output amplifier power
+        """
         return self._power
 
     @power.setter
@@ -235,6 +324,9 @@ class Antenna:
     def frequency(self):
         """
         TODO
+        Returns
+        -------
+            frequency (float, GHz): the transmit frequency of the antenna
         """
         if self._frequency is None:
             self._frequency = wavelength_to_frequency(self._wavelength)
@@ -292,6 +384,22 @@ class Antenna:
         self._cross_sect_diameter = value
 
     @property
+    def equiv_noise_temp(self):
+        """
+        TODO
+        """
+        if self._equiv_noise_temp is None:
+            self._equiv_noise_temp = self.noise_temperature * (self.noise_figure - 1)
+        return self._equiv_noise_temp
+
+    @equiv_noise_temp.setter
+    def equiv_noise_temp(self, value):
+        """
+        TODO
+        """
+        self._equiv_noise_temp = value
+
+    @property
     def cross_sect_area(self):
         """
         TODO
@@ -309,6 +417,10 @@ class Antenna:
     def loss(self):
         """
         TODO
+        Returns
+        -------
+            loss (float, ): coupling loss between transmitter and antenna
+                in the range [0, 1]
         """
         return self._loss
 

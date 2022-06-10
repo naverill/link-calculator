@@ -7,6 +7,14 @@ from link_calculator.propagation.conversions import (
     frequency_to_wavelength,
     wavelength_to_frequency,
 )
+from link_calculator.signal_processing.modulation import Modulation
+
+
+class Amplifier:
+    def __init__(self, power: float, gain: float, noise_power):
+        self.power = power
+        self.gain = gain
+        self.noise_power = noise_power
 
 
 class Antenna:
@@ -16,8 +24,11 @@ class Antenna:
         power: float = None,
         gain: float = None,
         loss: float = 1,
+        back_off_loss: float = 1,
+        feeder_loss: float = 1,
         frequency: float = None,
         wavelength: float = None,
+        modulation: Modulation = None,
         effective_aperture: float = None,
         cross_sect_area: float = None,
         cross_sect_diameter: float = None,
@@ -25,7 +36,6 @@ class Antenna:
         efficiency: float = None,
         roughness_factor: float = None,
         noise_temperature: float = None,
-        equiv_noise_temp: float = None,
         low_noise_amp_gain: float = None,
         combined_gain: float = None,
         carrier_to_noise: float = None,
@@ -59,16 +69,18 @@ class Antenna:
         self._power = power
         self._gain = gain
         self._loss = loss
+        self._back_off_loss = back_off_loss
+        self._feeder_loss = feeder_loss
         self._efficiency = efficiency
         self._half_beamwidth = half_beamwidth
         self._cross_sect_area = cross_sect_area
         self._cross_sect_diameter = cross_sect_diameter
         self._frequency = frequency
         self._wavelength = wavelength
+        self._modulation = modulation
         self._effective_aperture = effective_aperture
         self._roughness_factor = roughness_factor
         self._noise_temperature = noise_temperature
-        self._equiv_noise_temp = equiv_noise_temp
         self._low_noise_amp_gain = low_noise_amp_gain
         self._combined_gain = combined_gain
         self._carrier_to_noise = carrier_to_noise
@@ -146,21 +158,6 @@ class Antenna:
                 self.noise_power / (self.bandwidth * 1e9)
             ) / BOLTZMANN_CONSTANT
         return self._noise_temperature
-
-    @property
-    def noise_figure(self) -> float:
-        """
-        Calculate the noise figure of the device
-
-        Returns
-        -------
-            noise_figure (float, ):  the ratio of the S/N ratio at the input to the
-                S/N ratio at the output. Measure of the relative increase in noise
-                power compared to increase in signal power
-        """
-        if self._noise_figure is None:
-            self._noise_figure = 1 + (self.equiv_noise_temp / self.noise_temperature)
-        return self._noise_figure
 
     @property
     def eirp(self) -> float:
@@ -291,15 +288,9 @@ class Antenna:
         self._gain = value
 
     @property
-    def low_noise_amp_gain(self) -> float:
-        if self.low_noise_amp_gain is None:
-            self._low_noise_amp_gain = self.combined_gain / self.gain
-        return self._low_noise_amp_gain
-
-    @property
     def combined_gain(self) -> float:
         if self._combined_gain is None:
-            self._combined_gain = self.low_noise_amp_gain * self.gain
+            self._combined_gain = self.amplifier.gain * self.gain
         return self._combined_gain
 
     @property
@@ -384,22 +375,6 @@ class Antenna:
         self._cross_sect_diameter = value
 
     @property
-    def equiv_noise_temp(self):
-        """
-        TODO
-        """
-        if self._equiv_noise_temp is None:
-            self._equiv_noise_temp = self.noise_temperature * (self.noise_figure - 1)
-        return self._equiv_noise_temp
-
-    @equiv_noise_temp.setter
-    def equiv_noise_temp(self, value):
-        """
-        TODO
-        """
-        self._equiv_noise_temp = value
-
-    @property
     def cross_sect_area(self):
         """
         TODO
@@ -422,6 +397,8 @@ class Antenna:
             loss (float, ): coupling loss between transmitter and antenna
                 in the range [0, 1]
         """
+        if self._loss is None:
+            self._loss = self.back_off_loss * self.feeder_loss
         return self._loss
 
     @loss.setter
@@ -430,6 +407,27 @@ class Antenna:
         TODO
         """
         self._loss = value
+
+    @property
+    def back_off_loss(self):
+        """
+        TODO
+        Returns
+        -------
+            back_off_loss (float, ): the transmit back-off loss
+        """
+        return self._back_off_loss
+
+    @property
+    def transmit_loss(self):
+        """
+        TODO
+        Returns
+        -------
+            transmit_loss (float, ): the feeder and branching losses from the amplifier
+                to the transmit antenna
+        """
+        return self._transmit_loss
 
     def receive_power(
         self,

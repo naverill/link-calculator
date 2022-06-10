@@ -3,7 +3,7 @@ from math import acos, atan, cos, degrees, pi, radians, sin, sqrt, tan
 from link_calculator.constants import EARTH_MU, EARTH_RADIUS
 
 
-class KeplerianElements:
+class KeplerianCoordinate:
     def __init__(
         self,
         semi_major_axis: float,
@@ -11,7 +11,7 @@ class KeplerianElements:
         inclination: float,
         raan: float,
         arg_of_perigee: float,
-        true_anomaly: float,
+        true_anomaly: float = None,
     ):
         """
 
@@ -44,37 +44,54 @@ class KeplerianElements:
     def semi_major_axis(self) -> float:
         return self._semi_major_axis
 
+    @property
+    def orbital_radius(self) -> float:
+        return
 
-def central_angle(
-    ground_station_lat: float,
-    ground_station_long: float,
-    sat_lat: float,
-    sat_long: float,
-) -> float:
-    """
-    Calculate angle gamma at the centre of the ground, between the Earth station and the satellite
 
-    Parameters
-    ---------
-        ground_station_lat (float, deg): the latitude of the ground station
-        ground_station_long (float, deg): the longitude of the ground station
-        sat_lat (float, deg): the latitude of the satellite
-        sat_long (float, deg): the longitude of the satellite
+class GeodeticCoordinate:
+    def __init__(self, latitude: float, longitude: float, altitude: float = 0):
+        self._latitude = latitude
+        self._longitude = longitude
+        self._altitude = altitude
 
-    Returns
-    ------
-        gamma (float, rad): angle between satellite and ground station
-    """
-    gs_lat_rad = radians(ground_station_lat)
-    gs_long_rad = radians(ground_station_long)
-    sat_lat_rad = radians(sat_lat)
-    sat_long_rad = radians(sat_long)
+    @property
+    def latitude(self) -> float:
+        return self._latitude
 
-    gamma = acos(
-        cos(gs_lat_rad) * cos(sat_lat_rad) * cos(sat_long_rad - gs_long_rad)
-        + sin(gs_lat_rad) * sin(sat_lat_rad)
-    )
-    return degrees(gamma)
+    @property
+    def longitude(self) -> float:
+        return self._latitude
+
+    @property
+    def altitude(self) -> float:
+        return self.altitude
+
+    def central_angle(
+        self,
+        point: "GeodeticCoordinate",
+    ) -> float:
+        """
+        Calculate angle gamma at the centre of the ground, between the Earth station and the satellite
+
+        Parameters
+        ---------
+            ground_station_lat (float, deg): the latitude of the ground station
+            ground_station_long (float, deg): the longitude of the ground station
+            sat_lat (float, deg): the latitude of the satellite
+            sat_long (float, deg): the longitude of the satellite
+
+        Returns
+        ------
+            gamma (float, rad): angle between satellite and ground station
+        """
+        gamma = acos(
+            cos(radians(self.latitude))
+            * cos(radians(point.latitude))
+            * cos(radians(point.longitude) - radians(self.longitude))
+            + sin(radians(self.latitude)) * sin(radians(point.latitude))
+        )
+        return degrees(gamma)
 
 
 def central_angle_orbital_radius(

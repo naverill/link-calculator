@@ -290,6 +290,10 @@ class MPhaseShiftKeying(Modulation):
         return self._rolloff_rate
 
     @property
+    def carrier_to_noise(self) -> float:
+        return self._carrier_to_noise
+
+    @property
     def carrier_signal(self) -> Waveform:
         return self._carrier_signal
 

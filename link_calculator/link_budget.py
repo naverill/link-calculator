@@ -1,6 +1,7 @@
 from link_calulator.orbits.utils import slant_range
 
 from link_calculator.components.communicators import Communicator
+from link_calculator.constants import BOLTZMANN_CONSTANT
 from link_calculator.propagation.utils import free_space_loss
 
 
@@ -37,6 +38,39 @@ class LinkBudget:
         return self._sat_carrier_power
 
     @property
+    def uplink_carrier_to_noise(self) -> float:
+        if self._uplink_carrier_to_noise is None:
+            self._uplink_carrier_to_noise = (
+                self.satellite.combined_gain * self.satellite_carrier_power
+            ) / (BOLTZMANN_CONSTANT * self.satellite.equiv_noise_temp)
+        return self._uplink_carrier_to_noise
+
+    @property
+    def uplink_eb_no(self) -> float:
+        if self._uplink_eb_no is None:
+            self._uplink_eb_no = (
+                self.uplink_carrier_to_noise
+                * self.ground_station.transmit.modulation.bit_rate
+            )
+
+    @property
+    def downlink_carrier_to_noise(self) -> float:
+        if self._downlink_carrier_to_noise is None:
+            self._downlink_carrier_to_noise = (
+                self.ground_station.combined_gain * self.ground_station_carrier_power
+            ) / (BOLTZMANN_CONSTANT * self.ground_station.equiv_noise_temp)
+        return self._downlink_carrier_to_noise
+
+    @property
+    def downlink_eb_no(self) -> float:
+        if self._downlink_eb_no is None:
+            self._downlink_eb_no = (
+                self.downlink_carrier_to_noise
+                * self.satellite.transmit.modulation.bit_rate
+            )
+        return self._downlink_eb_no
+
+    @property
     def ground_station_carrier_power(self, distance) -> float:
         if self._gs_carrier_power is None:
             self._gs_carrier_power = (
@@ -48,8 +82,8 @@ class LinkBudget:
 
     @property
     def eb_no(self) -> float:
-        return (self._uplink.eb_no * self._downlink.eb_no) / (
-            self._uplink.eb_no + self._downlink.eb_no
+        return (self.uplink_eb_no * self.downlink_eb_no) / (
+            self.uplink_eb_no + self._downlink_eb_no
         )
 
     @property

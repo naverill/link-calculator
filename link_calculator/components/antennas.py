@@ -36,11 +36,8 @@ class Antenna:
         efficiency: float = None,
         roughness_factor: float = None,
         noise_temperature: float = None,
-        low_noise_amp_gain: float = None,
-        combined_gain: float = None,
         carrier_to_noise: float = None,
         carrier_power: float = None,
-        receive_carrier_power: float = None,
         gain_to_equiv_noise_temp: float = None,
     ):
         """
@@ -81,8 +78,6 @@ class Antenna:
         self._effective_aperture = effective_aperture
         self._roughness_factor = roughness_factor
         self._noise_temperature = noise_temperature
-        self._low_noise_amp_gain = low_noise_amp_gain
-        self._combined_gain = combined_gain
         self._carrier_to_noise = carrier_to_noise
         self._gain_to_equiv_noise_temp = gain_to_equiv_noise_temp
         self._carrier_power = carrier_power
@@ -192,14 +187,6 @@ class Antenna:
         return self._carrier_to_noise
 
     @property
-    def gain_to_noise_temp(self) -> float:
-        if self._gain_to_noise_temp is None:
-            self._gain_to_noise_temp = (self.carrier_power * BOLTZMANN_CONSTANT) / (
-                self.noise_density * self.receive_carrier_power
-            )
-        return self._gain_to_noise_ratio
-
-    @property
     def effective_aperture(self) -> float:
         """
         Calculate the effective area of the receiving antenna
@@ -286,12 +273,6 @@ class Antenna:
         TODO
         """
         self._gain = value
-
-    @property
-    def combined_gain(self) -> float:
-        if self._combined_gain is None:
-            self._combined_gain = self.amplifier.gain * self.gain
-        return self._combined_gain
 
     @property
     def carrier_power(self) -> float:

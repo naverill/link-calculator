@@ -1,5 +1,7 @@
 import numpy as np
+
 from link_calculator.constants import SPEED_OF_LIGHT
+
 
 def decibel_to_watt(decibels: float):
     """
@@ -11,7 +13,7 @@ def decibel_to_watt(decibels: float):
 
     Returns
     -------
-      watts (float, W): Watt value 
+      watts (float, W): Watt value
     """
     return 10 ** (decibels / 10)
 
@@ -22,13 +24,13 @@ def watt_to_decibel(watts: float):
 
     Parameters
     ----------
-      watts (float, W): Watt value 
+      watts (float, W): Watt value
 
     Returns
     -------
       decibels (float, dBW): decibel value
     """
-    return 10 * np.log10(watts) 
+    return 10 * np.log10(watts)
 
 
 def frequency_to_wavelength(frequency: float) -> float:
@@ -38,7 +40,7 @@ def frequency_to_wavelength(frequency: float) -> float:
     Parameters
     ----------
       frequency (float, GHz): the frequency of the wave
-  
+
     Returns
     -------
       wavelength (float, m): length of the wave between peaks
@@ -53,7 +55,7 @@ def wavelength_to_frequency(wavelength: float) -> float:
     Parameters
     ----------
       wavelength (float, m): length of the wave between peaks
-  
+
     Returns
     -------
       frequency (float, GHz): the frequency of the wave

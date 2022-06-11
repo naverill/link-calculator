@@ -11,21 +11,26 @@ from link_calculator.signal_processing.modulation import Modulation
 
 
 class Amplifier:
-    def __init__(self, power: float, gain: float, noise_power):
+    def __init__(
+        self, power: float, gain: float = 1, loss: float = 1, noise_power: float = None
+    ):
+        """
+        Parameters
+        ----------
+            loss (float, ): losses in the amplifier (e.g. back-off loss)
+        """
         self.power = power
         self.gain = gain
+        self.loss = loss
         self.noise_power = noise_power
 
 
 class Antenna:
     def __init__(
         self,
-        name: str,
         power: float = None,
         gain: float = None,
         loss: float = 1,
-        back_off_loss: float = 1,
-        feeder_loss: float = 1,
         frequency: float = None,
         wavelength: float = None,
         modulation: Modulation = None,
@@ -35,10 +40,8 @@ class Antenna:
         half_beamwidth: float = None,
         efficiency: float = None,
         roughness_factor: float = None,
-        noise_temperature: float = None,
         carrier_to_noise: float = None,
         carrier_power: float = None,
-        gain_to_equiv_noise_temp: float = None,
     ):
         """
         Instantiate an Antenna object
@@ -61,13 +64,10 @@ class Antenna:
             efficiency (float, ): the efficiency with which the antenna radiates all
               energy fed into it
             roughness_factor (float, m): rms roughness of the antenna dish surface
-            noise_temperature (float, Kelvin): the temperature of the environment
         """
         self._power = power
         self._gain = gain
         self._loss = loss
-        self._back_off_loss = back_off_loss
-        self._feeder_loss = feeder_loss
         self._efficiency = efficiency
         self._half_beamwidth = half_beamwidth
         self._cross_sect_area = cross_sect_area
@@ -77,9 +77,7 @@ class Antenna:
         self._modulation = modulation
         self._effective_aperture = effective_aperture
         self._roughness_factor = roughness_factor
-        self._noise_temperature = noise_temperature
         self._carrier_to_noise = carrier_to_noise
-        self._gain_to_equiv_noise_temp = gain_to_equiv_noise_temp
         self._carrier_power = carrier_power
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
@@ -114,45 +112,6 @@ class Antenna:
         """
         distance = distance * 1000  # convert to m
         return (self.power * self.gain) / (4 * np.pi * distance**2)
-
-    @property
-    def noise_power(self) -> float:
-        """
-        Returns
-        ----------
-            noise_power (float, ): sum of the input noise power and the noise power
-                added by the amplifier
-        """
-        if self._noise_power is None:
-            self._noise_power = self.noise_density * self.bandwidth * 1e9
-        return self._noise_power
-
-    @property
-    def noise_density(self) -> float:
-        """
-        Calculate the noise density of the system
-
-        Returns
-        -------
-            noise_density (float, W/Hz): the total noise power, normalised to a 1-Hz bandwidth
-        """
-        if self._noise_density is None:
-            self._noise_density = BOLTZMANN_CONSTANT * self.noise_temperature
-        return self.noise_density
-
-    @property
-    def noise_temperature(self) -> float:
-        """
-
-        Returns
-        -------
-            noise_temperature (float, K): ambient temperature of the environment
-        """
-        if self._noise_temperature is None:
-            self._noise_temperature = (
-                self.noise_power / (self.bandwidth * 1e9)
-            ) / BOLTZMANN_CONSTANT
-        return self._noise_temperature
 
     @property
     def eirp(self) -> float:
@@ -378,8 +337,6 @@ class Antenna:
             loss (float, ): coupling loss between transmitter and antenna
                 in the range [0, 1]
         """
-        if self._loss is None:
-            self._loss = self.back_off_loss * self.feeder_loss
         return self._loss
 
     @loss.setter

@@ -211,7 +211,12 @@ class MPhaseShiftKeying(Modulation):
     @property
     def bit_rate(self) -> float:
         if self._bit_rate is None:
-            self._bit_rate = 1.0 / self.bit_period
+            if self.bit_period is not None:
+                self._bit_rate = 1.0 / self.bit_period
+            elif self.rolloff_rate is not None:
+                self.bit_rate = (
+                    self.bits_per_symbol * self.bandwidth / (1 + self.rolloff_rate)
+                )
         return self._bit_rate
 
     @property
@@ -248,6 +253,12 @@ class MPhaseShiftKeying(Modulation):
         if self._energy_per_symbol is None:
             self._energy_per_symbol = self.carrier_power * self.symbol_period
         return self._energy_per_symbol
+
+    @property
+    def bits_per_symbol(self):
+        if self._bits_per_symbol is None:
+            self._bits_per_symbol = log2(self.levels)
+        return self._bits_per_symbol
 
     @property
     def energy_per_bit(self) -> float:

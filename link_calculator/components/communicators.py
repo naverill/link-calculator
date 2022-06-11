@@ -11,17 +11,22 @@ class Communicator:
         name: str,
         transmit: Antenna,
         receive: Antenna,
-        amplifier: Amplifier = None,
+        amplifier: Amplifier,
+        ground_coordinate: GeodeticCoordinate = None,
         combined_gain: float = None,
         noise_figure: float = None,
         noise_temperature: float = None,
+        gain_to_equiv_noise_temp: float = None,
     ):
         self._name = name
         self._transmit = transmit
         self._receive = receive
+        self._amplifier = amplifier
+        self._ground_coordinate = (ground_coordinate,)
         self._noise_figure = noise_figure
         self._noise_temperature = noise_temperature
         self._combined_gain = combined_gain
+        self._gain_to_equiv_noise_temp = gain_to_equiv_noise_temp
 
     @property
     def noise_figure(self) -> float:
@@ -52,8 +57,8 @@ class Communicator:
 
     @property
     def output_noise_power(self) -> float:
-        return self.amplifier.gain * (
-            self.receive.noise_power + self.amplifier.noise_power
+        return self.receive.amplifier.gain * (
+            self.receive.noise_power + self.receive.amplifier.noise_power
         )
 
     @property
@@ -75,7 +80,7 @@ class Communicator:
     @property
     def combined_gain(self) -> float:
         if self._combined_gain is None:
-            self._combined_gain = self.amplifier.gain * self.receive.gain
+            self._combined_gain = self.receive.amplifier.gain * self.receive.gain
         return self._combined_gain
 
     @property
@@ -86,15 +91,20 @@ class Communicator:
             )
         return self._gain_to_noise_ratio
 
+    @property
+    def ground_coordinate(self) -> GeodeticCoordinate:
+        return self._ground_coordinate
+
 
 class GroundStation(Communicator):
     def __init__(
         self,
         name: str,
-        coordinate: GeodeticCoordinate,
+        ground_coordinate: GeodeticCoordinate,
         transmit: Antenna,
         receive: Antenna,
         amplifier: Amplifier,
+        gain_to_equiv_noise_temp: float = None,
     ):
         """
 
@@ -105,8 +115,15 @@ class GroundStation(Communicator):
             longitude (str, deg): the longitude of the groundstation
             altitude (str, km): the altitude of the groundstation above sea level
         """
-        self.coordinate = coordinate
-        super().__init__(self, name, transmit, receive, amplifier)
+        super().__init__(
+            self,
+            name=name,
+            transmit=transmit,
+            receive=receive,
+            amplifier=amplifier,
+            ground_coordinate=ground_coordinate,
+            gain_to_equiv_noise_temp=gain_to_equiv_noise_temp,
+        )
 
 
 class Satellite(Communicator):
@@ -117,12 +134,21 @@ class Satellite(Communicator):
         receive: Antenna,
         amplifier: Amplifier,
         orbit: KeplerianElements,
-        sub_satellite_point: GeodeticCoordinate,
+        ground_coordinate: GeodeticCoordinate,
+        gain_to_equiv_noise_temp: float = None,
         combined_gain: float = None,
     ):
         self._orbit = orbit
-        self._sub_sat_point = sub_satellite_point
-        super().__init__(self, name, transmit, receive, amplifier, combined_gain)
+        super().__init__(
+            self,
+            name=name,
+            transmit=transmit,
+            receive=receive,
+            amplifier=amplifier,
+            ground_coordinate=ground_coordinate,
+            combined_gain=combined_gain,
+            gain_to_equiv_noise_temp=gain_to_equiv_noise_temp,
+        )
 
     def velocity(self, orbital_radius: float, mu: float = EARTH_MU) -> float:
         """

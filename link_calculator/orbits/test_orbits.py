@@ -2,12 +2,12 @@ from math import isclose, radians
 
 from link_calculator.constants import EARTH_POLAR_RADIUS, EARTH_RADIUS, SIDEREAL_DAY_S
 from link_calculator.orbits.utils import (
+    GeodeticCoordinate,
+    KeplerianElements,
     azimuth_intermediate,
-    central_angle,
     central_angle_orbital_radius,
     elevation_angle,
     percentage_of_coverage,
-    period,
     slant_range,
 )
 
@@ -17,12 +17,14 @@ def test_period():
     pd = [5370, 5677, 6307, 20860]  # period
 
     for h, T in zip(ht, pd):
-        assert isclose(period(h + EARTH_RADIUS), T, rel_tol=0.5)
+        coord = KeplerianElements(semi_major_axis=h + EARTH_RADIUS)
+        assert isclose(coord.period(), T, rel_tol=0.5)
 
 
 def test_period_1():
     h = 23200
-    assert isclose(period(h + EARTH_RADIUS), 50625, rel_tol=0.5)
+    coord = KeplerianElements(semi_major_axis=h + EARTH_RADIUS)
+    assert isclose(coord.period(), 50625, rel_tol=0.5)
 
 
 def test_percentage_of_coverage():
@@ -40,7 +42,6 @@ def test_azimuth_intermediate_NE():
     gs_lat = 30
     gs_long = -120
     sat_long = -90
-
     assert isclose(azimuth_intermediate(gs_lat, gs_long, sat_long), 49.11, rel_tol=0.1)
 
 
@@ -85,12 +86,13 @@ def test_elevation_angle():
     gs_lat = 30
     gs_long = -120
     sat_long = -90
-
     # Geo-stationary satellite
     sat_lat = 0
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
     orbital_radius = 42164
 
-    gamma = central_angle(gs_lat, gs_long, sat_lat, sat_long)
+    gamma = point.central_angle(ss_point)
 
     assert isclose(elevation_angle(orbital_radius, gamma), 42.15, rel_tol=0.1)
 
@@ -101,9 +103,11 @@ def test_elevation_angle_1():
     sat_long = 5
     # Geo-stationary satellite
     sat_lat = 0
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
     orbital_radius = 42164
 
-    gamma = central_angle(gs_lat, gs_long, sat_lat, sat_long)
+    gamma = point.central_angle(ss_point)
 
     assert isclose(elevation_angle(orbital_radius, gamma), 38.4, rel_tol=0.1)
 
@@ -114,8 +118,10 @@ def test_elevation_angle_2():
     sat_long = 30
     sat_lat = 0
     orbital_radius = 42164
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
 
-    gamma = central_angle(gs_lat, gs_long, sat_lat, sat_long)
+    gamma = point.central_angle(ss_point)
     assert isclose(elevation_angle(orbital_radius, gamma), 17.36, rel_tol=0.1)
 
 
@@ -127,8 +133,10 @@ def test_slant_range():
     # Geo-stationary satellite
     sat_lat = 0
     orbital_radius = 42164
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
 
-    gamma = central_angle(gs_lat, gs_long, sat_lat, sat_long)
+    gamma = point.central_angle(ss_point)
     assert isclose(slant_range(orbital_radius, gamma), 37618, rel_tol=0.5)
 
 
@@ -139,8 +147,10 @@ def test_slant_range_1():
     # Geo-stationary satellite
     sat_lat = 0
     orbital_radius = 42164
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
 
-    gamma = central_angle(gs_lat, gs_long, sat_lat, sat_long)
+    gamma = point.central_angle(ss_point)
 
     assert isclose(slant_range(orbital_radius, gamma), 37901, rel_tol=0.5)
 
@@ -152,8 +162,10 @@ def test_slant_range_2():
 
     sat_lat = 0
     orbital_radius = 42164
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
 
-    gamma = central_angle(gs_lat, gs_long, sat_lat, sat_long)
+    gamma = point.central_angle(ss_point)
     assert isclose(slant_range(orbital_radius, gamma), 39819, rel_tol=0.1)
 
 
@@ -162,9 +174,9 @@ def test_central_angle():
     gs_lat = 40
     sat_long = 5
     sat_lat = 0
-    assert isclose(
-        central_angle(gs_lat, gs_long, sat_lat, sat_long), 44.7, rel_tol=0.01
-    )
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
+    assert isclose(point.central_angle(ss_point), 44.7, rel_tol=0.01)
 
 
 def test_central_angle_orbital_radius():
@@ -210,7 +222,8 @@ def test_polar_coverage():
 
     """
     orbital_radius = 500 + EARTH_POLAR_RADIUS
-    orbital_period = period(orbital_radius)
+    coord = KeplerianElements(semi_major_axis=orbital_radius)
+    orbital_period = coord.period()
     assert isclose(orbital_period, 5713, rel_tol=0.1)
 
     orbits_per_day = SIDEREAL_DAY_S / orbital_period

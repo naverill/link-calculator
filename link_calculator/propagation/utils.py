@@ -6,39 +6,6 @@ from link_calculator.components.antennas import Antenna
 from link_calculator.constants import EARTH_RADIUS
 
 
-def free_space_loss(distance: float, wavelength: float) -> float:
-    """
-    Calculate the free space loss between two antennas
-
-    Parameters
-    ----------
-        distance (float, km): distance between the transmit and receive antennas
-        wavelength (float, m): frequency of the transmitter
-
-    Returns
-    -------
-        path_loss (float, )
-
-    """
-    return (wavelength / (4 * np.pi * distance * 1000)) ** 2
-
-
-def free_space_loss_db(slant_range: float, frequency: float):
-    """
-    Calculate the free space loss between two antennas
-
-    Parameters
-    ----------
-        slant_range (float, km): slant range between the transmit and receive antennas
-        frequency (float, GHz): frequency of the transmitter
-
-    Returns
-    -------
-        path_loss (float, dB): The path loss over the
-    """
-    return -92.44 - 20 * np.log10(slant_range * frequency)
-
-
 def slant_path(
     elevation_angle: float,
     rain_altitude: float,

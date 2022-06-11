@@ -3,15 +3,17 @@ from math import acos, atan, cos, degrees, pi, radians, sin, sqrt, tan
 from link_calculator.constants import EARTH_MU, EARTH_RADIUS
 
 
-class KeplerianCoordinate:
+class KeplerianElements:
     def __init__(
         self,
-        semi_major_axis: float,
-        eccentricity,
-        inclination: float,
-        raan: float,
-        arg_of_perigee: float,
+        semi_major_axis: float = None,
+        eccentricity: float = None,
+        inclination: float = float,
+        raan: float = None,
+        arg_of_perigee: float = None,
         true_anomaly: float = None,
+        period: float = None,
+        orbital_radius: float = None,
     ):
         """
 
@@ -25,6 +27,7 @@ class KeplerianCoordinate:
         self._raan = raan
         self._arg_of_perigee = arg_of_perigee
         self._true_anomaly = true_anomaly
+        self._period = period
 
     def period(self, mu: float = EARTH_MU) -> float:
         """
@@ -46,7 +49,13 @@ class KeplerianCoordinate:
 
     @property
     def orbital_radius(self) -> float:
-        return
+        if self._orbital_radius is None:
+            self._orbital_radius = (
+                self.semi_major_axis
+                * (1 - self.eccentricity**2)
+                / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
+            )
+        return self._orbital_radius
 
 
 class GeodeticCoordinate:
@@ -61,7 +70,7 @@ class GeodeticCoordinate:
 
     @property
     def longitude(self) -> float:
-        return self._latitude
+        return self._longitude
 
     @property
     def altitude(self) -> float:

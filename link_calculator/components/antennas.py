@@ -382,8 +382,7 @@ class HalfWaveDipole(Antenna):
 
     def __init__(
         self,
-        name: str,
-        power: float = None,
+        amplifier: Amplifier = None,
         gain: float = None,
         loss: float = None,
         frequency: float = None,
@@ -391,8 +390,7 @@ class HalfWaveDipole(Antenna):
         half_beamwidth: float = None,  # deg
     ):
         super().__init__(
-            name=name,
-            power=power,
+            amplifier=amplifier,
             gain=gain,
             loss=loss,
             frequency=frequency,
@@ -416,8 +414,7 @@ class HalfWaveDipole(Antenna):
 class ConicalHornAntenna(Antenna):
     def __init__(
         self,
-        name: str,
-        power: float = None,
+        amplifier: Amplifier = None,
         gain: float = None,
         loss: float = None,
         frequency: float = None,
@@ -425,8 +422,7 @@ class ConicalHornAntenna(Antenna):
         half_beamwidth: float = 20,  # deg
     ):
         super().__init__(
-            name=name,
-            power=power,
+            amplifier=amplifier,
             gain=gain,
             loss=loss,
             frequency=frequency,
@@ -438,11 +434,10 @@ class ConicalHornAntenna(Antenna):
 class SquareHornAntenna(Antenna):
     def __init__(
         self,
-        name: str,
         cross_sect_diameter: float,
+        amplifier: Amplifier = None,
         efficiency: float = 1,
         half_beamwidth: float = None,  # deg
-        power: float = None,
         gain: float = None,
         loss: float = 1,
         frequency: float = None,
@@ -450,8 +445,7 @@ class SquareHornAntenna(Antenna):
     ):
         effective_aperture = efficiency * cross_sect_diameter**2
         super().__init__(
-            name=name,
-            power=power,
+            amplifier=amplifier,
             gain=gain,
             loss=loss,
             frequency=frequency,
@@ -491,9 +485,8 @@ class SquareHornAntenna(Antenna):
 class ParabolicAntenna(Antenna):
     def __init__(
         self,
-        name: str,
         circular_diameter: float,
-        power: float = None,
+        amplifier: Amplifier = None,
         gain: float = None,
         loss: float = None,
         frequency: float = None,
@@ -504,8 +497,7 @@ class ParabolicAntenna(Antenna):
     ):
         self._beamwidth_scale_factor = beamwidth_scale_factor
         super().__init__(
-            name=name,
-            power=power,
+            amplifier=amplifier,
             gain=gain,
             loss=loss,
             frequency=frequency,
@@ -556,11 +548,10 @@ class ParabolicAntenna(Antenna):
 class HelicalAntenna(Antenna):
     def __init__(
         self,
-        name: str,
         circular_diameter: float,
         n_helix_turns: float,
         turn_spacing: float,
-        power: float = None,
+        amplifier: Amplifier = None,
         gain: float = None,
         loss: float = None,
         frequency: float = None,
@@ -571,8 +562,7 @@ class HelicalAntenna(Antenna):
         self.n_helix_turns = n_helix_turns
         self.turn_spacing = n_helix_turns
         super().__init__(
-            name=name,
-            power=power,
+            amplifier=amplifier,
             gain=gain,
             loss=loss,
             frequency=frequency,

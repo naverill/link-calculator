@@ -11,28 +11,12 @@ from link_calculator.propagation.conversions import (
     watt_to_decibel,
 )
 from link_calculator.propagation.utils import (
-    free_space_loss_db,
     horizontal_reduction,
     rain_attenuation,
     rain_specific_attenuation,
     slant_path,
     zeta,
 )
-
-
-def test_free_space_loss():
-    orbital_radius = 42164
-    frequency = 6  # GHz
-
-    elevation_angles = [10, 90]
-    path_loss = [200.17, 199.08]
-
-    for angle, loss in zip(elevation_angles, path_loss):
-        angle_sat_to_gs = central_angle_orbital_radius(orbital_radius, elevation=angle)
-
-        srange = slant_range(orbital_radius, angle_sat_to_gs)
-        loss_calc = abs(free_space_loss_db(srange, frequency))
-        assert isclose(loss_calc, loss, rel_tol=0.05)
 
 
 def test_rain_specific_attenuation_vertical():

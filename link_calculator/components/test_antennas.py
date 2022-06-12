@@ -3,6 +3,7 @@ from math import degrees, isclose
 import numpy as np
 
 from link_calculator.components.antennas import (
+    Amplifier,
     Antenna,
     ParabolicAntenna,
     SquareHornAntenna,
@@ -20,39 +21,31 @@ def test_parabolic_antenna():
     gain_ = [62.41, 60.19]
 
     for e, g in zip(efficiency_, gain_):
-        ant = ParabolicAntenna(
-            name="test", circular_diameter=9, efficiency=e, frequency=14
-        )
+        ant = ParabolicAntenna(circular_diameter=9, efficiency=e, frequency=14)
         assert np.isclose(ant.wavelength, 0.02143, rtol=0.1)
         assert np.isclose(watt_to_decibel(ant.gain), g, rtol=0.1)
 
 
 def test_parabolic_antenna_1():
-    ant = ParabolicAntenna(
-        name="test", circular_diameter=8, efficiency=0.5, frequency=7
-    )
+    ant = ParabolicAntenna(circular_diameter=8, efficiency=0.5, frequency=7)
     assert np.isclose(watt_to_decibel(ant.gain), 52.4, rtol=0.1)
 
 
 def test_square_horn_antenna():
-    ant = SquareHornAntenna(
-        name="test", cross_sect_diameter=0.07, efficiency=0.45, frequency=14
-    )
+    ant = SquareHornAntenna(cross_sect_diameter=0.07, efficiency=0.45, frequency=14)
     assert np.isclose(ant.wavelength, 0.02143, rtol=0.1)
     assert np.isclose(watt_to_decibel(ant.gain), 17.8, rtol=0.1)
     assert np.isclose(ant.half_beamwidth, 15.44, rtol=0.1)
 
 
 def test_square_horn_antenna_1():
-    ant = SquareHornAntenna(
-        name="test", cross_sect_diameter=0.07, efficiency=0.45, frequency=12
-    )
+    ant = SquareHornAntenna(cross_sect_diameter=0.07, efficiency=0.45, frequency=12)
     assert np.isclose(watt_to_decibel(ant.gain), 16.47, rtol=0.1)
     assert np.isclose(ant.half_beamwidth, 18.0, rtol=0.1)
 
 
 def test_pointing_loss():
-    ant = Antenna(name="test", half_beamwidth=1)
+    ant = Antenna(half_beamwidth=1)
     pointing_error = degrees(0.002)
     assert np.isclose(
         -watt_to_decibel(ant.pointing_loss(pointing_error)), 0.16, rtol=0.1
@@ -60,7 +53,7 @@ def test_pointing_loss():
 
 
 def test_pointing_loss_1():
-    ant = Antenna(name="test", half_beamwidth=2)
+    ant = Antenna(half_beamwidth=2)
     pointing_error = degrees(0.005)
     assert np.isclose(
         -watt_to_decibel(ant.pointing_loss(pointing_error)), 0.246, rtol=0.1
@@ -73,7 +66,8 @@ def test_received_power():
     transmit_power = 10  # W
     effective_app = 10  # m^2
 
-    ant = Antenna(name="test", power=transmit_power, gain=transmit_gain)
+    amp = Amplifier(power=transmit_power)
+    ant = Antenna(amplifier=amp, gain=transmit_gain)
     power_dens = ant.power_density(sat_altitude)
     assert isclose(power_dens, 2.49e-14, rel_tol=0.1)
 
@@ -85,14 +79,13 @@ def test_received_power():
 def test_received_power_2():
     sat_altitude = 40000  # km
 
-    receive_ant = Antenna(
-        name="test", gain=decibel_to_watt(52.3), effective_aperture=10
-    )
+    receive_ant = Antenna(gain=decibel_to_watt(52.3), effective_aperture=10)
     wavelength = np.sqrt(
         (4 * np.pi * receive_ant.effective_aperture) / receive_ant.gain
     )
+    amp = Amplifier(power=10)
     transmit_ant = Antenna(
-        name="test", power=10, gain=decibel_to_watt(17), wavelength=wavelength
+        amplifier=amp, gain=decibel_to_watt(17), wavelength=wavelength
     )
     assert isclose(wavelength, 2.727e-2, rel_tol=0.01)
     rec_power = receive_ant.receive_power(
@@ -103,16 +96,15 @@ def test_received_power_2():
 
 
 def test_receive_power_3():
+    amp = Amplifier(power=9)
     transmit_ant = Antenna(
-        name="test",
-        power=9,
+        amplifier=amp,
         gain=decibel_to_watt(16),
         loss=decibel_to_watt(-3),
     )
     distance = 24500  # km
 
     receive_ant = Antenna(
-        name="test",
         gain=decibel_to_watt(57),
         loss=decibel_to_watt(-2),
         wavelength=frequency_to_wavelength(11),
@@ -128,10 +120,11 @@ def test_receive_power_3():
 
 
 def test_receive_power_4():
-    transmit_ant = Antenna(name="test", power=6, gain=decibel_to_watt(18), loss=1)
+    amp = Amplifier(power=6)
+    transmit_ant = Antenna(amplifier=amp, gain=decibel_to_watt(18), loss=1)
     distance = 12000  # km
 
-    receive_ant = Antenna(name="test", gain=1, effective_aperture=13)
+    receive_ant = Antenna(gain=1, effective_aperture=13)
 
     power = receive_ant.receive_power(
         transmit_ant,

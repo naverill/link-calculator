@@ -18,17 +18,54 @@ class Amplifier:
         Parameters
         ----------
             loss (float, ): losses in the amplifier (e.g. back-off loss)
+            power (float, W): the total output amplifier power
         """
-        self.power = power
-        self.gain = gain
-        self.loss = loss
-        self.noise_power = noise_power
+        self._power = power
+        self._gain = gain
+        self._loss = loss
+        self._noise_power = noise_power
+
+    @property
+    def power(self) -> float:
+        """
+        TODO
+        Returns
+        -------
+            power (float, W): the total output amplifier power
+        """
+        return self._power
+
+    @property
+    def gain(self) -> float:
+        """
+        TODO
+        Returns
+        -------
+        """
+        return self._gain
+
+    @property
+    def loss(self) -> float:
+        """
+        TODO
+        Returns
+        -------
+        """
+        return self._loss
+
+    @property
+    def noise_power(self) -> float:
+        """
+        TODO
+        Returns
+        -------
+        """
+        return self._noise_power
 
 
 class Antenna:
     def __init__(
         self,
-        power: float = None,
         gain: float = None,
         loss: float = 1,
         frequency: float = None,
@@ -41,7 +78,9 @@ class Antenna:
         efficiency: float = None,
         roughness_factor: float = None,
         carrier_to_noise: float = None,
+        signal_to_noise: float = None,
         carrier_power: float = None,
+        amplifier: Amplifier = None,
     ):
         """
         Instantiate an Antenna object
@@ -49,7 +88,6 @@ class Antenna:
         Parameters
         ----------
             name (str): Name of antenna
-            power (float, W): the total output amplifier power
             gain (float, ): ratio of maximum power densiry to that of an isotropic radiatior
                 at the same distance in the direction of the receiving antenna
             loss (float, ): coupling loss between transmitter and antenna
@@ -65,7 +103,7 @@ class Antenna:
               energy fed into it
             roughness_factor (float, m): rms roughness of the antenna dish surface
         """
-        self._power = power
+        self._amplifier = amplifier
         self._gain = gain
         self._loss = loss
         self._efficiency = efficiency
@@ -78,6 +116,7 @@ class Antenna:
         self._effective_aperture = effective_aperture
         self._roughness_factor = roughness_factor
         self._carrier_to_noise = carrier_to_noise
+        self._signal_to_noise = signal_to_noise
         self._carrier_power = carrier_power
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
@@ -111,7 +150,7 @@ class Antenna:
             power_density (float, W/m^2): the power density at distance d
         """
         distance = distance * 1000  # convert to m
-        return (self.power * self.gain) / (4 * np.pi * distance**2)
+        return (self.amplifier.power * self.gain) / (4 * np.pi * distance**2)
 
     @property
     def eirp(self) -> float:
@@ -125,7 +164,7 @@ class Antenna:
                 from an isotropic antenna to achieve the same power incident at the
                 receiver  as that of a transmitter with a specific antenna gain
         """
-        return self.power * self.loss * self.gain
+        return self.amplifier.power * self.amplifier.loss * self.loss * self.gain
 
     @property
     def half_beamwidth(self) -> float:
@@ -134,10 +173,6 @@ class Antenna:
                 self.cross_sect_diameter * np.sqrt(self.efficiency)
             )
         return self._half_beamwidth
-
-    @half_beamwidth.setter
-    def half_beamwidth(self, value):
-        self.half_beamwidth = value
 
     @property
     def carrier_to_noise(self) -> float:
@@ -160,10 +195,6 @@ class Antenna:
         if self._effective_aperture is None:
             self._effective_aperture = self.gain * self.wavelength**2 / (4 * np.pi)
         return self._effective_aperture
-
-    @effective_aperture.setter
-    def effective_aperture(self, value):
-        self._effective_aperture = value
 
     @property
     def directive_gain(self) -> float:
@@ -226,30 +257,9 @@ class Antenna:
             )
         return self._gain
 
-    @gain.setter
-    def gain(self, value):
-        """
-        TODO
-        """
-        self._gain = value
-
     @property
     def carrier_power(self) -> float:
         return self._carrier_power
-
-    @property
-    def power(self) -> float:
-        """
-        TODO
-        Returns
-        -------
-            power (float, W): the total output amplifier power
-        """
-        return self._power
-
-    @power.setter
-    def power(self, value) -> float:
-        self._power = value
 
     @property
     def frequency(self):
@@ -263,13 +273,6 @@ class Antenna:
             self._frequency = wavelength_to_frequency(self._wavelength)
         return self._frequency
 
-    @frequency.setter
-    def frequency(self, value):
-        """
-        TODO
-        """
-        self.frequency = value
-
     @property
     def wavelength(self):
         """
@@ -279,26 +282,12 @@ class Antenna:
             self._wavelength = frequency_to_wavelength(self._frequency)
         return self._wavelength
 
-    @wavelength.setter
-    def wavelength(self, value):
-        """
-        TODO
-        """
-        self._wavelength = value
-
     @property
     def efficiency(self):
         """
         TODO
         """
         return self._efficiency
-
-    @efficiency.setter
-    def efficiency(self, value):
-        """
-        TODO
-        """
-        self._efficiency = value
 
     @property
     def cross_sect_diameter(self):
@@ -307,26 +296,12 @@ class Antenna:
         """
         return self._cross_sect_diameter
 
-    @cross_sect_diameter.setter
-    def cross_sect_diameter(self, value):
-        """
-        TODO
-        """
-        self._cross_sect_diameter = value
-
     @property
     def cross_sect_area(self):
         """
         TODO
         """
         return self._cross_sect_area
-
-    @cross_sect_area.setter
-    def cross_sect_area(self, value):
-        """
-        TODO
-        """
-        self._cross_sect_area = value
 
     @property
     def loss(self):
@@ -339,22 +314,19 @@ class Antenna:
         """
         return self._loss
 
-    @loss.setter
-    def loss(self, value):
+    @property
+    def amplifier(self):
         """
         TODO
         """
-        self._loss = value
+        return self._amplifier
 
     @property
-    def back_off_loss(self):
+    def modulation(self):
         """
         TODO
-        Returns
-        -------
-            back_off_loss (float, ): the transmit back-off loss
         """
-        return self._back_off_loss
+        return self._modulation
 
     @property
     def transmit_loss(self):
@@ -395,12 +367,12 @@ class Antenna:
         """
         return self._roughness_factor
 
-    @roughness_factor.setter
-    def roughness_factor(self, value):
+    @property
+    def signal_to_noise(self):
         """
         TODO
         """
-        self._roughness_factor = value
+        return self._signal_to_noise
 
 
 class HalfWaveDipole(Antenna):
@@ -562,13 +534,6 @@ class ParabolicAntenna(Antenna):
         if self._cross_sect_area is None:
             self._cross_sect_area = pi / 4 * self.circular_diameter**2
         return self._cross_sect_area
-
-    @cross_sect_area.setter
-    def cross_sect_area(self, value) -> float:
-        """
-        TODO
-        """
-        self._cross_sect_area = value
 
     @property
     def half_beamwidth(self) -> float:

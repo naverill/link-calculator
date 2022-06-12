@@ -11,22 +11,22 @@ class Communicator:
         name: str,
         transmit: Antenna,
         receive: Antenna,
-        amplifier: Amplifier,
         ground_coordinate: GeodeticCoordinate = None,
         combined_gain: float = None,
         noise_figure: float = None,
         noise_temperature: float = None,
         gain_to_equiv_noise_temp: float = None,
+        equiv_noise_temp: float = None,
     ):
         self._name = name
         self._transmit = transmit
         self._receive = receive
-        self._amplifier = amplifier
         self._ground_coordinate = (ground_coordinate,)
         self._noise_figure = noise_figure
         self._noise_temperature = noise_temperature
         self._combined_gain = combined_gain
         self._gain_to_equiv_noise_temp = gain_to_equiv_noise_temp
+        self._equiv_noise_temp = equiv_noise_temp
 
     @property
     def noise_figure(self) -> float:
@@ -40,20 +40,15 @@ class Communicator:
                 power compared to increase in signal power
         """
         if self._noise_figure is None:
-            self.noise_figure = (
-                self.receive.signal_to_noise / self.transmit.signal_to_noise
-            )
-
-            self._noise_figure = 1 + (self.equiv_noise_temp / self.noise_temperature)
+            if self.receive.signal_to_noise is not None:
+                self.noise_figure = (
+                    self.receive.signal_to_noise / self.transmit.signal_to_noise
+                )
+            elif self.noise_temperature is not None:
+                self._noise_figure = 1 + (
+                    self.equiv_noise_temp / self.noise_temperature
+                )
         return self._noise_figure
-
-    @property
-    def receive_carrier_to_noise(self) -> float:
-        if self._receive_carrier_to_noise is None:
-            self._receive_carrier_to_noise = (
-                self.receive.carrier_power * self.combined_gain
-            ) / (BOLTZMANN_CONSTANT * self.equiv_noise_temp)
-        return self._receive_carrier_to_noise
 
     @property
     def output_noise_power(self) -> float:
@@ -67,7 +62,10 @@ class Communicator:
         TODO
         """
         if self._equiv_noise_temp is None:
-            self._equiv_noise_temp = self.noise_temperature * (self.noise_figure - 1)
+            if self.noise_temperature is not None:
+                self._equiv_noise_temp = self.noise_temperature * (
+                    self.noise_figure - 1
+                )
         return self._equiv_noise_temp
 
     @equiv_noise_temp.setter
@@ -84,26 +82,48 @@ class Communicator:
         return self._combined_gain
 
     @property
-    def gain_to_noise_temp(self) -> float:
-        if self._gain_to_noise_temp is None:
-            self._gain_to_noise_temp = (self.carrier_power * BOLTZMANN_CONSTANT) / (
-                self.noise_density * self.receive_carrier_power
-            )
-        return self._gain_to_noise_ratio
+    def gain_to_equiv_noise_temp(self) -> float:
+        if self._gain_to_equiv_noise_temp is None:
+            if self.equiv_noise_temp is not None:
+                self._equiv_noise_temp = self.combined_gain / self.equiv_noise_temp
+            elif self.noise_density is not None:
+                self._gain_to_equiv_noise_temp = (
+                    self.carrier_power * BOLTZMANN_CONSTANT
+                ) / (self.noise_density * self.receive_carrier_power)
+        return self._gain_to_equiv_noise_temp
 
     @property
     def ground_coordinate(self) -> GeodeticCoordinate:
         return self._ground_coordinate
+
+    @property
+    def receive(self) -> Antenna:
+        return self._receive
+
+    @property
+    def transmit(self) -> Antenna:
+        return self._transmit
+
+    @property
+    def amplifier(self) -> Amplifier:
+        return self._amplifier
+
+    @property
+    def noise_temperature(self) -> float:
+        return self._noise_temperature
+
+    @property
+    def noise_density(self) -> float:
+        return self._noise_density
 
 
 class GroundStation(Communicator):
     def __init__(
         self,
         name: str,
-        ground_coordinate: GeodeticCoordinate,
         transmit: Antenna,
         receive: Antenna,
-        amplifier: Amplifier,
+        ground_coordinate: GeodeticCoordinate = None,
         gain_to_equiv_noise_temp: float = None,
     ):
         """
@@ -116,11 +136,9 @@ class GroundStation(Communicator):
             altitude (str, km): the altitude of the groundstation above sea level
         """
         super().__init__(
-            self,
             name=name,
             transmit=transmit,
             receive=receive,
-            amplifier=amplifier,
             ground_coordinate=ground_coordinate,
             gain_to_equiv_noise_temp=gain_to_equiv_noise_temp,
         )
@@ -132,19 +150,16 @@ class Satellite(Communicator):
         name: str,
         transmit: Antenna,
         receive: Antenna,
-        amplifier: Amplifier,
-        orbit: KeplerianElements,
-        ground_coordinate: GeodeticCoordinate,
+        orbit: KeplerianElements = None,
+        ground_coordinate: GeodeticCoordinate = None,
         gain_to_equiv_noise_temp: float = None,
         combined_gain: float = None,
     ):
         self._orbit = orbit
         super().__init__(
-            self,
             name=name,
             transmit=transmit,
             receive=receive,
-            amplifier=amplifier,
             ground_coordinate=ground_coordinate,
             combined_gain=combined_gain,
             gain_to_equiv_noise_temp=gain_to_equiv_noise_temp,
@@ -169,7 +184,3 @@ class Satellite(Communicator):
     @property
     def semi_major_axis(self) -> float:
         return self._orbit.semi_major_axis
-
-    @property
-    def sub_satellite_point(self) -> GeodeticCoordinate:
-        return self._sub_satellite_point

@@ -17,9 +17,9 @@ class Link:
         self,
         transmitter: Communicator,
         receiver: Communicator,
-        distance: float = None,
+        slant_range: float = None,
         atmospheric_loss: float = 1,
-        path_loss: float = 1,
+        path_loss: float = None,
         min_elevation: float = 0,
         transmitter_eirp: float = None,
         receiver_carrier_power: float = None,
@@ -34,13 +34,13 @@ class Link:
 
         Parameters
         ----------
-            distance (float, km): distance between the transmit and receive antennas
+            slant_range (float, km): slant_range between the transmit and receive antennas
             noise_temperature (float, Kelvin): the temperature of the environment
 
         """
         self._transmitter = transmitter
         self._receiver = receiver
-        self._distance = distance
+        self._slant_range = slant_range
         self._atmospheric_loss = atmospheric_loss
         self._path_loss = path_loss
         self._min_elevation = min_elevation
@@ -65,7 +65,7 @@ class Link:
                     * self.path_loss
                     * self.atmospheric_loss
                     * self.receiver.receive.loss
-                    * self.transmitter.gain_to_equiv_noise_temp
+                    * self.receiver.gain_to_equiv_noise_temp
                     / BOLTZMANN_CONSTANT
                 )
         return self._carrier_to_noise_density
@@ -109,12 +109,27 @@ class Link:
             )
         return self._receiver_carrier_power
 
+    @property
+    def central_angle(self) -> float:
+        if (
+            self.transmitter.ground_coordinate is not None
+            and self.receiver.ground_coordinate is not None
+        ):
+            return self.transmitter.ground_coordinate.central_angle(
+                self.receiver.ground_coordinate
+            )
+        return None
+
     @staticmethod
     def distance(satellite: Satellite, ground_station: GroundStation) -> float:
-        gamma = ground_station.ground_coordinate.central_angle(
-            satellite.ground_coordinate
+        gamma = satellite.ground_coordinate.central_angle(
+            ground_station.ground_coordinate
         )
         return slant_range(satellite.orbit.orbital_radius, gamma)
+
+    @property
+    def slant_range(self) -> float:
+        return self._slant_range
 
     @property
     def path_loss(self) -> float:
@@ -123,7 +138,7 @@ class Link:
 
         Parameters
         ----------
-            distance (float, km): distance between the transmit and receive antennas
+            slant_range (float, km): slant_range between the transmit and receive antennas
             wavelength (float, m): frequency of the transmitter
 
         Returns
@@ -134,7 +149,7 @@ class Link:
         if self._path_loss is None:
             self._path_loss = (
                 self.transmitter.transmit.wavelength
-                / (4 * np.pi * self.distance * 1000)
+                / (4 * np.pi * self.slant_range * 1000)
             ) ** 2
         return self._path_loss
 
@@ -192,95 +207,62 @@ class Link:
     def atmospheric_loss(self) -> float:
         return self._atmospheric_loss
 
-    def get_link_table(self) -> pd.DataFrame:
-        link_table = pd.DataFrame.from_records(
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
             [
                 {
-                    "name": "Transmitter amplifier output P at saturation",
-                    "unit": "dBW",
-                    "value": watt_to_decibel(self.transmitter.transmit.amplifier.power),
-                },
-                {
-                    "name": "Transmitter back-off loss",
-                    "unit": "dB",
-                    "value": watt_to_decibel(self.transmitter.transmit.amplifier.loss),
-                },
-                {
-                    "name": "Transmitter feeder loss",
-                    "unit": "dB",
-                    "value": watt_to_decibel(self.transmitter.transmit.loss),
-                },
-                {
-                    "name": "Transmitter antenna gain",
-                    "unit": "dB",
-                    "value": watt_to_decibel(self.transmitter.transmit.gain),
-                },
-                {
-                    "name": "Transmitter EIRP",
-                    "unit": "dBW",
-                    "value": watt_to_decibel(self.transmitter.transmit.eirp),
-                },
-                {
-                    "name": "Free-space path loss",
-                    "unit": "dB",
-                    "value": watt_to_decibel(self.path_loss),
-                },
-                {
-                    "name": "Atmospheric loss",
-                    "unit": "dB",
-                    "value": watt_to_decibel(self.atmospheric_loss),
-                },
-                {
-                    "name": "Carrier power density at receiver",
+                    "name": "Carrier Power Density",
                     "unit": "dBW",
                     "value": watt_to_decibel(self.receiver_carrier_power),
                 },
                 {
-                    "name": "Receiver feeder loss",
-                    "unit": "dBW",
-                    "value": watt_to_decibel(self.receiver.receive.loss),
+                    "name": "Free-Space Path Loss",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.path_loss),
                 },
                 {
-                    "name": "Gain to equivalent noise temperature ratio",
-                    "unit": "dBK-1",
-                    "value": watt_to_decibel(self.transmitter.gain_to_equiv_noise_temp),
+                    "name": "Atmospheric Loss",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.atmospheric_loss),
                 },
                 {
-                    "name": "Boltzmann's constant",
+                    "name": "Boltzmann's Constant",
                     "unit": "dB",
                     "value": watt_to_decibel(BOLTZMANN_CONSTANT),
                 },
                 {
-                    "name": "Carrier to noise density ratio",
+                    "name": "Carrier to Noise Density Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.carrier_to_noise_density),
                 },
                 {
-                    "name": "Bit rate",
-                    "unit": "dB",
-                    "value": watt_to_decibel(
-                        self.transmitter.transmit.modulation.bit_rate
-                    ),
-                },
-                {
-                    "name": "Eb/No ratio",
+                    "name": "Eb/No Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.eb_no),
                 },
                 {
-                    "name": "Bandwidth to bit rate ratio",
+                    "name": "Bandwidth to Bit Rate Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.bandwidth_to_bit_rate),
                 },
                 {
-                    "name": "Carrier to noise ratio",
+                    "name": "Carrier to Noise Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.carrier_to_noise),
                 },
+                {"name": "Central Angle", "unit": "°", "value": self.central_angle},
+                {"name": "Slant Range", "unit": "km", "value": self.slant_range},
             ]
         )
-        link_table.set_index("name", inplace=True)
-        return link_table
+        receiver = self.receiver.summary()
+        receiver.index = "Receiver " + receiver.index
+
+        transmitter = self.transmitter.summary()
+        transmitter.index = "Transmitter " + transmitter.index
+
+        summary.set_index("name", inplace=True)
+        summary = pd.concat([summary, receiver, transmitter])
+        return summary
 
 
 class LinkBudget:
@@ -306,11 +288,61 @@ class LinkBudget:
     def downlink(self) -> Link:
         return self._downlink
 
-    def get_link_budget(self) -> pd.DataFrame:
-        uplink = self.uplink.get_link_table()
-        uplink.index = "Uplink " + uplink.index
-        downlink = self.downlink.get_link_table()
-        downlink.index = "Downlink " + downlink.index
-        link_budget = pd.concat([uplink, downlink])
-        link_budget.loc["Overall EbNo"] = ["dB", watt_to_decibel(self.eb_no)]
-        return link_budget
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {
+                    "name": "Eb/No Ratio",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.eb_no),
+                },
+            ]
+        )
+
+        uplink = self.uplink.summary()
+        uplink.rename(columns={"value": "Uplink", "unit": "Uplink unit"}, inplace=True)
+        downlink = self.downlink.summary()
+        downlink.rename(
+            columns={"value": "Downlink", "unit": "Downlink unit"}, inplace=True
+        )
+        summary.set_index("name", inplace=True)
+        summary.rename(columns={"value": "Overall"}, inplace=True)
+
+        # Merge uplink and downlink summaries
+        summary = pd.concat([summary, uplink, downlink], axis=1)
+
+        # Merge unit columns
+        summary["unit"] = summary["unit"].combine_first(
+            summary["Uplink unit"].combine_first(summary["Downlink unit"])
+        )
+        summary.drop(columns=["Downlink unit", "Uplink unit"], inplace=True)
+
+        # Clean and reformat columns
+        summary = summary[
+            [
+                not (
+                    idx.startswith("Transmitter Receive")
+                    or idx.startswith("Receiver Transmit")
+                )
+                for idx in summary.index
+            ]
+        ]
+        summary.rename(
+            index={
+                k: k.replace("Receiver Receive", "Receiver")
+                if "Receiver Receive" in k
+                else k
+                for k in summary.index
+            },
+            inplace=True,
+        )
+        summary.rename(
+            index={
+                k: k.replace("Transmitter Transmit", "Transmitter")
+                if "Transmitter Transmit" in k
+                else k
+                for k in summary.index
+            },
+            inplace=True,
+        )
+        return summary

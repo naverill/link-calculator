@@ -1,9 +1,11 @@
 from math import acos, atan, cos, degrees, pi, radians, sin, sqrt, tan
 
+import pandas as pd
+
 from link_calculator.constants import EARTH_MU, EARTH_RADIUS
 
 
-class KeplerianElements:
+class Orbit:
     def __init__(
         self,
         semi_major_axis: float = None,
@@ -28,6 +30,7 @@ class KeplerianElements:
         self._arg_of_perigee = arg_of_perigee
         self._true_anomaly = true_anomaly
         self._period = period
+        self._orbital_radius = orbital_radius
 
     def period(self, mu: float = EARTH_MU) -> float:
         """
@@ -74,7 +77,7 @@ class GeodeticCoordinate:
 
     @property
     def altitude(self) -> float:
-        return self.altitude
+        return self._altitude
 
     def central_angle(
         self,
@@ -101,6 +104,17 @@ class GeodeticCoordinate:
             + sin(radians(self.latitude)) * sin(radians(point.latitude))
         )
         return degrees(gamma)
+
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {"name": "Latitude", "unit": "°", "value": self.latitude},
+                {"name": "Longitude", "unit": "°", "value": self.longitude},
+                {"name": "Altitude", "unit": "°", "value": self.altitude},
+            ]
+        )
+        summary.set_index("name", inplace=True)
+        return summary
 
 
 def central_angle_orbital_radius(

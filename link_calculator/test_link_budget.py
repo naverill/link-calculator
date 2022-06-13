@@ -18,8 +18,7 @@ def test_link_budget():
     )
     # Ground Station
     gs_amp = Amplifier(
-        power=decibel_to_watt(20),
-        loss=decibel_to_watt(-3),  # back off loss
+        power=decibel_to_watt(20), loss=decibel_to_watt(-3), gain=1  # back off loss
     )
     gs_transmit = Antenna(
         gain=decibel_to_watt(65),
@@ -27,18 +26,21 @@ def test_link_budget():
         modulation=psk,
         amplifier=gs_amp,
     )
-    gs_receive = Antenna(loss=decibel_to_watt(-3))
+    gs_receive = Antenna(
+        gain=1,
+        loss=decibel_to_watt(-3),
+        amplifier=gs_amp,
+    )
     gs = GroundStation(
         name="gs",
-        gain_to_equiv_noise_temp=decibel_to_watt(-5.5),
+        gain_to_equiv_noise_temp=decibel_to_watt(35.5),
         transmit=gs_transmit,
         receive=gs_receive,
     )
 
     # Satellite
     sat_amp = Amplifier(
-        power=decibel_to_watt(10),
-        loss=decibel_to_watt(-0.2),  # back-off loss
+        power=decibel_to_watt(10), loss=decibel_to_watt(-0.2), gain=1  # back-off loss
     )
     sat_transmit = Antenna(
         gain=decibel_to_watt(35),
@@ -46,11 +48,15 @@ def test_link_budget():
         modulation=psk,
         amplifier=sat_amp,
     )
-    sat_receive = Antenna(loss=decibel_to_watt(-0.5))
+    sat_receive = Antenna(
+        gain=1,
+        loss=decibel_to_watt(-0.5),
+        amplifier=sat_amp,
+    )
     sat = Satellite(
         name="sat",
-        gain_to_equiv_noise_temp=decibel_to_watt(35.5),
         transmit=sat_transmit,
+        gain_to_equiv_noise_temp=decibel_to_watt(-5.5),
         receive=sat_receive,
     )
     uplink = Link(
@@ -82,7 +88,7 @@ def test_link_budget():
     assert np.isclose(watt_to_decibel(budget.uplink.atmospheric_loss), -0.5)
     assert np.isclose(watt_to_decibel(BOLTZMANN_CONSTANT), -228.6, rtol=0.01)
     assert np.isclose(
-        watt_to_decibel(budget.uplink.transmitter.gain_to_equiv_noise_temp),
+        watt_to_decibel(budget.uplink.receiver.gain_to_equiv_noise_temp),
         -5.5,
         rtol=0.01,
     )
@@ -123,7 +129,7 @@ def test_link_budget():
     assert np.isclose(watt_to_decibel(budget.downlink.path_loss), -205.1)
     assert np.isclose(watt_to_decibel(budget.downlink.atmospheric_loss), -0.3)
     assert np.isclose(
-        watt_to_decibel(budget.downlink.transmitter.gain_to_equiv_noise_temp),
+        watt_to_decibel(budget.downlink.receiver.gain_to_equiv_noise_temp),
         35.5,
         rtol=0.01,
     )
@@ -152,4 +158,4 @@ def test_link_budget():
 
     """~~~~~~~~~~~~~~~~~~~ Link Budget ~~~~~~~~~~~~~~~~~~~"""
     assert np.isclose(watt_to_decibel(budget.eb_no), 12.8, rtol=0.01)
-    print(budget.get_link_budget())
+    print(budget.summary())

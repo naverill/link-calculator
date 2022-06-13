@@ -1,8 +1,11 @@
 from math import sqrt
 
+import pandas as pd
+
 from link_calculator.components.antennas import Amplifier, Antenna
 from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_MU, EARTH_RADIUS
-from link_calculator.orbits.utils import GeodeticCoordinate, KeplerianElements
+from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
+from link_calculator.propagation.conversions import watt_to_decibel
 
 
 class Communicator:
@@ -21,7 +24,7 @@ class Communicator:
         self._name = name
         self._transmit = transmit
         self._receive = receive
-        self._ground_coordinate = (ground_coordinate,)
+        self._ground_coordinate = ground_coordinate
         self._noise_figure = noise_figure
         self._noise_temperature = noise_temperature
         self._combined_gain = combined_gain
@@ -78,14 +81,19 @@ class Communicator:
     @property
     def combined_gain(self) -> float:
         if self._combined_gain is None:
-            self._combined_gain = self.receive.amplifier.gain * self.receive.gain
+            if self.receive.amplifier is not None:
+                self._combined_gain = self.receive.amplifier.gain * self.receive.gain
+            else:
+                self._combined_gain = self.receive.gain
         return self._combined_gain
 
     @property
     def gain_to_equiv_noise_temp(self) -> float:
         if self._gain_to_equiv_noise_temp is None:
             if self.equiv_noise_temp is not None:
-                self._equiv_noise_temp = self.combined_gain / self.equiv_noise_temp
+                self._gain_to_equiv_noise_temp = (
+                    self.combined_gain / self.equiv_noise_temp
+                )
             elif self.noise_density is not None:
                 self._gain_to_equiv_noise_temp = (
                     self.carrier_power * BOLTZMANN_CONSTANT
@@ -116,6 +124,42 @@ class Communicator:
     def noise_density(self) -> float:
         return self._noise_density
 
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {"name": "Noise Figure", "unit": "", "value": self.noise_figure},
+                {
+                    "name": "Equivalent Noise Temperature",
+                    "unit": "K",
+                    "value": self.equiv_noise_temp,
+                },
+                {
+                    "name": "Noise Temperature",
+                    "unit": "K",
+                    "value": self.noise_temperature,
+                },
+                {
+                    "name": "Combined Gain",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.combined_gain),
+                },
+                {
+                    "name": "Gain to Equivalent Noise Temperature Ratio",
+                    "unit": "dBK-1",
+                    "value": watt_to_decibel(self.gain_to_equiv_noise_temp),
+                },
+            ]
+        )
+        receiver = self.receive.summary()
+        receiver.index = "Receive Antenna " + receiver.index
+
+        transmitter = self.transmit.summary()
+        transmitter.index = "Transmit Antenna " + transmitter.index
+
+        summary.set_index("name", inplace=True)
+        summary = pd.concat([summary, receiver, transmitter])
+        return summary
+
 
 class GroundStation(Communicator):
     def __init__(
@@ -125,6 +169,10 @@ class GroundStation(Communicator):
         receive: Antenna,
         ground_coordinate: GeodeticCoordinate = None,
         gain_to_equiv_noise_temp: float = None,
+        combined_gain: float = None,
+        noise_figure: float = None,
+        noise_temperature: float = None,
+        equiv_noise_temp: float = None,
     ):
         """
 
@@ -141,7 +189,18 @@ class GroundStation(Communicator):
             receive=receive,
             ground_coordinate=ground_coordinate,
             gain_to_equiv_noise_temp=gain_to_equiv_noise_temp,
+            noise_figure=noise_figure,
+            noise_temperature=noise_temperature,
+            equiv_noise_temp=equiv_noise_temp,
         )
+
+    def summary(self) -> pd.DataFrame:
+        summary = super().summary()
+        if self.ground_coordinate is not None:
+            coordinate = self.ground_coordinate.summary()
+            coordinate.index = "Earth Station " + coordinate.index
+            summary = pd.concat([summary, coordinate])
+        return summary
 
 
 class Satellite(Communicator):
@@ -150,10 +209,13 @@ class Satellite(Communicator):
         name: str,
         transmit: Antenna,
         receive: Antenna,
-        orbit: KeplerianElements = None,
+        orbit: Orbit = None,
         ground_coordinate: GeodeticCoordinate = None,
         gain_to_equiv_noise_temp: float = None,
         combined_gain: float = None,
+        noise_figure: float = None,
+        noise_temperature: float = None,
+        equiv_noise_temp: float = None,
     ):
         self._orbit = orbit
         super().__init__(
@@ -163,6 +225,9 @@ class Satellite(Communicator):
             ground_coordinate=ground_coordinate,
             combined_gain=combined_gain,
             gain_to_equiv_noise_temp=gain_to_equiv_noise_temp,
+            noise_figure=noise_figure,
+            noise_temperature=noise_temperature,
+            equiv_noise_temp=equiv_noise_temp,
         )
 
     def velocity(self, orbital_radius: float, mu: float = EARTH_MU) -> float:
@@ -183,4 +248,16 @@ class Satellite(Communicator):
 
     @property
     def semi_major_axis(self) -> float:
-        return self._orbit.semi_major_axis
+        return self.orbit.semi_major_axis
+
+    @property
+    def orbit(self) -> float:
+        return self._orbit
+
+    def summary(self) -> pd.DataFrame:
+        summary = super().summary()
+        if self.ground_coordinate is not None:
+            coordinate = self.ground_coordinate.summary()
+            coordinate.index = "Sub-Satellite " + coordinate.index
+            summary = pd.concat([summary, coordinate])
+        return summary

@@ -3,7 +3,7 @@ import numpy as np
 from link_calculator.constants import SPEED_OF_LIGHT
 
 
-def decibel_to_watt(decibels: float):
+def decibel_to_watt(value: float):
     """
     Convert decibel watt units to watts
 
@@ -15,10 +15,12 @@ def decibel_to_watt(decibels: float):
     -------
       watts (float, W): Watt value
     """
-    return 10 ** (decibels / 10)
+    if value is None:
+        return None
+    return 10 ** (value / 10)
 
 
-def watt_to_decibel(watts: float):
+def watt_to_decibel(value: float):
     """
     Convert watts to decibel watts
 
@@ -30,10 +32,12 @@ def watt_to_decibel(watts: float):
     -------
       decibels (float, dBW): decibel value
     """
-    return 10 * np.log10(watts)
+    if value is None:
+        return None
+    return 10 * np.log10(value)
 
 
-def frequency_to_wavelength(frequency: float) -> float:
+def frequency_to_wavelength(value: float) -> float:
     """
     Convert frequency to wavelength
 
@@ -45,10 +49,12 @@ def frequency_to_wavelength(frequency: float) -> float:
     -------
       wavelength (float, m): length of the wave between peaks
     """
-    return SPEED_OF_LIGHT / (frequency * 1e9)
+    if value is None:
+        return None
+    return SPEED_OF_LIGHT / (value * 1e9)
 
 
-def wavelength_to_frequency(wavelength: float) -> float:
+def wavelength_to_frequency(value: float) -> float:
     """
     Convert frequency to wavelength
 
@@ -60,4 +66,6 @@ def wavelength_to_frequency(wavelength: float) -> float:
     -------
       frequency (float, GHz): the frequency of the wave
     """
-    return (SPEED_OF_LIGHT / wavelength) * 1e-9
+    if value is None:
+        return None
+    return (SPEED_OF_LIGHT / value) * 1e-9

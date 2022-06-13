@@ -3,7 +3,7 @@ from math import isclose, radians
 from link_calculator.constants import EARTH_POLAR_RADIUS, EARTH_RADIUS, SIDEREAL_DAY_S
 from link_calculator.orbits.utils import (
     GeodeticCoordinate,
-    KeplerianElements,
+    Orbit,
     azimuth_intermediate,
     central_angle_orbital_radius,
     elevation_angle,
@@ -17,13 +17,13 @@ def test_period():
     pd = [5370, 5677, 6307, 20860]  # period
 
     for h, T in zip(ht, pd):
-        coord = KeplerianElements(semi_major_axis=h + EARTH_RADIUS)
+        coord = Orbit(semi_major_axis=h + EARTH_RADIUS)
         assert isclose(coord.period(), T, rel_tol=0.5)
 
 
 def test_period_1():
     h = 23200
-    coord = KeplerianElements(semi_major_axis=h + EARTH_RADIUS)
+    coord = Orbit(semi_major_axis=h + EARTH_RADIUS)
     assert isclose(coord.period(), 50625, rel_tol=0.5)
 
 
@@ -222,7 +222,7 @@ def test_polar_coverage():
 
     """
     orbital_radius = 500 + EARTH_POLAR_RADIUS
-    coord = KeplerianElements(semi_major_axis=orbital_radius)
+    coord = Orbit(semi_major_axis=orbital_radius)
     orbital_period = coord.period()
     assert isclose(orbital_period, 5713, rel_tol=0.1)
 

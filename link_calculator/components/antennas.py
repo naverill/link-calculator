@@ -1,10 +1,12 @@
 from math import cos, degrees, exp, pi, radians, sin
 
 import numpy as np
+import pandas as pd
 
 from link_calculator.constants import BOLTZMANN_CONSTANT
 from link_calculator.propagation.conversions import (
     frequency_to_wavelength,
+    watt_to_decibel,
     wavelength_to_frequency,
 )
 from link_calculator.signal_processing.modulation import Modulation
@@ -62,6 +64,34 @@ class Amplifier:
         """
         return self._noise_power
 
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {
+                    "name": "Power",
+                    "unit": "dBW",
+                    "value": watt_to_decibel(self.power),
+                },
+                {
+                    "name": "Gain",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.gain),
+                },
+                {
+                    "name": "Back-Off Loss",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.loss),
+                },
+                {
+                    "name": "Noise Power",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.noise_power),
+                },
+            ]
+        )
+        summary.set_index("name", inplace=True)
+        return summary
+
 
 class Antenna:
     def __init__(
@@ -70,7 +100,6 @@ class Antenna:
         loss: float = 1,
         frequency: float = None,
         wavelength: float = None,
-        modulation: Modulation = None,
         effective_aperture: float = None,
         cross_sect_area: float = None,
         cross_sect_diameter: float = None,
@@ -80,6 +109,7 @@ class Antenna:
         carrier_to_noise: float = None,
         signal_to_noise: float = None,
         carrier_power: float = None,
+        modulation: Modulation = None,
         amplifier: Amplifier = None,
     ):
         """
@@ -248,13 +278,14 @@ class Antenna:
                 at the same distance in the direction of the receiving antenna
         """
         if self._gain is None:
-            self._gain = (
-                self.efficiency
-                * 4
-                * np.pi
-                * self.cross_sect_area
-                / self.wavelength**2
-            )
+            if self.efficiency is not None:
+                self._gain = (
+                    self.efficiency
+                    * 4
+                    * np.pi
+                    * self.cross_sect_area
+                    / self.wavelength**2
+                )
         return self._gain
 
     @property
@@ -374,6 +405,54 @@ class Antenna:
         """
         return self._signal_to_noise
 
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {
+                    "name": "Frequency",
+                    "unit": "GHz",
+                    "value": self.frequency,
+                },
+                {
+                    "name": "Wavelength",
+                    "unit": "m",
+                    "value": self.wavelength,
+                },
+                {
+                    "name": "Efficiency",
+                    "unit": "%",
+                    "value": self.efficiency,
+                },
+                {
+                    "name": "Feeder Loss",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.loss),
+                },
+                {
+                    "name": "Gain",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.gain),
+                },
+                {
+                    "name": "EIRP",
+                    "unit": "dBW",
+                    "value": watt_to_decibel(self.eirp),
+                },
+            ]
+        )
+        summary.set_index("name", inplace=True)
+
+        if self.amplifier is not None:
+            amplifier = self.amplifier.summary()
+            amplifier.index = "Amplifier " + amplifier.index
+            summary = pd.concat([summary, amplifier])
+
+        if self.modulation is not None:
+            modulation = self.modulation.summary()
+            modulation.index = "Modulation " + modulation.index
+            summary = pd.concat([summary, modulation])
+        return summary
+
 
 class HalfWaveDipole(Antenna):
     """
@@ -490,21 +569,32 @@ class ParabolicAntenna(Antenna):
         gain: float = None,
         loss: float = None,
         frequency: float = None,
+        wavelength: float = None,
         effective_aperture: float = None,
         efficiency: float = None,
         beamwidth_scale_factor: float = None,
-        half_beamwidth: float = 20,  # deg
+        half_beamwidth: float = None,  # deg
+        roughness_factor: float = None,
+        carrier_to_noise: float = None,
+        signal_to_noise: float = None,
+        modulation: Modulation = None,
     ):
         self._beamwidth_scale_factor = beamwidth_scale_factor
+        cross_sect_area = pi * circular_diameter**2
         super().__init__(
             amplifier=amplifier,
             gain=gain,
             loss=loss,
             frequency=frequency,
+            wavelength=wavelength,
             efficiency=efficiency,
             effective_aperture=effective_aperture,
             half_beamwidth=half_beamwidth,
             cross_sect_diameter=circular_diameter,
+            cross_sect_area=cross_sect_area,
+            modulation=modulation,
+            carrier_to_noise=carrier_to_noise,
+            signal_to_noise=signal_to_noise,
         )
 
     @property
@@ -543,6 +633,22 @@ class ParabolicAntenna(Antenna):
         TODO
         """
         return self.gain * self.pointing_loss(theta)
+
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {
+                    "name": "Diameter",
+                    "unit": "m",
+                    "value": self.cross_sect_diameter,
+                },
+            ]
+        )
+        summary.set_index("name", inplace=True)
+
+        antenna = super().summary()
+        summary = pd.concat([summary, antenna])
+        return summary
 
 
 class HelicalAntenna(Antenna):

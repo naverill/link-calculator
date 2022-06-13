@@ -4,9 +4,10 @@ from link_calculator.components.antennas import Antenna, ParabolicAntenna
 from link_calculator.components.groundstation import GroundStation
 from link_calculator.components.satellite import Satellite
 from link_calculator.constants import EARTH_RADIUS, SPEED_OF_LIGHT
+from link_calculator.link_budget import Link
 from link_calculator.orbits.utils import (
     GeodeticCoordinate,
-    KeplerianElements,
+    Orbit,
     central_angle_orbital_radius,
     slant_range,
 )
@@ -16,7 +17,7 @@ from link_calculator.propagation.conversions import (
     watt_to_decibel,
     wavelength_to_frequency,
 )
-from link_calculator.propagation.utils import free_space_loss, rain_attenuation
+from link_calculator.propagation.utils import rain_attenuation
 from link_calculator.signal_processing.conversions import GHz_to_MHz, MHz_to_GHz
 from link_calculator.signal_processing.modulation import (
     BinaryPhaseShiftKeying,
@@ -54,17 +55,22 @@ def test_q4():
     gs_lat = 48
     sat_long = -96
     sat_lat = 22
-    point = GeodeticCoordinate(gs_lat, gs_long)
-    ss_point = GeodeticCoordinate(sat_lat, sat_long)
     orbital_radius = 22500 + EARTH_RADIUS  # km
 
-    frequency = 24  # GHz
-    wavelength = frequency_to_wavelength(frequency)
-    gamma = point.central_angle(ss_point)
-    sr = slant_range(orbital_radius, gamma)
+    point = GeodeticCoordinate(gs_lat, gs_long)
+    ss_point = GeodeticCoordinate(sat_lat, sat_long)
 
-    loss = free_space_loss(sr, wavelength)
-    assert np.isclose(watt_to_decibel(loss), -207.4, rtol=0.01)
+    orbit = Orbit(orbital_radius=orbital_radius)
+    sat = Satellite(name="test", ground_coordinate=ss_point, orbit=orbit)
+    gs = GroundStation(name="test", ground_coordinate=point)
+
+    # frequency = 24  # GHz
+    # wavelength = frequency_to_wavelength(frequency)
+    # gamma = point.central_angle(ss_point)
+    # sr = slant_range(orbital_radius, gamma)
+
+    link = Link(transmit=gs, receive=sat)
+    assert np.isclose(watt_to_decibel(link.path_loss), -207.4, rtol=0.01)
 
 
 def test_q5():
@@ -105,7 +111,7 @@ def test_q6():
 
     assert np.isclose(gamma, 18.5, rtol=0.01)
     assert np.isclose(vis, 37, rtol=0.01)
-    coord = KeplerianElements(orbital_radius)
+    coord = Orbit(orbital_radius)
     t = coord.period()
     assert np.isclose(t, 5736, rtol=0.01)
     time_visible = t * total_orbit_per

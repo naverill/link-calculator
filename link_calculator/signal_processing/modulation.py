@@ -1,6 +1,13 @@
 from math import log2, log10, pi, sin, sqrt
 
+import pandas as pd
 from scipy.special import erfc
+
+from link_calculator.signal_processing.conversions import (
+    GHz_to_Hz,
+    Hz_to_GHz,
+    bit_to_mbit,
+)
 
 
 class Modulation:
@@ -148,6 +155,7 @@ class MPhaseShiftKeying(Modulation):
         bits_per_symbol: int = None,
         carrier_power: float = None,
         carrier_to_noise: float = None,
+        spectral_efficiency: float = None,
         eb_no: float = None,
         es_no: float = None,
         rolloff_rate: float = None,
@@ -185,12 +193,8 @@ class MPhaseShiftKeying(Modulation):
         self._carrier_signal = carrier_signal
         self._modulating_signal = modulating_signal
         self._frequency_range = frequency_range
+        self._spectral_efficiency = spectral_efficiency
         self._noise_probability = noise_probability
-
-    @property
-    def frequency_deviation(self) -> float:
-        if self._frequency_deviation is None:
-            self._frequency_deviation = None
 
     @property
     def es_no(self) -> float:
@@ -214,8 +218,10 @@ class MPhaseShiftKeying(Modulation):
             if self.bit_period is not None:
                 self._bit_rate = 1.0 / self.bit_period
             elif self.rolloff_rate is not None:
-                self.bit_rate = (
-                    self.bits_per_symbol * self.bandwidth / (1 + self.rolloff_rate)
+                self._bit_rate = (
+                    self.bits_per_symbol
+                    * GHz_to_Hz(self.bandwidth)
+                    / (1 + self.rolloff_rate)
                 )
         return self._bit_rate
 
@@ -229,7 +235,9 @@ class MPhaseShiftKeying(Modulation):
     def symbol_rate(self) -> float:
         if self._symbol_rate is None:
             if self._bandwidth is not None and self._rolloff_rate is not None:
-                self._symbol_rate = (self._bandwidth) / (1 + self.rolloff_rate)
+                self._symbol_rate = (GHz_to_Hz(self._bandwidth)) / (
+                    1 + self.rolloff_rate
+                )
             else:
                 self._symbol_rate = self.bit_rate / self.bits_per_symbol
         return self._symbol_rate
@@ -322,6 +330,26 @@ class MPhaseShiftKeying(Modulation):
                 self.carrier_signal.frequency + self.bandwidth / 2,
             ]
         return self._frequency_range
+
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {
+                    "name": "Maximum Bit Rate",
+                    "unit": "bps",
+                    "value": Hz_to_GHz(self.bit_rate),
+                },
+                {"name": "Bandwidth", "unit": "GHz", "value": self.bandwidth},
+                {
+                    "name": "Spectral Efficiency",
+                    "unit": "bits/s/GHz",
+                    "value": Hz_to_GHz(self.spectral_efficiency),
+                },
+                {"name": "Roll-Off Factor", "unit": "", "value": self.rolloff_rate},
+            ]
+        )
+        summary.set_index("name", inplace=True)
+        return summary
 
 
 class BinaryPhaseShiftKeying(MPhaseShiftKeying):

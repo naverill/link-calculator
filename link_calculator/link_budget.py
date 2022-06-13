@@ -226,11 +226,6 @@ class Link:
                     "value": watt_to_decibel(self.atmospheric_loss),
                 },
                 {
-                    "name": "Boltzmann's Constant",
-                    "unit": "dB",
-                    "value": watt_to_decibel(BOLTZMANN_CONSTANT),
-                },
-                {
                     "name": "C/No Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.carrier_to_noise_density),

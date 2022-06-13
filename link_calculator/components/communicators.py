@@ -144,20 +144,20 @@ class Communicator:
                     "value": watt_to_decibel(self.combined_gain),
                 },
                 {
-                    "name": "Gain to Equivalent Noise Temperature Ratio",
+                    "name": "G/Te Ratio",
                     "unit": "dBK-1",
                     "value": watt_to_decibel(self.gain_to_equiv_noise_temp),
                 },
             ]
         )
-        receiver = self.receive.summary()
-        receiver.index = "Receive Antenna " + receiver.index
-
         transmitter = self.transmit.summary()
-        transmitter.index = "Transmit Antenna " + transmitter.index
+        transmitter.index = "Transmit " + transmitter.index
+
+        receiver = self.receive.summary()
+        receiver.index = "Receive " + receiver.index
 
         summary.set_index("name", inplace=True)
-        summary = pd.concat([summary, receiver, transmitter])
+        summary = pd.concat([summary, transmitter, receiver])
         return summary
 
 

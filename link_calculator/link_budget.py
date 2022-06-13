@@ -231,7 +231,7 @@ class Link:
                     "value": watt_to_decibel(BOLTZMANN_CONSTANT),
                 },
                 {
-                    "name": "Carrier to Noise Density Ratio",
+                    "name": "C/No Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.carrier_to_noise_density),
                 },
@@ -246,7 +246,7 @@ class Link:
                     "value": watt_to_decibel(self.bandwidth_to_bit_rate),
                 },
                 {
-                    "name": "Carrier to Noise Ratio",
+                    "name": "C/N Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.carrier_to_noise),
                 },
@@ -261,7 +261,7 @@ class Link:
         transmitter.index = "Transmitter " + transmitter.index
 
         summary.set_index("name", inplace=True)
-        summary = pd.concat([summary, receiver, transmitter])
+        summary = pd.concat([summary, transmitter, receiver])
         return summary
 
 

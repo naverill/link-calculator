@@ -1,0 +1,71 @@
+,Overall,Uplink,Downlink
+Eb/No Ratio (dB),11.62,42.93,11.62
+Carrier Power Density (dBW),,-126.39,-163.10
+Free-Space Path Loss (dB),,-213.53,-210.05
+Atmospheric Loss (dB),,-6.00,-6.00
+Boltzmann's Constant (dB),,-228.60,-228.60
+C/No Ratio (dB),,123.55,92.25
+Bandwidth to Bit Rate Ratio (dB),,-3.63,-3.63
+C/N Ratio (dB),,46.56,15.26
+Central Angle (°),,35.25,33.75
+Slant Range (km),,"37,138.17","37,030.62"
+Transmitter Noise Figure (),,2.10,2.50
+Transmitter Equivalent Noise Temperature (K),,27.50,450.00
+Transmitter Noise Temperature (K),,25.00,300.00
+Transmitter Combined Gain (dB),,65.19,47.87
+Transmitter G/Te Ratio (dBK-1),,50.80,21.34
+Transmitter Diameter (m),,10.50,1.00
+Transmitter Frequency (GHz),,30.50,20.50
+Transmitter Wavelength (m),,0.01,0.01
+Transmitter Efficiency (%),,0.65,0.60
+Transmitter Feeder Loss (dB),,-2.50,-0.50
+Transmitter Gain (dB),,68.65,44.42
+Transmitter EIRP (dBW),,93.14,52.95
+Transmitter Amplifier Power (dBW),,26.99,9.03
+Transmitter Amplifier Gain (dB),,0.00,0.00
+Transmitter Amplifier Back-Off Loss (dB),,0.00,0.00
+Transmitter Amplifier Noise Power (dB),,,
+Transmitter Modulation Maximum Bit Rate (mbps),,115.38,115.38
+Transmitter Modulation Data Rate (mbps),,115.38,115.38
+Transmitter Modulation Bandwidth (GHz),,0.05,0.05
+Transmitter Modulation Spectral Efficiency (bits/s/GHz),,2.31,2.31
+Transmitter Modulation C/N Ratio (bits/s/GHz),,19.66,19.66
+Transmitter Modulation Eb/No Ratio (dB),,16.03,16.03
+Transmitter Modulation Bit Error Rate (),,0.00,0.00
+Transmitter Modulation Roll-Off Factor (),,0.30,0.30
+Transmitter Earth Station Latitude (°),,-35.17,
+Transmitter Earth Station Longitude (°),,147.27,
+Transmitter Earth Station Altitude (°),,0.00,
+Receiver Noise Figure (),,2.50,2.50
+Receiver Equivalent Noise Temperature (K),,450.00,37.50
+Receiver Noise Temperature (K),,300.00,25.00
+Receiver Combined Gain (dB),,47.87,42.48
+Receiver G/Te Ratio (dBK-1),,21.34,26.74
+Receiver Diameter (m),,1.00,0.80
+Receiver Frequency (GHz),,30.50,20.50
+Receiver Wavelength (m),,0.01,0.01
+Receiver Efficiency (%),,0.60,0.60
+Receiver Feeder Loss (dB),,-0.50,-1.00
+Receiver Gain (dB),,47.87,42.48
+Receiver EIRP (dBW),,56.40,60.52
+Receiver Amplifier Power (dBW),,9.03,19.03
+Receiver Amplifier Gain (dB),,0.00,0.00
+Receiver Amplifier Back-Off Loss (dB),,0.00,0.00
+Receiver Amplifier Noise Power (dB),,,
+Receiver Modulation Maximum Bit Rate (mbps),,115.38,115.38
+Receiver Modulation Data Rate (mbps),,115.38,115.38
+Receiver Modulation Bandwidth (GHz),,0.05,0.05
+Receiver Modulation Spectral Efficiency (bits/s/GHz),,2.31,2.31
+Receiver Modulation C/N Ratio (bits/s/GHz),,19.66,19.66
+Receiver Modulation Eb/No Ratio (dB),,16.03,16.03
+Receiver Modulation Bit Error Rate (),,0.00,0.00
+Receiver Modulation Roll-Off Factor (),,0.30,0.30
+Receiver Sub-Satellite Latitude (°),,0.00,
+Receiver Sub-Satellite Longitude (°),,149.80,
+Receiver Sub-Satellite Altitude (°),,0.00,
+Transmitter Sub-Satellite Latitude (°),,,0.00
+Transmitter Sub-Satellite Longitude (°),,,149.80
+Transmitter Sub-Satellite Altitude (°),,,0.00
+Receiver Earth Station Latitude (°),,,-19.08
+Receiver Earth Station Longitude (°),,,178.18
+Receiver Earth Station Altitude (°),,,0.00

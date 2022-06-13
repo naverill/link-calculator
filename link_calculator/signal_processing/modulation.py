@@ -425,7 +425,7 @@ class MPhaseShiftKeying(Modulation):
                     "value": Hz_to_GHz(self.spectral_efficiency),
                 },
                 {
-                    "name": "Carrier to Noise Ratio",
+                    "name": "C/N Ratio",
                     "unit": "bits/s/GHz",
                     "value": watt_to_decibel(self.carrier_to_noise),
                 },

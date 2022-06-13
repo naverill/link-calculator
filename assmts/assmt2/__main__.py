@@ -22,7 +22,7 @@ from link_calculator.signal_processing.modulation import (
 
 print("\n\n")
 
-# pd.options.display.float_format = "{:,.2f}".format
+pd.options.display.float_format = "{:,.2f}".format
 ABS_PATH = pathlib.Path(__file__).parent.resolve()
 
 
@@ -175,7 +175,12 @@ def q1():
     gsA_upstream_summary.rename(
         columns={"name": "Earth Station A Upstream"}, inplace=True
     )
-    gsA_upstream_summary.to_csv(f"{ABS_PATH}/output/Q1 Earth Station A Upstream.csv")
+    gsA_upstream_summary.index = (
+        gsA_upstream_summary.index + " (" + gsA_upstream_summary.pop("unit") + ")"
+    )
+    gsA_upstream_summary.to_csv(
+        f"{ABS_PATH}/output/Q1EarthStationAUpstream.csv", float_format="{:,.2f}".format
+    )
     print(gsA_upstream_summary)
 
     gsA_uplink_downstream = Link(
@@ -197,8 +202,12 @@ def q1():
     gsA_downstream_summary.rename(
         columns={"name": "Earth Station A Downstream"}, inplace=True
     )
+    gsA_downstream_summary.index = (
+        gsA_downstream_summary.index + " (" + gsA_downstream_summary.pop("unit") + ")"
+    )
     gsA_downstream_summary.to_csv(
-        f"{ABS_PATH}/output/Q1 Earth Station A Downstream.csv"
+        f"{ABS_PATH}/output/Q1EarthStationADownstream.csv",
+        float_format="{:,.2f}".format,
     )
     print(gsA_downstream_summary)
 
@@ -221,7 +230,12 @@ def q1():
     gsB_upstream_summary.rename(
         columns={"name": "Earth Station B Upstream"}, inplace=True
     )
-    gsB_upstream_summary.to_csv(f"{ABS_PATH}/output/Q1 Earth Station B Upstream.csv")
+    gsB_upstream_summary.index = (
+        gsB_upstream_summary.index + " (" + gsB_upstream_summary.pop("unit") + ")"
+    )
+    gsB_upstream_summary.to_csv(
+        f"{ABS_PATH}/output/Q1EarthStationBUpstream.csv", float_format="{:,.2f}".format
+    )
     print(gsB_upstream_summary)
 
     gsB_uplink_downstream = Link(
@@ -243,8 +257,12 @@ def q1():
     gsB_downstream_summary.rename(
         columns={"name": "Earth Station B Downstream"}, inplace=True
     )
+    gsB_downstream_summary.index = (
+        gsB_downstream_summary.index + " (" + gsB_downstream_summary.pop("unit") + ")"
+    )
     gsB_downstream_summary.to_csv(
-        f"{ABS_PATH}/output/Q1 Earth Station B Downstream.csv"
+        f"{ABS_PATH}/output/Q1EarthStationBDownstream.csv",
+        float_format="{:,.2f}".format,
     )
     print(gsB_downstream_summary)
 
@@ -286,7 +304,13 @@ def q2():
         else inf,
     )
     best_mod = results[best_code]["mod"]
-    best_mod.summary().to_csv(f"{ABS_PATH}/output/Q2 Uplink Modulation.csv")
+    best_mod_summary = best_mod.summary()
+    best_mod_summary.index = (
+        best_mod_summary.index + " (" + best_mod_summary.pop("unit") + ")"
+    )
+    best_mod_summary.to_csv(
+        f"{ABS_PATH}/output/Q2UplinkModulation.csv", float_format="{:,.2f}".format
+    )
 
     overall_mod = MPhaseShiftKeying(
         levels=8,
@@ -299,8 +323,13 @@ def q2():
     overall_summary.rename(
         columns={"name": "Overall Link Modulation Summary"}, inplace=True
     )
+    overall_summary.index = (
+        overall_summary.index + " (" + overall_summary.pop("unit") + ")"
+    )
     print(overall_summary)
-    overall_summary.to_csv(f"{ABS_PATH}/output/Q2 Overall Modulation.csv")
+    overall_summary.to_csv(
+        f"{ABS_PATH}/output/Q2OverallModulation.csv", float_format="{:,.2f}".format
+    )
 
     downlink_eb_no = link_eb_no(overall_mod.eb_no, uplink_eb_no)
     min_eb_no = downlink_eb_no / best_mod.code.coding_gain
@@ -313,8 +342,13 @@ def q2():
         code=best_mod.code,
     )
     downlink_summary = downlink_mod.summary()
+    downlink_summary.index = (
+        downlink_summary.index + " (" + downlink_summary.pop("unit") + ")"
+    )
     print(downlink_summary)
-    downlink_summary.to_csv(f"{ABS_PATH}/output/Q2 Downlink Modulation.csv")
+    downlink_summary.to_csv(
+        f"{ABS_PATH}/output/Q2DownlinkModulation.csv", float_format="{:,.2f}".format
+    )
 
 
 def q3():

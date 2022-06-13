@@ -1,3 +1,6 @@
+import pathlib
+from math import inf
+
 import numpy as np
 import pandas as pd
 
@@ -12,15 +15,24 @@ from link_calculator.signal_processing.conversions import (
     MHz_to_Hz,
     mbit_to_bit,
 )
-from link_calculator.signal_processing.modulation import MPhaseShiftKeying
+from link_calculator.signal_processing.modulation import (
+    ConvolutionalCode,
+    MPhaseShiftKeying,
+)
 
 print("\n\n")
 
-pd.options.display.float_format = "{:,.2f}".format
+# pd.options.display.float_format = "{:,.2f}".format
+ABS_PATH = pathlib.Path(__file__).parent.resolve()
 
 
 def q1():
-    sat_mod = MPhaseShiftKeying(levels=8, bandwidth=MHz_to_GHz(50), rolloff_rate=0.3)
+    sat_mod = MPhaseShiftKeying(
+        levels=8,
+        bandwidth=MHz_to_GHz(50),
+        rolloff_rate=0.3,
+        bit_error_rate=1e-9,
+    )
 
     # Ground Station A
     gsA_point = GeodeticCoordinate(latitude=-19.08, longitude=178.18)
@@ -163,7 +175,8 @@ def q1():
     gsA_upstream_summary.rename(
         columns={"name": "Earth Station A Upstream"}, inplace=True
     )
-    gsA_upstream_summary.to_csv("Earth Station A Upstream.csv")
+    gsA_upstream_summary.to_csv(f"{ABS_PATH}/output/Q1 Earth Station A Upstream.csv")
+    print(gsA_upstream_summary)
 
     gsA_uplink_downstream = Link(
         transmitter=gsF,
@@ -184,7 +197,10 @@ def q1():
     gsA_downstream_summary.rename(
         columns={"name": "Earth Station A Downstream"}, inplace=True
     )
-    gsA_downstream_summary.to_csv("Earth Station A Downstream.csv")
+    gsA_downstream_summary.to_csv(
+        f"{ABS_PATH}/output/Q1 Earth Station A Downstream.csv"
+    )
+    print(gsA_downstream_summary)
 
     gsB_uplink_upstream = Link(
         transmitter=gsB,
@@ -205,7 +221,8 @@ def q1():
     gsB_upstream_summary.rename(
         columns={"name": "Earth Station B Upstream"}, inplace=True
     )
-    gsB_upstream_summary.to_csv("Earth Station B Upstream.csv")
+    gsB_upstream_summary.to_csv(f"{ABS_PATH}/output/Q1 Earth Station B Upstream.csv")
+    print(gsB_upstream_summary)
 
     gsB_uplink_downstream = Link(
         transmitter=gsF,
@@ -226,11 +243,78 @@ def q1():
     gsB_downstream_summary.rename(
         columns={"name": "Earth Station B Downstream"}, inplace=True
     )
-    gsB_downstream_summary.to_csv("Earth Station B Downstream.csv")
+    gsB_downstream_summary.to_csv(
+        f"{ABS_PATH}/output/Q1 Earth Station B Downstream.csv"
+    )
+    print(gsB_downstream_summary)
 
 
 def q2():
-    pass
+    def link_eb_no(overall_eb_no: float, link_eb_no) -> float:
+        return (overall_eb_no * link_eb_no) / (link_eb_no - overall_eb_no)
+
+    uplink_eb_no = decibel_to_watt(33.2)
+    min_bit_error_rate = 1e-9
+    min_data_rate = mbit_to_bit(60)
+
+    codes = {
+        "7/8": {"code_rate": 7 / 8, "code_gain": decibel_to_watt(2.5)},
+        "3/4": {"code_rate": 3 / 4, "code_gain": decibel_to_watt(3)},
+        "1/2": {"code_rate": 1 / 2, "code_gain": decibel_to_watt(3.5)},
+    }
+    results = {}
+    for name, params in codes.items():
+        code = ConvolutionalCode(
+            coding_rate=params["code_rate"], coding_gain=params["code_gain"]
+        )
+        mod = MPhaseShiftKeying(
+            levels=8,
+            bandwidth=MHz_to_GHz(50),
+            rolloff_rate=0.3,
+            code=code,
+            eb_no=uplink_eb_no,
+        )
+        results[name] = {"data_rate": mod.data_rate, "mod": mod}
+        summary = mod.summary()
+        summary.rename(columns={"name": f"{name} Modulation Summary"}, inplace=True)
+        print(summary)
+
+    best_code = min(
+        results,
+        key=lambda x: results[x]["data_rate"]
+        if results[x]["data_rate"] > min_data_rate
+        else inf,
+    )
+    best_mod = results[best_code]["mod"]
+    best_mod.summary().to_csv(f"{ABS_PATH}/output/Q2 Uplink Modulation.csv")
+
+    overall_mod = MPhaseShiftKeying(
+        levels=8,
+        bit_error_rate=min_bit_error_rate,
+        bandwidth=MHz_to_GHz(50),
+        rolloff_rate=0.3,
+        code=best_mod.code,
+    )
+    overall_summary = overall_mod.summary()
+    overall_summary.rename(
+        columns={"name": "Overall Link Modulation Summary"}, inplace=True
+    )
+    print(overall_summary)
+    overall_summary.to_csv(f"{ABS_PATH}/output/Q2 Overall Modulation.csv")
+
+    downlink_eb_no = link_eb_no(overall_mod.eb_no, uplink_eb_no)
+    min_eb_no = downlink_eb_no / best_mod.code.coding_gain
+
+    downlink_mod = MPhaseShiftKeying(
+        levels=8,
+        bandwidth=MHz_to_GHz(50),
+        eb_no=min_eb_no,
+        rolloff_rate=0.3,
+        code=best_mod.code,
+    )
+    downlink_summary = downlink_mod.summary()
+    print(downlink_summary)
+    downlink_summary.to_csv(f"{ABS_PATH}/output/Q2 Downlink Modulation.csv")
 
 
 def q3():
@@ -239,4 +323,4 @@ def q3():
 
 q1()
 q2()
-q3()
+# q3()

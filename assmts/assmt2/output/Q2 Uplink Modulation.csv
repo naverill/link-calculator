@@ -1,0 +1,11 @@
+name,unit,value
+Maximum Bit Rate,mbps,115.38461538461539
+Data Rate,mbps,86.53846153846153
+Bandwidth,GHz,0.05
+Spectral Efficiency,bits/s/GHz,2.3076923076923075
+Carrier to Noise Ratio,bits/s/GHz,36.83177902412826
+Eb/No Ratio,dB,33.2
+Bit Error Rate,,0.0
+Roll-Off Factor,,0.3
+Coding Rate,mbps,0.75
+Coding Gain,dB,3.0

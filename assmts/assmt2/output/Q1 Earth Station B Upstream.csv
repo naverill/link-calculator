@@ -25,9 +25,13 @@ Receiver Antenna Amplifier Power,dBW,,9.030899869919436,26.989700043360187
 Receiver Antenna Amplifier Gain,dB,,0.0,0.0
 Receiver Antenna Amplifier Back-Off Loss,dB,,0.0,0.0
 Receiver Antenna Amplifier Noise Power,dB,,,
-Receiver Antenna Modulation Maximum Bit Rate,bps,,0.1153846153846154,0.1153846153846154
+Receiver Antenna Modulation Maximum Bit Rate,mbps,,115.38461538461539,115.38461538461539
+Receiver Antenna Modulation Data Rate,mbps,,115.38461538461539,115.38461538461539
 Receiver Antenna Modulation Bandwidth,GHz,,0.05,0.05
 Receiver Antenna Modulation Spectral Efficiency,bits/s/GHz,,2.3076923076923075,2.3076923076923075
+Receiver Antenna Modulation Carrier to Noise Ratio,bits/s/GHz,,19.65690784179897,19.65690784179897
+Receiver Antenna Modulation Eb/No Ratio,dB,,16.025128817670712,16.025128817670712
+Receiver Antenna Modulation Bit Error Rate,,,1e-09,1e-09
 Receiver Antenna Modulation Roll-Off Factor,,,0.3,0.3
 Receiver Sub-Satellite Latitude,°,,0.0,
 Receiver Sub-Satellite Longitude,°,,149.8,
@@ -48,9 +52,13 @@ Transmitter Antenna Amplifier Power,dBW,,19.030899869919434,9.030899869919436
 Transmitter Antenna Amplifier Gain,dB,,0.0,0.0
 Transmitter Antenna Amplifier Back-Off Loss,dB,,0.0,0.0
 Transmitter Antenna Amplifier Noise Power,dB,,,
-Transmitter Antenna Modulation Maximum Bit Rate,bps,,0.1153846153846154,0.1153846153846154
+Transmitter Antenna Modulation Maximum Bit Rate,mbps,,115.38461538461539,115.38461538461539
+Transmitter Antenna Modulation Data Rate,mbps,,115.38461538461539,115.38461538461539
 Transmitter Antenna Modulation Bandwidth,GHz,,0.05,0.05
 Transmitter Antenna Modulation Spectral Efficiency,bits/s/GHz,,2.3076923076923075,2.3076923076923075
+Transmitter Antenna Modulation Carrier to Noise Ratio,bits/s/GHz,,19.65690784179897,19.65690784179897
+Transmitter Antenna Modulation Eb/No Ratio,dB,,16.025128817670712,16.025128817670712
+Transmitter Antenna Modulation Bit Error Rate,,,1e-09,1e-09
 Transmitter Antenna Modulation Roll-Off Factor,,,0.3,0.3
 Transmitter Earth Station Latitude,°,,-19.08,
 Transmitter Earth Station Longitude,°,,178.18,

@@ -111,6 +111,7 @@ class Antenna:
         carrier_power: float = None,
         modulation: Modulation = None,
         amplifier: Amplifier = None,
+        gain_to_noise_temperature=None,
     ):
         """
         Instantiate an Antenna object
@@ -148,6 +149,7 @@ class Antenna:
         self._carrier_to_noise = carrier_to_noise
         self._signal_to_noise = signal_to_noise
         self._carrier_power = carrier_power
+        self._gain_to_noise_temperature = gain_to_noise_temperature
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
         """
@@ -182,6 +184,16 @@ class Antenna:
         distance = distance * 1000  # convert to m
         return (self.amplifier.power * self.gain) / (4 * np.pi * distance**2)
 
+    def combined_loss(self) -> float:
+        if self._combined_loss is None:
+            if self.amplifier is not None:
+                self._combined_loss = self.loss * self.loss
+            elif self.eirp is not None:
+                self._combined_loss = self.eirp / (self.amplifier.power * self.gain)
+            else:
+                self._combined_loss = self.loss
+        return self._combined_loss
+
     @property
     def eirp(self) -> float:
         """
@@ -194,7 +206,7 @@ class Antenna:
                 from an isotropic antenna to achieve the same power incident at the
                 receiver  as that of a transmitter with a specific antenna gain
         """
-        return self.amplifier.power * self.amplifier.loss * self.loss * self.gain
+        return self.amplifier.power * self.combined_loss * self.gain
 
     @property
     def half_beamwidth(self) -> float:
@@ -286,6 +298,8 @@ class Antenna:
                     * self.cross_sect_area
                     / self.wavelength**2
                 )
+            elif self.eirp is not None:
+                self._gain = self.eirp / (self.power * self.combined_loss)
         return self._gain
 
     @property

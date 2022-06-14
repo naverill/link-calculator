@@ -4,7 +4,7 @@ from math import inf
 import numpy as np
 import pandas as pd
 
-from link_calculator.components.antennas import Amplifier, ParabolicAntenna
+from link_calculator.components.antennas import Amplifier, Antenna, ParabolicAntenna
 from link_calculator.components.communicators import GroundStation, Satellite
 from link_calculator.constants import BOLTZMANN_CONSTANT
 from link_calculator.link_budget import Link, LinkBudget
@@ -298,6 +298,7 @@ def q2():
         summary.to_csv(
             f"{ABS_PATH}/output/Q2{name}Modulation.csv", float_format="{:,.3f}".format
         )
+        summary.index = summary.index + " (" + summary.pop("unit") + ")"
 
     best_code = min(
         results,
@@ -345,9 +346,41 @@ def q2():
 
 
 def q3():
+    triton_transmit_bandwidth = 31 - 27.5
+    triton_transmit_mod = MPhaseShiftKeying(
+        levels=1,  # TODO change,
+        bandwidth=triton_transmit_bandwidth,
+        data_rate=mbit_to_bit(800),
+        spectral_efficiency=4,  # 4 bits/Hz (check units)
+    )
+    triton_transmit_amp = Amplifier(power=35)
+    triton_transmit = Antenna(
+        eirp=decibel_to_watt(55.5),
+        amplifier=triton_transmit_amp,
+        modulation=triton_transmit_mod,
+    )
+    triton_receive_bandwidth = 31 - 27.5
+    triton_receive_mod = MPhaseShiftKeying(
+        levels=1,  # TODO change,
+        bandwidth=triton_receive_bandwidth,
+        data_rate=mbit_to_bit(800),
+        spectral_efficiency=4,  # 4 bits/Hz (check units)
+    )
+    triton_receive_amp = Amplifier(power=35)
+    triton_receive = Antenna(
+        eirp=decibel_to_watt(55.5),
+        amplifier=triton_receive_amp,
+        modulation=triton_receive_mod,
+    )
+    triton = GroundStation(
+        name="MQ-4C Triton",
+        transmit=triton_transmit,
+        receive=triton_receive,
+    )
+    print(triton.summary())
     pass
 
 
 q1()
 q2()
-# q3()
+q3()

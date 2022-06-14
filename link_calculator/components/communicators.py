@@ -5,7 +5,7 @@ import pandas as pd
 from link_calculator.components.antennas import Amplifier, Antenna
 from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_MU, EARTH_RADIUS
 from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
-from link_calculator.propagation.conversions import watt_to_decibel
+from link_calculator.propagation.conversions import GHz_to_Hz, watt_to_decibel
 
 
 class Communicator:
@@ -57,6 +57,14 @@ class Communicator:
     def output_noise_power(self) -> float:
         return self.receive.amplifier.gain * (
             self.receive.noise_power + self.receive.amplifier.noise_power
+        )
+
+    @property
+    def receive_noise_power(self) -> float:
+        return (
+            BOLTZMANN_CONSTANT
+            * self.noise_temperature
+            * GHz_to_Hz(self.receive.modulation.bandwidth)
         )
 
     @property

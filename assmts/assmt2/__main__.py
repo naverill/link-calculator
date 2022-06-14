@@ -22,7 +22,6 @@ from link_calculator.signal_processing.modulation import (
 
 print("\n\n")
 
-pd.options.display.float_format = "{:,.2f}".format
 ABS_PATH = pathlib.Path(__file__).parent.resolve()
 
 
@@ -31,7 +30,6 @@ def q1():
         levels=8,
         bandwidth=MHz_to_GHz(50),
         rolloff_rate=0.3,
-        bit_error_rate=1e-9,
     )
 
     # Ground Station A
@@ -179,7 +177,7 @@ def q1():
         gsA_upstream_summary.index + " (" + gsA_upstream_summary.pop("unit") + ")"
     )
     gsA_upstream_summary.to_csv(
-        f"{ABS_PATH}/output/Q1EarthStationAUpstream.csv", float_format="{:,.2f}".format
+        f"{ABS_PATH}/output/Q1EarthStationAUpstream.csv", float_format="{:,.3f}".format
     )
     print(gsA_upstream_summary)
 
@@ -207,7 +205,7 @@ def q1():
     )
     gsA_downstream_summary.to_csv(
         f"{ABS_PATH}/output/Q1EarthStationADownstream.csv",
-        float_format="{:,.2f}".format,
+        float_format="{:,.3f}".format,
     )
     print(gsA_downstream_summary)
 
@@ -234,7 +232,7 @@ def q1():
         gsB_upstream_summary.index + " (" + gsB_upstream_summary.pop("unit") + ")"
     )
     gsB_upstream_summary.to_csv(
-        f"{ABS_PATH}/output/Q1EarthStationBUpstream.csv", float_format="{:,.2f}".format
+        f"{ABS_PATH}/output/Q1EarthStationBUpstream.csv", float_format="{:,.3f}".format
     )
     print(gsB_upstream_summary)
 
@@ -262,9 +260,8 @@ def q1():
     )
     gsB_downstream_summary.to_csv(
         f"{ABS_PATH}/output/Q1EarthStationBDownstream.csv",
-        float_format="{:,.2f}".format,
+        float_format="{:,.3f}".format,
     )
-    print(gsB_downstream_summary)
 
 
 def q2():
@@ -276,12 +273,13 @@ def q2():
     min_data_rate = mbit_to_bit(60)
 
     codes = {
-        "7/8": {"code_rate": 7 / 8, "code_gain": decibel_to_watt(2.5)},
-        "3/4": {"code_rate": 3 / 4, "code_gain": decibel_to_watt(3)},
-        "1/2": {"code_rate": 1 / 2, "code_gain": decibel_to_watt(3.5)},
+        "7-8": {"code_rate": 7 / 8, "code_gain": decibel_to_watt(2.5)},
+        "3-4": {"code_rate": 3 / 4, "code_gain": decibel_to_watt(3)},
+        "1-2": {"code_rate": 1 / 2, "code_gain": decibel_to_watt(3.5)},
     }
     results = {}
     for name, params in codes.items():
+        print(decibel_to_watt(params["code_gain"]))
         code = ConvolutionalCode(
             coding_rate=params["code_rate"], coding_gain=params["code_gain"]
         )
@@ -296,6 +294,10 @@ def q2():
         summary = mod.summary()
         summary.rename(columns={"name": f"{name} Modulation Summary"}, inplace=True)
         print(summary)
+        summary.index = summary.index + " (" + summary.pop("unit") + ")"
+        summary.to_csv(
+            f"{ABS_PATH}/output/Q2{name}Modulation.csv", float_format="{:,.3f}".format
+        )
 
     best_code = min(
         results,
@@ -304,13 +306,6 @@ def q2():
         else inf,
     )
     best_mod = results[best_code]["mod"]
-    best_mod_summary = best_mod.summary()
-    best_mod_summary.index = (
-        best_mod_summary.index + " (" + best_mod_summary.pop("unit") + ")"
-    )
-    best_mod_summary.to_csv(
-        f"{ABS_PATH}/output/Q2UplinkModulation.csv", float_format="{:,.2f}".format
-    )
 
     overall_mod = MPhaseShiftKeying(
         levels=8,
@@ -328,16 +323,14 @@ def q2():
     )
     print(overall_summary)
     overall_summary.to_csv(
-        f"{ABS_PATH}/output/Q2OverallModulation.csv", float_format="{:,.2f}".format
+        f"{ABS_PATH}/output/Q2OverallModulation.csv", float_format="{:,.3f}".format
     )
 
     downlink_eb_no = link_eb_no(overall_mod.eb_no, uplink_eb_no)
-    min_eb_no = downlink_eb_no / best_mod.code.coding_gain
-
     downlink_mod = MPhaseShiftKeying(
         levels=8,
         bandwidth=MHz_to_GHz(50),
-        eb_no=min_eb_no,
+        eb_no=downlink_eb_no,
         rolloff_rate=0.3,
         code=best_mod.code,
     )
@@ -347,7 +340,7 @@ def q2():
     )
     print(downlink_summary)
     downlink_summary.to_csv(
-        f"{ABS_PATH}/output/Q2DownlinkModulation.csv", float_format="{:,.2f}".format
+        f"{ABS_PATH}/output/Q2DownlinkModulation.csv", float_format="{:,.3f}".format
     )
 
 

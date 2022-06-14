@@ -51,6 +51,13 @@ class Link:
         self._carrier_to_noise = carrier_to_noise
         self._bandwidth_to_bit_rate = bandwidth_to_bit_rate
         self._eb_no = eb_no
+        if self._transmitter.transmit.modulation is not None:
+            self._transmitter.transmit.modulation.eb_no = self.eb_no
+        if self._receiver.receive.modulation is not None:
+            self._receiver.receive.modulation.carrier_power = (
+                self.receiver_carrier_power
+            )
+            self._receiver.receive.modulation.eb_no = self.eb_no
 
     @property
     def carrier_to_noise_density(self) -> float:

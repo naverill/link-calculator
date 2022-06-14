@@ -68,24 +68,3 @@ def error_probability(block_size, n_errors, error_probability) -> float:
         * (error_probability**n_errors)
         * (1 - error_probability) ** (block_size - n_errors)
     )
-
-
-def coding_gain(code_rate: float, min_distance: float) -> float:
-    return 10 * log10(code_rate * min_distance)
-
-
-def coding_gain_eb_no(eb_no_coded: float, eb_no_uncoded: float) -> float:
-    """
-    calculate the difference in Eb/No required to produce the same error rate for coded and
-    uncoded signals
-
-    Parameters
-    ---------
-        eb_no_coded (float, W); the Eb/No of the coded signal
-        eb_no_coded (float, W): the Eb/No of the uncoded signal
-
-    Returns
-    -------
-      coding_gain (float, ):
-    """
-    return eb_no_uncoded / eb_no_coded

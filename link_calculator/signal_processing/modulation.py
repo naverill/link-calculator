@@ -1,7 +1,7 @@
-from math import log2, log10, pi, sin, sqrt
+from math import erfc, log2, log10, pi, sin, sqrt
 
 import pandas as pd
-from scipy.special import erfc, erfcinv
+from scipy.special import erfcinv
 
 from link_calculator.propagation.conversions import watt_to_decibel
 from link_calculator.signal_processing.conversions import (
@@ -142,13 +142,19 @@ class Waveform:
 
 
 class ConvolutionalCode:
-    def __init__(self, coding_rate: float = None, coding_gain: float = None):
+    def __init__(
+        self,
+        coding_rate: float = None,
+        coding_gain: float = None,
+        min_distance: float = None,
+    ):
         """
         coding_rate (float, bps):
         coding_gain (float, W):
         """
         self._coding_rate = coding_rate
         self._coding_gain = coding_gain
+        self._min_distance = min_distance
 
     @property
     def coding_rate(self) -> float:
@@ -156,7 +162,27 @@ class ConvolutionalCode:
 
     @property
     def coding_gain(self) -> float:
+        if self._coding_gain is None:
+            if self._min_distance is not None:
+                self._coding_gain = self.code_rate * self.min_distance
         return self._coding_gain
+
+    @staticmethod
+    def coding_gain_eb_no(eb_no_coded: float, eb_no_uncoded: float) -> float:
+        """
+        calculate the difference in Eb/No required to produce the same error rate for coded and
+        uncoded signals
+
+        Parameters
+        ---------
+            eb_no_coded (float, W); the Eb/No of the coded signal
+            eb_no_coded (float, W): the Eb/No of the uncoded signal
+
+        Returns
+        -------
+          coding_gain (float, ):
+        """
+        return eb_no_uncoded / eb_no_coded
 
     def summary(self) -> pd.DataFrame:
         summary = pd.DataFrame.from_records(
@@ -190,17 +216,24 @@ class MPhaseShiftKeying(Modulation):
         symbol_period: float = None,
         bit_rate: float = None,
         bit_error_rate: float = None,
+        bit_error_rate_coded: float = None,
         bit_period: float = None,
         bits_per_symbol: int = None,
         carrier_power: float = None,
         coding_rate: float = None,
         carrier_to_noise: float = None,
+        carrier_to_noise_coded: float = None,
         spectral_efficiency: float = None,
         eb_no: float = None,
+        eb_no_coded: float = None,
         es_no: float = None,
+        es_no_coded: float = None,
         rolloff_rate: float = None,
         frequency_range: list = None,
         noise_probability: float = None,
+        noise_probability_coded: float = None,
+        noise_power_density: float = None,
+        noise_power_density_coded: float = None,
         code: ConvolutionalCode = None,
         data_rate: float = None,
     ):
@@ -239,6 +272,13 @@ class MPhaseShiftKeying(Modulation):
         self._noise_probability = noise_probability
         self._code = code
         self._data_rate = data_rate
+        self._bit_error_rate_coded = bit_error_rate_coded
+        self._carrier_to_noise_coded = carrier_to_noise_coded
+        self._eb_no_coded = eb_no_coded
+        self._noise_power_density_coded = noise_power_density_coded
+        self._noise_power_density = noise_power_density
+        self._noise_probability_coded = noise_probability_coded
+        self._es_no_coded = es_no_coded
 
     @property
     def es_no(self) -> float:
@@ -247,9 +287,22 @@ class MPhaseShiftKeying(Modulation):
                 self._es_no = (
                     self.carrier_to_noise * GHz_to_Hz(self.bandwidth) / self.symbol_rate
                 )
-            elif self.eb_no is not None:
+            if self.eb_no is not None:
                 return self.eb_no * self.bits_per_symbol
         return self._es_no
+
+    @property
+    def es_no_coded(self) -> float:
+        if self._es_no_coded is None:
+            if self.carrier_to_noise_coded is not None:
+                self._es_no = (
+                    self.carrier_to_noise_coded
+                    * GHz_to_Hz(self.bandwidth)
+                    / self.symbol_rate
+                )
+            elif self.eb_no_coded is not None:
+                return self.eb_no_coded * self.bits_per_symbol
+        return self._es_no_coded
 
     @property
     def eb_no(self) -> float:
@@ -261,11 +314,30 @@ class MPhaseShiftKeying(Modulation):
                 ) ** 2 / self.bits_per_symbol
             elif self.es_no is not None:
                 self._eb_no = self.es_no / self.bits_per_symbol
+            elif self.energy_per_bit is not None:
+                self._eb_no = self.energy_per_bit / self.noise_power_density
         return self._eb_no
+
+    @property
+    def eb_no_coded(self) -> float:
+        if self._eb_no_coded is None:
+            if self.code is not None:
+                self._eb_no_coded = self.eb_no * self.code.coding_gain
+            else:
+                self._eb_no_coded = self.eb_no
+        return self._eb_no_coded
+
+    @eb_no.setter
+    def eb_no(self, value) -> None:
+        self._eb_no = value
 
     @property
     def carrier_power(self) -> float:
         return self._carrier_power
+
+    @carrier_power.setter
+    def carrier_power(self, value) -> None:
+        self._carrier_power = value
 
     @property
     def bit_rate(self) -> float:
@@ -339,7 +411,8 @@ class MPhaseShiftKeying(Modulation):
             energy_per_bit (float, J/s)
         """
         if self._energy_per_bit is None:
-            self._energy_per_bit = self.carrier_power * self.bit_period
+            if self.carrier_power is not None:
+                self._energy_per_bit = self.carrier_power * self.bit_period
         return self._energy_per_bit
 
     @property
@@ -351,12 +424,27 @@ class MPhaseShiftKeying(Modulation):
         return self._noise_power_density
 
     @property
+    def noise_power_density_coded(self) -> float:
+        if self._noise_power_density_coded is None:
+            self._noise_power_density_coded = self.symbol_rate / (
+                self.bandwidth * self.carrier_to_noise_coded * self.energy_per_symbol
+            )
+        return self._noise_power_density_coded
+
+    @property
     def noise_probability(self) -> float:
         if self._noise_probability is None:
-            self._noise_probability = erfc(
-                sqrt(self.bits_per_symbol * self.eb_no) * sin(pi / self.levels)
-            )
+            if self.es_no is not None:
+                self._noise_probability = erfc(sqrt(self.es_no) * sin(pi / self.levels))
         return self._noise_probability
+
+    @property
+    def noise_probability_coded(self) -> float:
+        if self._noise_probability_coded is None:
+            self._noise_probability_coded = erfc(
+                sqrt(self.bits_per_symbol * self.eb_no_coded) * sin(pi / self.levels)
+            )
+        return self._noise_probability_coded
 
     @property
     def bit_error_rate(self) -> float:
@@ -364,6 +452,15 @@ class MPhaseShiftKeying(Modulation):
             if self.noise_probability is not None:
                 self._bit_error_rate = self.noise_probability / self.bits_per_symbol
         return self._bit_error_rate
+
+    @property
+    def bit_error_rate_coded(self) -> float:
+        if self._bit_error_rate_coded is None:
+            if self.noise_probability_coded is not None:
+                self._bit_error_rate_coded = (
+                    self.noise_probability_coded / self.bits_per_symbol
+                )
+        return self._bit_error_rate_coded
 
     @property
     def levels(self) -> float:
@@ -381,6 +478,15 @@ class MPhaseShiftKeying(Modulation):
                     self.eb_no * self.bit_rate / GHz_to_Hz(self._bandwidth)
                 )
         return self._carrier_to_noise
+
+    @property
+    def carrier_to_noise_coded(self) -> float:
+        if self._carrier_to_noise_coded is None:
+            if self.eb_no_coded is not None:
+                self._carrier_to_noise_coded = (
+                    self.eb_no_coded * self.bit_rate / GHz_to_Hz(self._bandwidth)
+                )
+        return self._carrier_to_noise_coded
 
     @property
     def carrier_signal(self) -> Waveform:
@@ -430,14 +536,29 @@ class MPhaseShiftKeying(Modulation):
                     "value": watt_to_decibel(self.carrier_to_noise),
                 },
                 {
+                    "name": "Coded C/N Ratio",
+                    "unit": "bits/s/GHz",
+                    "value": watt_to_decibel(self.carrier_to_noise_coded),
+                },
+                {
                     "name": "Eb/No Ratio",
                     "unit": "dB",
                     "value": watt_to_decibel(self.eb_no),
                 },
                 {
+                    "name": "Coded Eb/No Ratio",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.eb_no_coded),
+                },
+                {
                     "name": "Bit Error Rate",
                     "unit": "",
                     "value": self.bit_error_rate,
+                },
+                {
+                    "name": "Coded Bit Error Rate",
+                    "unit": "",
+                    "value": self.bit_error_rate_coded,
                 },
                 {"name": "Roll-Off Factor", "unit": "", "value": self.rolloff_rate},
             ]
@@ -447,6 +568,8 @@ class MPhaseShiftKeying(Modulation):
         if self.code is not None:
             code = self.code.summary()
             summary = pd.concat([summary, code])
+        else:
+            summary = summary[[not ("Coded" in idx) for idx in summary.index]]
 
         return summary
 

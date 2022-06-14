@@ -1,70 +1,72 @@
 ,Overall,Uplink,Downlink
-Eb/No Ratio (dB),13.89,13.92,35.66
-Carrier Power Density (dBW),,-155.40,-163.13
-Free-Space Path Loss (dB),,-213.51,-210.08
-Atmospheric Loss (dB),,-6.00,-6.00
-C/No Ratio (dB),,94.54,116.28
-Bandwidth to Bit Rate Ratio (dB),,-3.63,-3.63
-C/N Ratio (dB),,17.55,39.29
-Central Angle (°),,33.75,35.25
-Slant Range (km),,"37,030.62","37,138.17"
-Transmitter Noise Figure (),,2.80,2.50
-Transmitter Equivalent Noise Temperature (K),,45.00,450.00
-Transmitter Noise Temperature (K),,25.00,300.00
-Transmitter Combined Gain (dB),,45.63,47.87
-Transmitter G/Te Ratio (dBK-1),,29.10,21.34
-Transmitter Diameter (m),,1.20,1.00
-Transmitter Frequency (GHz),,30.50,20.50
-Transmitter Wavelength (m),,0.01,0.01
-Transmitter Efficiency (%),,0.55,0.60
-Transmitter Feeder Loss (dB),,-1.00,-0.50
-Transmitter Gain (dB),,49.08,44.42
-Transmitter EIRP (dBW),,64.10,52.95
-Transmitter Amplifier Power (dBW),,16.02,9.03
-Transmitter Amplifier Gain (dB),,0.00,0.00
-Transmitter Amplifier Back-Off Loss (dB),,0.00,0.00
+Eb/No Ratio (dB),13.888,13.917,35.656
+Carrier Power Density (dBW),,-155.405,-163.125
+Free-Space Path Loss (dB),,-213.505,-210.079
+Atmospheric Loss (dB),,-6.000,-6.000
+C/No Ratio (dB),,94.539,116.277
+Bandwidth to Bit Rate Ratio (dB),,-3.632,-3.632
+C/N Ratio (dB),,17.549,39.288
+Central Angle (°),,33.749,35.249
+Slant Range (km),,"37,030.624","37,138.171"
+Transmitter Noise Figure (),,2.800,2.500
+Transmitter Equivalent Noise Temperature (K),,45.000,450.000
+Transmitter Noise Temperature (K),,25.000,300.000
+Transmitter Combined Gain (dB),,45.629,47.874
+Transmitter G/Te Ratio (dBK-1),,29.097,21.342
+Transmitter Diameter (m),,1.200,1.000
+Transmitter Gain (dB),,49.080,44.423
+Transmitter Half Beamwidth (dBW),,64.100,52.954
+Transmitter Frequency (GHz),,30.500,20.500
+Transmitter Wavelength (m),,0.010,0.015
+Transmitter Efficiency (%),,0.550,0.600
+Transmitter Feeder Loss (dB),,-1.000,-0.500
+Transmitter EIRP (dBW),,64.100,52.954
+Transmitter Amplifier Power (dBW),,16.021,9.031
+Transmitter Amplifier Gain (dB),,0.000,0.000
+Transmitter Amplifier Back-Off Loss (dB),,0.000,0.000
 Transmitter Amplifier Noise Power (dB),,,
-Transmitter Modulation Maximum Bit Rate (mbps),,115.38,115.38
-Transmitter Modulation Data Rate (mbps),,115.38,115.38
-Transmitter Modulation Bandwidth (GHz),,0.05,0.05
-Transmitter Modulation Spectral Efficiency (bits/s/GHz),,2.31,2.31
-Transmitter Modulation C/N Ratio (bits/s/GHz),,19.66,19.66
-Transmitter Modulation Eb/No Ratio (dB),,16.03,16.03
-Transmitter Modulation Bit Error Rate (),,0.00,0.00
-Transmitter Modulation Roll-Off Factor (),,0.30,0.30
-Transmitter Earth Station Latitude (°),,-19.08,
-Transmitter Earth Station Longitude (°),,178.18,
-Transmitter Earth Station Altitude (°),,0.00,
-Receiver Noise Figure (),,2.50,2.10
-Receiver Equivalent Noise Temperature (K),,450.00,27.50
-Receiver Noise Temperature (K),,300.00,25.00
-Receiver Combined Gain (dB),,47.87,65.19
-Receiver G/Te Ratio (dBK-1),,21.34,50.80
-Receiver Diameter (m),,1.00,10.50
-Receiver Frequency (GHz),,30.50,20.50
-Receiver Wavelength (m),,0.01,0.01
-Receiver Efficiency (%),,0.60,0.65
-Receiver Feeder Loss (dB),,-0.50,-2.50
-Receiver Gain (dB),,47.87,65.19
-Receiver EIRP (dBW),,56.40,89.68
-Receiver Amplifier Power (dBW),,9.03,26.99
-Receiver Amplifier Gain (dB),,0.00,0.00
-Receiver Amplifier Back-Off Loss (dB),,0.00,0.00
+Transmitter Modulation Maximum Bit Rate (mbps),,115.385,115.385
+Transmitter Modulation Data Rate (mbps),,115.385,115.385
+Transmitter Modulation Bandwidth (GHz),,0.050,0.050
+Transmitter Modulation Spectral Efficiency (bits/s/GHz),,2.308,2.308
+Transmitter Modulation C/N Ratio (bits/s/GHz),,39.288,39.288
+Transmitter Modulation Eb/No Ratio (dB),,35.656,35.656
+Transmitter Modulation Bit Error Rate (),,0.000,0.000
+Transmitter Modulation Roll-Off Factor (),,0.300,0.300
+Transmitter Earth Station Latitude (°),,-19.080,
+Transmitter Earth Station Longitude (°),,178.180,
+Transmitter Earth Station Altitude (°),,0.000,
+Receiver Noise Figure (),,2.500,2.100
+Receiver Equivalent Noise Temperature (K),,450.000,27.500
+Receiver Noise Temperature (K),,300.000,25.000
+Receiver Combined Gain (dB),,47.874,65.195
+Receiver G/Te Ratio (dBK-1),,21.342,50.801
+Receiver Diameter (m),,1.000,10.500
+Receiver Gain (dB),,47.874,65.195
+Receiver Half Beamwidth (dBW),,56.405,89.684
+Receiver Frequency (GHz),,30.500,20.500
+Receiver Wavelength (m),,0.010,0.015
+Receiver Efficiency (%),,0.600,0.650
+Receiver Feeder Loss (dB),,-0.500,-2.500
+Receiver EIRP (dBW),,56.405,89.684
+Receiver Amplifier Power (dBW),,9.031,26.990
+Receiver Amplifier Gain (dB),,0.000,0.000
+Receiver Amplifier Back-Off Loss (dB),,0.000,0.000
 Receiver Amplifier Noise Power (dB),,,
-Receiver Modulation Maximum Bit Rate (mbps),,115.38,115.38
-Receiver Modulation Data Rate (mbps),,115.38,115.38
-Receiver Modulation Bandwidth (GHz),,0.05,0.05
-Receiver Modulation Spectral Efficiency (bits/s/GHz),,2.31,2.31
-Receiver Modulation C/N Ratio (bits/s/GHz),,19.66,19.66
-Receiver Modulation Eb/No Ratio (dB),,16.03,16.03
-Receiver Modulation Bit Error Rate (),,0.00,0.00
-Receiver Modulation Roll-Off Factor (),,0.30,0.30
-Receiver Sub-Satellite Latitude (°),,0.00,
-Receiver Sub-Satellite Longitude (°),,149.80,
-Receiver Sub-Satellite Altitude (°),,0.00,
-Transmitter Sub-Satellite Latitude (°),,,0.00
-Transmitter Sub-Satellite Longitude (°),,,149.80
-Transmitter Sub-Satellite Altitude (°),,,0.00
-Receiver Earth Station Latitude (°),,,-35.17
-Receiver Earth Station Longitude (°),,,147.27
-Receiver Earth Station Altitude (°),,,0.00
+Receiver Modulation Maximum Bit Rate (mbps),,115.385,115.385
+Receiver Modulation Data Rate (mbps),,115.385,115.385
+Receiver Modulation Bandwidth (GHz),,0.050,0.050
+Receiver Modulation Spectral Efficiency (bits/s/GHz),,2.308,2.308
+Receiver Modulation C/N Ratio (bits/s/GHz),,39.288,39.288
+Receiver Modulation Eb/No Ratio (dB),,35.656,35.656
+Receiver Modulation Bit Error Rate (),,0.000,0.000
+Receiver Modulation Roll-Off Factor (),,0.300,0.300
+Receiver Sub-Satellite Latitude (°),,0.000,
+Receiver Sub-Satellite Longitude (°),,149.800,
+Receiver Sub-Satellite Altitude (°),,0.000,
+Transmitter Sub-Satellite Latitude (°),,,0.000
+Transmitter Sub-Satellite Longitude (°),,,149.800
+Transmitter Sub-Satellite Altitude (°),,,0.000
+Receiver Earth Station Latitude (°),,,-35.170
+Receiver Earth Station Longitude (°),,,147.270
+Receiver Earth Station Altitude (°),,,0.000

@@ -1,11 +1,14 @@
 ,value
-Maximum Bit Rate (mbps),115.38
-Data Rate (mbps),86.54
-Bandwidth (GHz),0.05
-Spectral Efficiency (bits/s/GHz),2.31
-C/N Ratio (bits/s/GHz),19.66
-Eb/No Ratio (dB),16.03
-Bit Error Rate (),0.00
-Roll-Off Factor (),0.30
-Coding Rate (mbps),0.75
-Coding Gain (dB),3.00
+Maximum Bit Rate (mbps),115.385
+Data Rate (mbps),86.538
+Bandwidth (GHz),0.050
+Spectral Efficiency (bits/s/GHz),2.308
+C/N Ratio (bits/s/GHz),19.657
+Coded C/N Ratio (bits/s/GHz),22.657
+Eb/No Ratio (dB),16.025
+Coded Eb/No Ratio (dB),19.025
+Bit Error Rate (),0.000
+Coded Bit Error Rate (),0.000
+Roll-Off Factor (),0.300
+Coding Rate (mbps),0.750
+Coding Gain (dB),3.000

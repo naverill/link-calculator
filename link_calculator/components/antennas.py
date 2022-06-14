@@ -580,7 +580,6 @@ class ParabolicAntenna(Antenna):
         modulation: Modulation = None,
     ):
         self._beamwidth_scale_factor = beamwidth_scale_factor
-        cross_sect_area = pi * circular_diameter**2
         super().__init__(
             amplifier=amplifier,
             gain=gain,
@@ -591,7 +590,6 @@ class ParabolicAntenna(Antenna):
             effective_aperture=effective_aperture,
             half_beamwidth=half_beamwidth,
             cross_sect_diameter=circular_diameter,
-            cross_sect_area=cross_sect_area,
             modulation=modulation,
             carrier_to_noise=carrier_to_noise,
             signal_to_noise=signal_to_noise,
@@ -642,11 +640,22 @@ class ParabolicAntenna(Antenna):
                     "unit": "m",
                     "value": self.cross_sect_diameter,
                 },
+                {
+                    "name": "Gain",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.gain),
+                },
+                {
+                    "name": "Half Beamwidth",
+                    "unit": "dBW",
+                    "value": watt_to_decibel(self.eirp),
+                },
             ]
         )
         summary.set_index("name", inplace=True)
 
         antenna = super().summary()
+        antenna.drop("Gain", inplace=True)
         summary = pd.concat([summary, antenna])
         return summary
 

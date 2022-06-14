@@ -2,7 +2,14 @@ import numpy as np
 
 from link_calculator.components.conversions import joules_to_decibel_joules
 from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
-from link_calculator.signal_processing.conversions import GHz_to_MHz, MHz_to_GHz
+from link_calculator.signal_processing.conversions import (
+    GHz_to_Hz,
+    GHz_to_MHz,
+    Hz_to_MHz,
+    MHz_to_GHz,
+    bit_to_mbit,
+    mbit_to_bit,
+)
 from link_calculator.signal_processing.modulation import (
     BinaryPhaseShiftKeying,
     FrequencyModulation,
@@ -10,6 +17,40 @@ from link_calculator.signal_processing.modulation import (
     QuadraturePhaseShiftKeying,
     Waveform,
 )
+
+
+def test_ber_to_eb_no():
+    min_bit_error_rate = 1e-9
+    mod = MPhaseShiftKeying(
+        levels=8,
+        bit_error_rate=min_bit_error_rate,
+        bandwidth=MHz_to_GHz(50),
+        rolloff_rate=0.3,
+    )
+    conv_eb_no = mod.eb_no
+
+    conv_mod = MPhaseShiftKeying(
+        levels=8, bandwidth=MHz_to_GHz(50), rolloff_rate=0.3, eb_no=conv_eb_no
+    )
+    assert np.isclose(conv_mod.bit_error_rate, mod.bit_error_rate, rtol=0.01)
+
+
+def test_eb_no_to_ber():
+    mod = MPhaseShiftKeying(
+        levels=8,
+        bandwidth=MHz_to_GHz(50),
+        rolloff_rate=0.3,
+        eb_no=decibel_to_watt(22.5),
+    )
+    conv_eb_no = mod.eb_no
+    conv_mod = MPhaseShiftKeying(
+        levels=8,
+        eb_no=conv_eb_no,
+        bandwidth=MHz_to_GHz(50),
+        rolloff_rate=0.3,
+    )
+
+    assert np.isclose(conv_mod.eb_no, mod.eb_no, rtol=0.01)
 
 
 def test_energy_per_bit():
@@ -67,10 +108,10 @@ def test_fm_frequency_deviation_1():
 
 
 def test_roll_off_factor():
-    bandwidth = 1 * 0.001  # MHz to GHz
+    bandwidth = MHz_to_GHz(1)  # MHz to GHz
     rolloff_rate = 0.5
     mod = BinaryPhaseShiftKeying(bandwidth=bandwidth, rolloff_rate=rolloff_rate)
-    assert np.isclose(mod.symbol_rate, 666.7 * 1e-6, rtol=0.01)
+    assert np.isclose(bit_to_mbit(mod.symbol_rate), 666.7 * 1e-3, rtol=0.01)
 
 
 def test_bandwidth():
@@ -114,16 +155,16 @@ def test_bandwidth_2():
 
 
 def test_max_bit_rate():
-    bandwidth = 36 * 0.001
+    bandwidth = MHz_to_GHz(36)
     rolloff_rate = 0.4
     bmod = BinaryPhaseShiftKeying(bandwidth=bandwidth, rolloff_rate=rolloff_rate)
-    assert np.isclose(bmod.bit_rate, 25.7 * 1e-3, rtol=0.01)
+    assert np.isclose(bit_to_mbit(bmod.bit_rate), 25.7, rtol=0.01)
     qmod = QuadraturePhaseShiftKeying(bandwidth=bandwidth, rolloff_rate=rolloff_rate)
-    assert np.isclose(qmod.bit_rate, 51.4 * 1e-3, rtol=0.01)
+    assert np.isclose(bit_to_mbit(qmod.bit_rate), 51.4, rtol=0.01)
 
 
 def test_max_bit_rate_1():
-    bandwidth = 45 * 1e-3
+    bandwidth = MHz_to_GHz(45)
     bits_per_symbol = 2
     levels = 2**bits_per_symbol
     rolloff_factor = 0.4
@@ -131,7 +172,7 @@ def test_max_bit_rate_1():
     mod = MPhaseShiftKeying(
         levels=levels, bandwidth=bandwidth, rolloff_rate=rolloff_factor
     )
-    assert np.isclose(mod.bit_rate * 1000, 64.3, rtol=0.01)
+    assert np.isclose(bit_to_mbit(mod.bit_rate), 64.3, rtol=0.01)
 
 
 def test_max_bit_rate_2():
@@ -143,7 +184,7 @@ def test_max_bit_rate_2():
     mod = MPhaseShiftKeying(
         levels=levels, bandwidth=bandwidth, rolloff_rate=rolloff_factor
     )
-    assert np.isclose(mod.bit_rate * 1000, 80.8, rtol=0.01)
+    assert np.isclose(bit_to_mbit(mod.bit_rate), 80.8, rtol=0.01)
 
 
 def test_max_bit_rate_3():
@@ -155,7 +196,7 @@ def test_max_bit_rate_3():
     mod = MPhaseShiftKeying(
         levels=levels, bandwidth=bandwidth, rolloff_rate=rolloff_factor
     )
-    assert np.isclose(mod.bit_rate * 1000, 107.7, rtol=0.01)
+    assert np.isclose(bit_to_mbit(mod.bit_rate), 107.7, rtol=0.01)
 
 
 def test_eb_no():

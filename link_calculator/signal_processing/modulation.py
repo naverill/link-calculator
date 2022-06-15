@@ -388,7 +388,6 @@ class MPhaseShiftKeying(Modulation):
     @property
     def spectral_efficiency(self) -> float:
         if self._spectral_efficiency is None:
-            print(self.bit_rate, GHz_to_Hz(self.bandwidth))
             self._spectral_efficiency = self.bit_rate / GHz_to_Hz(self.bandwidth)
         return self._spectral_efficiency
 

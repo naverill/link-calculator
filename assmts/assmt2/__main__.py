@@ -353,99 +353,139 @@ def q3():
     """
     TODO
         - finalise parameters
-        - select ground location for sat and gs
-            - antenna loss
-            - atmospheric loss
             - bit error rate
             - coding
-        - calculate distance at high altitude
         - add signal to noise to output
-        - create link budget for low and high operations
     """
-    triton_transmit_mod = MPhaseShiftKeying(
-        levels=2,  # TODO change,
-        bandwidth=MHz_to_GHz(50),
-        bit_rate=mbit_to_bit(400),
-        spectral_efficiency=4,  # bit/s/Hz
-        bit_error_rate=1e-9,  # TODO change this
-    )
-    triton_transmit_amp = Amplifier(power=35)
-    triton_transmit = Antenna(
-        eirp=decibel_to_watt(55.5),
-        cross_sect_area=inches_to_m(24.2) * inches_to_m(22.4),
-        amplifier=triton_transmit_amp,
-        frequency=29,
-        modulation=triton_transmit_mod,
-        loss=1,  # TODO change this
-    )
-    triton_receive_mod = MPhaseShiftKeying(
-        levels=2,  # TODO change,
-        bandwidth=MHz_to_GHz(100),
-        bit_rate=mbit_to_bit(200),
-        spectral_efficiency=4,  # bit/s/Hz
-        bit_error_rate=1e-9,  # TODO change this
-    )
-    triton_receive_amp = Amplifier(power=35)
-    triton_receive = Antenna(
-        eirp=decibel_to_watt(55.5),
-        cross_sect_area=inches_to_m(30.6) * inches_to_m(32.4),
-        amplifier=triton_receive_amp,
-        frequency=19,
-        modulation=triton_receive_mod,
-        loss=1,  # TODO change this
-    )
-    triton = GroundStation(
-        name="MQ-4C Triton",
-        transmit=triton_transmit,
-        receive=triton_receive,
-    )
-    print(triton.summary())
+    locs = {
+        "LowAltitudeOperations": GeodeticCoordinate(
+            latitude=-3.74603, longitude=124.401, altitude=0
+        ),  # 15000km outside of RAAF Base Tindal
+        "HighAltitudeOperations": GeodeticCoordinate(
+            latitude=-3.74603, longitude=124.401, altitude=16
+        ),
+    }
 
-    kuiper_transmit_mod = MPhaseShiftKeying(
-        levels=2,  # TODO
-        bandwidth=MHz_to_GHz(100),
-        bit_error_rate=1e-9,  # TODO change this
-        bit_rate=mbit_to_bit(200),
-    )
-    kuiper_transmit_amp = Amplifier(
-        power=38.7,  # TODO
-        loss=None,  # TODO
-    )
-    kuiper_transmit = Antenna(
-        cross_sect_area=pi * 1.6**2,
-        eirp=decibel_to_watt(35.8),
-        modulation=kuiper_transmit_mod,
-        gain=decibel_to_watt(37),
-        frequency=19,
-        amplifier=kuiper_transmit_amp,
-        loss=1,  # TODO
-    )
-    kuiper_receive_mod = MPhaseShiftKeying(
-        levels=2,  # TODO
-        bit_rate=mbit_to_bit(400),
-        bit_error_rate=1e-9,  # TODO change this
-        bandwidth=MHz_to_GHz(50),
-    )
-    kuiper_receive_amp = Amplifier(
-        power=None,  # TODO
-        loss=1,  # TODO
-    )
-    kuiper_receive = Antenna(
-        cross_sect_area=pi * 1.6**2,
-        eirp=decibel_to_watt(46.0),
-        gain=decibel_to_watt(37),
-        frequency=29,
-        modulation=kuiper_receive_mod,
-        amplifier=kuiper_receive_amp,
-    )
-    orbit = Orbit(orbital_radius=560 + EARTH_RADIUS)
-    kuiper = Satellite(
-        name="KuiperSat-1",
-        orbit=orbit,
-        transmit=kuiper_transmit,
-        receive=kuiper_receive,
-    )
-    print(kuiper.summary())
+    for scenario, uav_loc in locs.items():
+        code = ConvolutionalCode(coding_rate=3 / 4, coding_gain=decibel_to_watt(6.5))
+        triton_transmit_mod = MPhaseShiftKeying(
+            levels=2,  # TODO change,
+            bandwidth=MHz_to_GHz(50),
+            bit_rate=mbit_to_bit(400),
+            spectral_efficiency=4,  # bit/s/Hz
+            bit_error_rate=1e-9,  # TODO change this
+            code=code,
+            rolloff_rate=0.4,
+        )
+        triton_transmit_amp = Amplifier(power=35, loss=decibel_to_watt(-1))
+        triton_transmit = Antenna(
+            eirp=decibel_to_watt(55.5),
+            cross_sect_area=inches_to_m(24.2) * inches_to_m(22.4),
+            amplifier=triton_transmit_amp,
+            frequency=29,
+            modulation=triton_transmit_mod,
+            loss=decibel_to_watt(-6),
+        )
+        triton_receive_mod = MPhaseShiftKeying(
+            levels=2,  # TODO change,
+            bandwidth=MHz_to_GHz(100),
+            bit_rate=mbit_to_bit(200),
+            spectral_efficiency=4,  # bit/s/Hz
+            bit_error_rate=1e-9,  # TODO change this
+            code=code,
+            rolloff_rate=0.4,
+        )
+        triton_receive_amp = Amplifier(power=35, loss=decibel_to_watt(-1))
+        triton_receive = Antenna(
+            eirp=decibel_to_watt(55.5),
+            cross_sect_area=inches_to_m(30.6) * inches_to_m(32.4),
+            amplifier=triton_receive_amp,
+            frequency=19,
+            modulation=triton_receive_mod,
+            loss=decibel_to_watt(-6),
+        )
+        triton = GroundStation(
+            name="MQ-4C Triton",
+            transmit=triton_transmit,
+            receive=triton_receive,
+            ground_coordinate=uav_loc,
+        )
+
+        ss_point = GeodeticCoordinate(latitude=-3.74603, longitude=124.401, altitude=16)
+        kuiper_transmit_mod = MPhaseShiftKeying(
+            levels=2,  # TODO
+            bandwidth=MHz_to_GHz(100),
+            bit_error_rate=1e-9,  # TODO change this
+            bit_rate=mbit_to_bit(200),
+            code=code,
+            rolloff_rate=0.4,
+        )
+        kuiper_transmit_amp = Amplifier(
+            power=38.7,
+            loss=decibel_to_watt(-1),
+        )
+        kuiper_transmit = Antenna(
+            cross_sect_area=pi * 1.6**2,
+            eirp=decibel_to_watt(35.8),
+            modulation=kuiper_transmit_mod,
+            gain=decibel_to_watt(37),
+            frequency=19,
+            amplifier=kuiper_transmit_amp,
+            loss=decibel_to_watt(-6),
+        )
+        kuiper_receive_mod = MPhaseShiftKeying(
+            levels=2,  # TODO
+            bit_rate=mbit_to_bit(400),
+            bit_error_rate=1e-9,  # TODO change this
+            bandwidth=MHz_to_GHz(50),
+            code=code,
+            rolloff_rate=0.4,
+        )
+        kuiper_receive_amp = Amplifier(
+            power=38.7,
+            loss=decibel_to_watt(-1),
+        )
+        kuiper_receive = Antenna(
+            cross_sect_area=pi * 1.6**2,
+            eirp=decibel_to_watt(46.0),
+            gain=decibel_to_watt(37),
+            loss=decibel_to_watt(-6),
+            frequency=29,
+            modulation=kuiper_receive_mod,
+            amplifier=kuiper_receive_amp,
+        )
+        orbit = Orbit(orbital_radius=630 + EARTH_RADIUS)
+        kuiper = Satellite(
+            name="KuiperSat-1",
+            orbit=orbit,
+            transmit=kuiper_transmit,
+            receive=kuiper_receive,
+            ground_coordinate=ss_point,
+        )
+
+        uplink = Link(
+            transmitter=triton,
+            receiver=kuiper,
+            atmospheric_loss=decibel_to_watt(-84.0),
+            slant_range=Link.distance(kuiper, triton)
+            - triton.ground_coordinate.altitude,
+            eb_no=decibel_to_watt(10.5),
+        )
+        downlink = Link(
+            transmitter=kuiper,
+            receiver=triton,
+            atmospheric_loss=decibel_to_watt(-84.0),
+            slant_range=Link.distance(kuiper, triton)
+            - triton.ground_coordinate.altitude,
+            eb_no=decibel_to_watt(10.5),
+        )
+        link_budget = LinkBudget(uplink=uplink, downlink=downlink)
+        link_summary = link_budget.summary()
+        link_summary.index = link_summary.index + " (" + link_summary.pop("unit") + ")"
+        link_summary.to_csv(
+            f"{ABS_PATH}/output/Q3Tritan{scenario}.csv", float_format="{:,.3f}".format
+        )
+        print(link_summary)
 
 
 # q1()

@@ -1,11 +1,11 @@
 ,Overall,Uplink,Downlink
-Eb/No Ratio (dB),13.888,13.917,35.656
-Carrier Power Density (dBW),,-155.405,-163.125
+Eb/No Ratio (dB),-50.186,-50.183,-17.298
+Carrier Power Density (dBW),,-219.505,-216.079
 Free-Space Path Loss (dB),,-213.505,-210.079
 Atmospheric Loss (dB),,-6.000,-6.000
-C/No Ratio (dB),,94.539,116.277
+C/No Ratio (dB),,30.438,63.323
 Bandwidth to Bit Rate Ratio (dB),,-3.632,-3.632
-C/N Ratio (dB),,17.549,39.288
+C/N Ratio (dB),,-46.552,-13.667
 Central Angle (°),,33.749,35.249
 Slant Range (km),,"37,030.624","37,138.171"
 Transmitter Noise Figure (),,2.800,2.500
@@ -15,12 +15,12 @@ Transmitter Combined Gain (dB),,45.629,47.874
 Transmitter G/Te Ratio (dBK-1),,29.097,21.342
 Transmitter Diameter (m),,1.200,1.000
 Transmitter Gain (dB),,49.080,44.423
-Transmitter Half Beamwidth (dBW),,64.100,52.954
+Transmitter Half Beamwidth (dBW),,0.000,0.000
 Transmitter Frequency (GHz),,30.500,20.500
 Transmitter Wavelength (m),,0.010,0.015
 Transmitter Efficiency (%),,0.550,0.600
 Transmitter Feeder Loss (dB),,-1.000,-0.500
-Transmitter EIRP (dBW),,64.100,52.954
+Transmitter EIRP (dBW),,0.000,0.000
 Transmitter Amplifier Power (dBW),,16.021,9.031
 Transmitter Amplifier Gain (dB),,0.000,0.000
 Transmitter Amplifier Back-Off Loss (dB),,0.000,0.000
@@ -29,9 +29,9 @@ Transmitter Modulation Maximum Bit Rate (mbps),,115.385,115.385
 Transmitter Modulation Data Rate (mbps),,115.385,115.385
 Transmitter Modulation Bandwidth (GHz),,0.050,0.050
 Transmitter Modulation Spectral Efficiency (bits/s/GHz),,2.308,2.308
-Transmitter Modulation C/N Ratio (bits/s/GHz),,39.288,39.288
-Transmitter Modulation Eb/No Ratio (dB),,35.656,35.656
-Transmitter Modulation Bit Error Rate (),,0.000,0.000
+Transmitter Modulation C/N Ratio (bits/s/GHz),,-13.667,-13.667
+Transmitter Modulation Eb/No Ratio (dB),,-17.298,-17.298
+Transmitter Modulation Bit Error Rate (),,0.299,0.299
 Transmitter Modulation Roll-Off Factor (),,0.300,0.300
 Transmitter Earth Station Latitude (°),,-19.080,
 Transmitter Earth Station Longitude (°),,178.180,
@@ -43,12 +43,12 @@ Receiver Combined Gain (dB),,47.874,65.195
 Receiver G/Te Ratio (dBK-1),,21.342,50.801
 Receiver Diameter (m),,1.000,10.500
 Receiver Gain (dB),,47.874,65.195
-Receiver Half Beamwidth (dBW),,56.405,89.684
+Receiver Half Beamwidth (dBW),,0.000,0.000
 Receiver Frequency (GHz),,30.500,20.500
 Receiver Wavelength (m),,0.010,0.015
 Receiver Efficiency (%),,0.600,0.650
 Receiver Feeder Loss (dB),,-0.500,-2.500
-Receiver EIRP (dBW),,56.405,89.684
+Receiver EIRP (dBW),,0.000,0.000
 Receiver Amplifier Power (dBW),,9.031,26.990
 Receiver Amplifier Gain (dB),,0.000,0.000
 Receiver Amplifier Back-Off Loss (dB),,0.000,0.000
@@ -57,9 +57,9 @@ Receiver Modulation Maximum Bit Rate (mbps),,115.385,115.385
 Receiver Modulation Data Rate (mbps),,115.385,115.385
 Receiver Modulation Bandwidth (GHz),,0.050,0.050
 Receiver Modulation Spectral Efficiency (bits/s/GHz),,2.308,2.308
-Receiver Modulation C/N Ratio (bits/s/GHz),,39.288,39.288
-Receiver Modulation Eb/No Ratio (dB),,35.656,35.656
-Receiver Modulation Bit Error Rate (),,0.000,0.000
+Receiver Modulation C/N Ratio (bits/s/GHz),,-13.667,-13.667
+Receiver Modulation Eb/No Ratio (dB),,-17.298,-17.298
+Receiver Modulation Bit Error Rate (),,0.299,0.299
 Receiver Modulation Roll-Off Factor (),,0.300,0.300
 Receiver Sub-Satellite Latitude (°),,0.000,
 Receiver Sub-Satellite Longitude (°),,149.800,

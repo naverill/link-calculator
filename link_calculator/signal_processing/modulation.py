@@ -249,6 +249,7 @@ class MPhaseShiftKeying(Modulation):
             bit_rate (float, bits/s): number of bits transmitted per second
             bit_period (float, s/bit): number of seconds to transmit a bit
             carrier_power (float, W): total transmit power of signal
+            spectral_efficiency (float bit/s/Hz):
         """
         self._levels = levels
         self._bandwidth = bandwidth
@@ -387,9 +388,8 @@ class MPhaseShiftKeying(Modulation):
     @property
     def spectral_efficiency(self) -> float:
         if self._spectral_efficiency is None:
-            self._spectral_efficiency = log2(self.levels) / (
-                self.bandwidth * self.symbol_period
-            )
+            print(self.bit_rate, GHz_to_Hz(self.bandwidth))
+            self._spectral_efficiency = self.bit_rate / GHz_to_Hz(self.bandwidth)
         return self._spectral_efficiency
 
     @property
@@ -527,8 +527,8 @@ class MPhaseShiftKeying(Modulation):
                 {"name": "Bandwidth", "unit": "GHz", "value": self.bandwidth},
                 {
                     "name": "Spectral Efficiency",
-                    "unit": "bits/s/GHz",
-                    "value": Hz_to_GHz(self.spectral_efficiency),
+                    "unit": "bits/s/Hz",
+                    "value": self.spectral_efficiency,
                 },
                 {
                     "name": "C/N Ratio",

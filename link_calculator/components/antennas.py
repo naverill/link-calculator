@@ -98,6 +98,7 @@ class Antenna:
         self,
         gain: float = None,
         loss: float = 1,
+        eirp: float = 1,
         frequency: float = None,
         wavelength: float = None,
         effective_aperture: float = None,
@@ -110,8 +111,10 @@ class Antenna:
         signal_to_noise: float = None,
         carrier_power: float = None,
         modulation: Modulation = None,
+        combined_loss: float = None,
         amplifier: Amplifier = None,
         gain_to_noise_temperature=None,
+        power_density: float = None,
     ):
         """
         Instantiate an Antenna object
@@ -137,6 +140,7 @@ class Antenna:
         self._amplifier = amplifier
         self._gain = gain
         self._loss = loss
+        self._eirp = eirp
         self._efficiency = efficiency
         self._half_beamwidth = half_beamwidth
         self._cross_sect_area = cross_sect_area
@@ -150,6 +154,8 @@ class Antenna:
         self._signal_to_noise = signal_to_noise
         self._carrier_power = carrier_power
         self._gain_to_noise_temperature = gain_to_noise_temperature
+        self._combined_loss = combined_loss
+        self._power_density = power_density
 
     def power_density_eirp(self, distance: float, atmospheric_loss: float = 1) -> float:
         """
@@ -168,7 +174,7 @@ class Antenna:
         distance = distance * 1000  # convert to m
         return self.eirp / (4 * np.pi * distance**2) * atmospheric_loss
 
-    def power_density(self, distance: float) -> float:
+    def power_density_distance(self, distance: float) -> float:
         """
         Calculate the power density of the wavefront
 
@@ -184,10 +190,11 @@ class Antenna:
         distance = distance * 1000  # convert to m
         return (self.amplifier.power * self.gain) / (4 * np.pi * distance**2)
 
+    @property
     def combined_loss(self) -> float:
         if self._combined_loss is None:
             if self.amplifier is not None:
-                self._combined_loss = self.loss * self.loss
+                self._combined_loss = self.loss * self.amplifier.loss
             elif self.eirp is not None:
                 self._combined_loss = self.eirp / (self.amplifier.power * self.gain)
             else:
@@ -206,7 +213,9 @@ class Antenna:
                 from an isotropic antenna to achieve the same power incident at the
                 receiver  as that of a transmitter with a specific antenna gain
         """
-        return self.amplifier.power * self.combined_loss * self.gain
+        if self._eirp is None:
+            self._eirp = self.amplifier.power * self.combined_loss * self.gain
+        return self._eirp
 
     @property
     def half_beamwidth(self) -> float:
@@ -290,7 +299,9 @@ class Antenna:
                 at the same distance in the direction of the receiving antenna
         """
         if self._gain is None:
-            if self.efficiency is not None:
+            if self.eirp is not None:
+                self._gain = self.eirp / (self.amplifier.power * self.combined_loss)
+            elif self.efficiency is not None:
                 self._gain = (
                     self.efficiency
                     * 4
@@ -298,13 +309,19 @@ class Antenna:
                     * self.cross_sect_area
                     / self.wavelength**2
                 )
-            elif self.eirp is not None:
-                self._gain = self.eirp / (self.power * self.combined_loss)
         return self._gain
 
     @property
     def carrier_power(self) -> float:
         return self._carrier_power
+
+    @property
+    def power_density(self) -> float:
+        return self._power_density
+
+    @power_density.setter
+    def power_density(self, value):
+        self._power_density = value
 
     @property
     def frequency(self):
@@ -332,6 +349,11 @@ class Antenna:
         """
         TODO
         """
+        if self._efficiency is None:
+            if self.gain is not None:
+                self._efficiency = self.gain / (
+                    4 * np.pi * self.cross_sect_area / self.wavelength**2
+                )
         return self._efficiency
 
     @property
@@ -357,6 +379,12 @@ class Antenna:
             loss (float, ): coupling loss between transmitter and antenna
                 in the range [0, 1]
         """
+        if self._loss is None:
+            if self.combined_loss is not None:
+                if self.amplifier is not None:
+                    self._loss = self.combined_loss / self.amplifier.loss
+                else:
+                    self._loss = self.combined_loss
         return self._loss
 
     @property
@@ -415,9 +443,35 @@ class Antenna:
     @property
     def signal_to_noise(self):
         """
+        calculate S/N knowing G/T, wavelength, bandwidth and the field
+        strength of the signal (Duffy 2007).
+
+        Signal/Noise=S(λ**2/4π)(G/T)(1/kbB) where:
+
+        S is power flux density;
+        λ is wavelength;
+        kb is Boltzmann’s constant; and
+        B is receiver quivalent noise bandwidth
+        """
+        if self._signal_to_noise is None:
+            if (
+                self.gain_to_noise_temperature is not None
+                and self.power_density is not None
+            ):
+                self._signal_to_noise = (
+                    self.power_density
+                    * (self.wavelength**2 / (4 * pi))
+                    * self.gain_to_noise_temperature
+                    * (1 / (BOLTZMANN_CONSTANT * self.modulation.bandwidth))
+                )
+        return self._signal_to_noise
+
+    @property
+    def gain_to_noise_temperature(self):
+        """
         TODO
         """
-        return self._signal_to_noise
+        return self._gain_to_noise_temperature
 
     def summary(self) -> pd.DataFrame:
         summary = pd.DataFrame.from_records(
@@ -451,6 +505,11 @@ class Antenna:
                     "name": "EIRP",
                     "unit": "dBW",
                     "value": watt_to_decibel(self.eirp),
+                },
+                {
+                    "name": "S/N",
+                    "unit": "dBW",
+                    "value": watt_to_decibel(self.signal_to_noise),
                 },
             ]
         )
@@ -592,6 +651,7 @@ class ParabolicAntenna(Antenna):
         carrier_to_noise: float = None,
         signal_to_noise: float = None,
         modulation: Modulation = None,
+        combined_loss: float = None,
     ):
         self._beamwidth_scale_factor = beamwidth_scale_factor
         super().__init__(
@@ -607,6 +667,7 @@ class ParabolicAntenna(Antenna):
             modulation=modulation,
             carrier_to_noise=carrier_to_noise,
             signal_to_noise=signal_to_noise,
+            combined_loss=combined_loss,
         )
 
     @property

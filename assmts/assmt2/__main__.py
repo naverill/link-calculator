@@ -1,16 +1,17 @@
 import pathlib
-from math import inf
+from math import inf, pi
 
 import numpy as np
 import pandas as pd
 
 from link_calculator.components.antennas import Amplifier, Antenna, ParabolicAntenna
 from link_calculator.components.communicators import GroundStation, Satellite
-from link_calculator.constants import BOLTZMANN_CONSTANT
+from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_RADIUS
 from link_calculator.link_budget import Link, LinkBudget
 from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
 from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
 from link_calculator.signal_processing.conversions import (
+    Hz_to_GHz,
     MHz_to_GHz,
     MHz_to_Hz,
     mbit_to_bit,
@@ -298,7 +299,6 @@ def q2():
         summary.to_csv(
             f"{ABS_PATH}/output/Q2{name}Modulation.csv", float_format="{:,.3f}".format
         )
-        summary.index = summary.index + " (" + summary.pop("unit") + ")"
 
     best_code = min(
         results,
@@ -345,32 +345,54 @@ def q2():
     )
 
 
+def inches_to_m(value) -> float:
+    return 0.0254 * value
+
+
 def q3():
-    triton_transmit_bandwidth = 31 - 27.5
+    """
+    TODO
+        - finalise parameters
+        - select ground location for sat and gs
+            - antenna loss
+            - atmospheric loss
+            - bit error rate
+            - coding
+        - calculate distance at high altitude
+        - add signal to noise to output
+        - create link budget for low and high operations
+    """
     triton_transmit_mod = MPhaseShiftKeying(
-        levels=1,  # TODO change,
-        bandwidth=triton_transmit_bandwidth,
-        data_rate=mbit_to_bit(800),
-        spectral_efficiency=4,  # 4 bits/Hz (check units)
+        levels=2,  # TODO change,
+        bandwidth=MHz_to_GHz(50),
+        bit_rate=mbit_to_bit(400),
+        spectral_efficiency=4,  # bit/s/Hz
+        bit_error_rate=1e-9,  # TODO change this
     )
     triton_transmit_amp = Amplifier(power=35)
     triton_transmit = Antenna(
         eirp=decibel_to_watt(55.5),
+        cross_sect_area=inches_to_m(24.2) * inches_to_m(22.4),
         amplifier=triton_transmit_amp,
+        frequency=29,
         modulation=triton_transmit_mod,
+        loss=1,  # TODO change this
     )
-    triton_receive_bandwidth = 31 - 27.5
     triton_receive_mod = MPhaseShiftKeying(
-        levels=1,  # TODO change,
-        bandwidth=triton_receive_bandwidth,
-        data_rate=mbit_to_bit(800),
-        spectral_efficiency=4,  # 4 bits/Hz (check units)
+        levels=2,  # TODO change,
+        bandwidth=MHz_to_GHz(100),
+        bit_rate=mbit_to_bit(200),
+        spectral_efficiency=4,  # bit/s/Hz
+        bit_error_rate=1e-9,  # TODO change this
     )
     triton_receive_amp = Amplifier(power=35)
     triton_receive = Antenna(
         eirp=decibel_to_watt(55.5),
+        cross_sect_area=inches_to_m(30.6) * inches_to_m(32.4),
         amplifier=triton_receive_amp,
+        frequency=19,
         modulation=triton_receive_mod,
+        loss=1,  # TODO change this
     )
     triton = GroundStation(
         name="MQ-4C Triton",
@@ -378,9 +400,54 @@ def q3():
         receive=triton_receive,
     )
     print(triton.summary())
-    pass
+
+    kuiper_transmit_mod = MPhaseShiftKeying(
+        levels=2,  # TODO
+        bandwidth=MHz_to_GHz(100),
+        bit_error_rate=1e-9,  # TODO change this
+        bit_rate=mbit_to_bit(200),
+    )
+    kuiper_transmit_amp = Amplifier(
+        power=38.7,  # TODO
+        loss=None,  # TODO
+    )
+    kuiper_transmit = Antenna(
+        cross_sect_area=pi * 1.6**2,
+        eirp=decibel_to_watt(35.8),
+        modulation=kuiper_transmit_mod,
+        gain=decibel_to_watt(37),
+        frequency=19,
+        amplifier=kuiper_transmit_amp,
+        loss=1,  # TODO
+    )
+    kuiper_receive_mod = MPhaseShiftKeying(
+        levels=2,  # TODO
+        bit_rate=mbit_to_bit(400),
+        bit_error_rate=1e-9,  # TODO change this
+        bandwidth=MHz_to_GHz(50),
+    )
+    kuiper_receive_amp = Amplifier(
+        power=None,  # TODO
+        loss=1,  # TODO
+    )
+    kuiper_receive = Antenna(
+        cross_sect_area=pi * 1.6**2,
+        eirp=decibel_to_watt(46.0),
+        gain=decibel_to_watt(37),
+        frequency=29,
+        modulation=kuiper_receive_mod,
+        amplifier=kuiper_receive_amp,
+    )
+    orbit = Orbit(orbital_radius=560 + EARTH_RADIUS)
+    kuiper = Satellite(
+        name="KuiperSat-1",
+        orbit=orbit,
+        transmit=kuiper_transmit,
+        receive=kuiper_receive,
+    )
+    print(kuiper.summary())
 
 
-q1()
-q2()
+# q1()
+# q2()
 q3()

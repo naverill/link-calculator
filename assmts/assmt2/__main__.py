@@ -354,7 +354,6 @@ def q3():
     TODO
         - finalise parameters
             - bit error rate
-            - coding
         - add signal to noise to output
     """
     locs = {
@@ -362,18 +361,18 @@ def q3():
             latitude=-3.74603, longitude=124.401, altitude=0
         ),  # 15000km outside of RAAF Base Tindal
         "HighAltitudeOperations": GeodeticCoordinate(
-            latitude=-3.74603, longitude=124.401, altitude=16
+            latitude=-3.74603, longitude=124.401, altitude=17
         ),
     }
 
     for scenario, uav_loc in locs.items():
         code = ConvolutionalCode(coding_rate=3 / 4, coding_gain=decibel_to_watt(6.5))
         triton_transmit_mod = MPhaseShiftKeying(
-            levels=2,  # TODO change,
+            levels=4,  # TODO change,
             bandwidth=MHz_to_GHz(50),
             bit_rate=mbit_to_bit(400),
             spectral_efficiency=4,  # bit/s/Hz
-            bit_error_rate=1e-9,  # TODO change this
+            bit_error_rate=1e-6,
             code=code,
             rolloff_rate=0.4,
         )
@@ -387,11 +386,11 @@ def q3():
             loss=decibel_to_watt(-6),
         )
         triton_receive_mod = MPhaseShiftKeying(
-            levels=2,  # TODO change,
+            levels=4,  # TODO change,
             bandwidth=MHz_to_GHz(100),
             bit_rate=mbit_to_bit(200),
             spectral_efficiency=4,  # bit/s/Hz
-            bit_error_rate=1e-9,  # TODO change this
+            bit_error_rate=1e-6,
             code=code,
             rolloff_rate=0.4,
         )
@@ -413,9 +412,9 @@ def q3():
 
         ss_point = GeodeticCoordinate(latitude=-3.74603, longitude=124.401, altitude=16)
         kuiper_transmit_mod = MPhaseShiftKeying(
-            levels=2,  # TODO
+            levels=4,  # TODO
             bandwidth=MHz_to_GHz(100),
-            bit_error_rate=1e-9,  # TODO change this
+            bit_error_rate=1e-6,  # TODO change this
             bit_rate=mbit_to_bit(200),
             code=code,
             rolloff_rate=0.4,
@@ -434,9 +433,9 @@ def q3():
             loss=decibel_to_watt(-6),
         )
         kuiper_receive_mod = MPhaseShiftKeying(
-            levels=2,  # TODO
+            levels=4,  # TODO
             bit_rate=mbit_to_bit(400),
-            bit_error_rate=1e-9,  # TODO change this
+            bit_error_rate=1e-6,  # TODO change this
             bandwidth=MHz_to_GHz(50),
             code=code,
             rolloff_rate=0.4,

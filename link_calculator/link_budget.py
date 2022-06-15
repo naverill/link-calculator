@@ -24,6 +24,8 @@ class Link:
         transmitter_eirp: float = None,
         receiver_carrier_power: float = None,
         noise_temperature: float = None,
+        noise_power: float = None,
+        noise_density: float = None,
         carrier_to_noise_density: float = None,
         carrier_to_noise: float = None,
         bandwidth_to_bit_rate: float = None,
@@ -51,6 +53,10 @@ class Link:
         self._carrier_to_noise = carrier_to_noise
         self._bandwidth_to_bit_rate = bandwidth_to_bit_rate
         self._eb_no = eb_no
+        self._noise_power = noise_power
+        self._noise_density = noise_density
+        self.propagate_calculations()
+
         if self._transmitter.transmit.modulation is not None:
             self._transmitter.transmit.modulation.eb_no = self.eb_no
         if self._receiver.receive is not None:
@@ -87,23 +93,26 @@ class Link:
     @property
     def eb_no(self) -> float:
         if self._eb_no is None:
-            if self.carrier_to_noise_density is not None:
+            if self._carrier_to_noise_density is not None:
                 self._eb_no = (
                     self.carrier_to_noise_density
                     / self.transmitter.transmit.modulation.bit_rate
                 )
-            elif self.carrier_to_noise is not None:
+            elif self._carrier_to_noise is not None:
                 self._eb_no = (
                     self.carrier_to_noise
                     * GHz_to_Hz(self.transmitter.transmit.modulation.bandwidth)
                     * self.transmitter.transmit.modulation.bit_rate
                 )
+            if self.transmitter.transmit.modulation.eb_no is not None:
+                self._eb_no = self.transmitter.transmit.modulation.eb_no
         return self._eb_no
 
     @property
     def carrier_to_noise(self) -> float:
         if self._carrier_to_noise is None:
-            self._carrier_to_noise = self.eb_no / self.bandwidth_to_bit_rate
+            if self._eb_no is not None and self._bandwidth_to_bit_rate is not None:
+                self._carrier_to_noise = self.eb_no / self.bandwidth_to_bit_rate
         return self._carrier_to_noise
 
     @property
@@ -176,9 +185,10 @@ class Link:
                 added by the amplifier
         """
         if self._noise_power is None:
-            self._noise_power = self.noise_density * GHz_to_Hz(
-                self.transmitter.transmit.modulation.bandwidth
-            )
+            if self._noise_density is not None:
+                self._noise_power = self.noise_density * GHz_to_Hz(
+                    self.transmitter.transmit.modulation.bandwidth
+                )
         return self._noise_power
 
     @property
@@ -191,8 +201,9 @@ class Link:
             noise_density (float, W/Hz): the total noise power, normalised to a 1-Hz bandwidth
         """
         if self._noise_density is None:
-            self._noise_density = BOLTZMANN_CONSTANT * self.noise_temperature
-        return self.noise_density
+            if self._noise_temperature is not None:
+                self._noise_density = BOLTZMANN_CONSTANT * self.noise_temperature
+        return self._noise_density
 
     @property
     def noise_temperature(self) -> float:
@@ -203,10 +214,11 @@ class Link:
             noise_temperature (float, K): ambient temperature of the environment
         """
         if self._noise_temperature is None:
-            self._noise_temperature = (
-                self.noise_power
-                / GHz_to_Hz(self.transmitter.transmit.modulation.bandwidth)
-            ) / BOLTZMANN_CONSTANT
+            if self._noise_power is not None:
+                self._noise_temperature = (
+                    self.noise_power
+                    / GHz_to_Hz(self.transmitter.transmit.modulation.bandwidth)
+                ) / BOLTZMANN_CONSTANT
         return self._noise_temperature
 
     @property
@@ -272,6 +284,12 @@ class Link:
         summary.set_index("name", inplace=True)
         summary = pd.concat([summary, transmitter, receiver])
         return summary
+
+    def propagate_calculations(self) -> float:
+        for _ in range(3):
+            for var in type(self).__dict__:
+                if not callable(var):
+                    getattr(self, var)
 
 
 class LinkBudget:

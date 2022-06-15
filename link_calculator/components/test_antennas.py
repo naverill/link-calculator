@@ -68,7 +68,7 @@ def test_received_power():
 
     amp = Amplifier(power=transmit_power)
     ant = Antenna(amplifier=amp, gain=transmit_gain)
-    power_dens = ant.power_density(sat_altitude)
+    power_dens = ant.power_density_distance(sat_altitude)
     assert isclose(power_dens, 2.49e-14, rel_tol=0.1)
 
     receive_power = power_dens * effective_app

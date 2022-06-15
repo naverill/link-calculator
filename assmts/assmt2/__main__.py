@@ -368,7 +368,7 @@ def q3():
     for scenario, uav_loc in locs.items():
         code = ConvolutionalCode(coding_rate=3 / 4, coding_gain=decibel_to_watt(6.5))
         triton_transmit_mod = MPhaseShiftKeying(
-            levels=4,  # TODO change,
+            levels=4,
             bandwidth=MHz_to_GHz(50),
             bit_rate=mbit_to_bit(400),
             spectral_efficiency=4,  # bit/s/Hz
@@ -386,11 +386,11 @@ def q3():
             loss=decibel_to_watt(-6),
         )
         triton_receive_mod = MPhaseShiftKeying(
-            levels=4,  # TODO change,
+            levels=4,
             bandwidth=MHz_to_GHz(100),
             bit_rate=mbit_to_bit(200),
             spectral_efficiency=4,  # bit/s/Hz
-            bit_error_rate=1e-6,
+            bit_error_rate=1e-5,
             code=code,
             rolloff_rate=0.4,
         )
@@ -412,9 +412,9 @@ def q3():
 
         ss_point = GeodeticCoordinate(latitude=-3.74603, longitude=124.401, altitude=16)
         kuiper_transmit_mod = MPhaseShiftKeying(
-            levels=4,  # TODO
+            levels=4,
             bandwidth=MHz_to_GHz(100),
-            bit_error_rate=1e-6,  # TODO change this
+            bit_error_rate=1e-5,
             bit_rate=mbit_to_bit(200),
             code=code,
             rolloff_rate=0.4,
@@ -433,9 +433,9 @@ def q3():
             loss=decibel_to_watt(-6),
         )
         kuiper_receive_mod = MPhaseShiftKeying(
-            levels=4,  # TODO
+            levels=4,
             bit_rate=mbit_to_bit(400),
-            bit_error_rate=1e-6,  # TODO change this
+            bit_error_rate=1e-6,
             bandwidth=MHz_to_GHz(50),
             code=code,
             rolloff_rate=0.4,
@@ -468,7 +468,7 @@ def q3():
             atmospheric_loss=decibel_to_watt(-84.0),
             slant_range=Link.distance(kuiper, triton)
             - triton.ground_coordinate.altitude,
-            eb_no=decibel_to_watt(10.5),
+            #            eb_no=decibel_to_watt(10.5),
         )
         downlink = Link(
             transmitter=kuiper,
@@ -476,7 +476,7 @@ def q3():
             atmospheric_loss=decibel_to_watt(-84.0),
             slant_range=Link.distance(kuiper, triton)
             - triton.ground_coordinate.altitude,
-            eb_no=decibel_to_watt(10.5),
+            #           eb_no=decibel_to_watt(10.5),
         )
         link_budget = LinkBudget(uplink=uplink, downlink=downlink)
         link_summary = link_budget.summary()
@@ -487,6 +487,6 @@ def q3():
         print(link_summary)
 
 
-# q1()
-# q2()
+q1()
+q2()
 q3()

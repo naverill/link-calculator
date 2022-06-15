@@ -33,6 +33,7 @@ class Communicator:
         self._combined_gain = combined_gain
         self._gain_to_equiv_noise_temp = gain_to_equiv_noise_temp
         self._equiv_noise_temp = equiv_noise_temp
+        self.propagate_calculations()
 
     @property
     def noise_figure(self) -> float:
@@ -50,7 +51,7 @@ class Communicator:
                 self.noise_figure = (
                     self.receive.signal_to_noise / self.transmit.signal_to_noise
                 )
-            elif self.noise_temperature is not None:
+            elif self._noise_temperature is not None:
                 self._noise_figure = 1 + (
                     self.equiv_noise_temp / self.noise_temperature
                 )
@@ -76,7 +77,7 @@ class Communicator:
         TODO
         """
         if self._equiv_noise_temp is None:
-            if self.noise_temperature is not None:
+            if self._noise_temperature is not None:
                 self._equiv_noise_temp = self.noise_temperature * (
                     self.noise_figure - 1
                 )
@@ -101,11 +102,11 @@ class Communicator:
     @property
     def gain_to_equiv_noise_temp(self) -> float:
         if self._gain_to_equiv_noise_temp is None:
-            if self.equiv_noise_temp is not None:
+            if self._equiv_noise_temp is not None:
                 self._gain_to_equiv_noise_temp = (
                     self.combined_gain / self.equiv_noise_temp
                 )
-            elif self.noise_density is not None:
+            elif self._noise_density is not None:
                 self._gain_to_equiv_noise_temp = (
                     self.carrier_power * BOLTZMANN_CONSTANT
                 ) / (self.noise_density * self.receive_carrier_power)
@@ -166,6 +167,11 @@ class Communicator:
         summary.set_index("name", inplace=True)
         summary = pd.concat([summary, transmitter, receiver])
         return summary
+
+    def propagate_calculations(self) -> float:
+        for _ in range(3):
+            for var in type(self).__dict__:
+                getattr(self, var)
 
 
 class GroundStation(Communicator):
@@ -255,7 +261,9 @@ class Satellite(Communicator):
 
     @property
     def semi_major_axis(self) -> float:
-        return self.orbit.semi_major_axis
+        if self.orbit is not None:
+            return self.orbit.semi_major_axis
+        return None
 
     @property
     def orbit(self) -> float:

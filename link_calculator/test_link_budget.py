@@ -3,8 +3,9 @@ import pandas as pd
 
 from link_calculator.components.antennas import Amplifier, Antenna
 from link_calculator.components.communicators import GroundStation, Satellite
-from link_calculator.constants import BOLTZMANN_CONSTANT
+from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_RADIUS
 from link_calculator.link_budget import Link, LinkBudget
+from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
 from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
 from link_calculator.signal_processing.conversions import MHz_to_GHz, mbit_to_bit
 from link_calculator.signal_processing.modulation import MPhaseShiftKeying
@@ -31,14 +32,17 @@ def test_link_budget():
         loss=decibel_to_watt(-3),
         amplifier=gs_amp,
     )
+    point = GeodeticCoordinate(0, 0, 0)
     gs = GroundStation(
         name="gs",
         gain_to_equiv_noise_temp=decibel_to_watt(35.5),
         transmit=gs_transmit,
         receive=gs_receive,
+        ground_coordinate=point,
     )
 
     # Satellite
+    orbit = Orbit(orbital_radius=630 + EARTH_RADIUS)
     sat_amp = Amplifier(
         power=decibel_to_watt(10), loss=decibel_to_watt(-0.2), gain=1  # back-off loss
     )
@@ -58,18 +62,22 @@ def test_link_budget():
         transmit=sat_transmit,
         gain_to_equiv_noise_temp=decibel_to_watt(-5.5),
         receive=sat_receive,
+        ground_coordinate=point,
+        orbit=orbit,
     )
     uplink = Link(
         transmitter=gs,
         receiver=sat,
         atmospheric_loss=decibel_to_watt(-0.5),
         path_loss=decibel_to_watt(-206.4),  # 14 GHz
+        slant_range=Link.distance(sat, gs),
     )
     downlink = Link(
         transmitter=sat,
         receiver=gs,
         atmospheric_loss=decibel_to_watt(-0.3),
         path_loss=decibel_to_watt(-205.1),  # 12 GHz
+        slant_range=Link.distance(sat, gs),
     )
 
     budget = LinkBudget(uplink=uplink, downlink=downlink)

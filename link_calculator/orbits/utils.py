@@ -1,5 +1,6 @@
 from math import acos, atan, cos, degrees, pi, radians, sin, sqrt, tan
 
+import numpy as np
 import pandas as pd
 
 from link_calculator.constants import EARTH_MU, EARTH_RADIUS
@@ -9,6 +10,7 @@ class Orbit:
     def __init__(
         self,
         semi_major_axis: float = None,
+        semi_minor_axis: float = None,
         eccentricity: float = None,
         inclination: float = float,
         raan: float = None,
@@ -24,6 +26,7 @@ class Orbit:
             semi_major_axis (float, km): The semi-major axis of the orbit
         """
         self._semi_major_axis = semi_major_axis
+        self._semi_minor_axis = semi_minor_axis
         self._eccentricity = eccentricity
         self._inclination = inclination
         self._raan = raan
@@ -51,6 +54,10 @@ class Orbit:
         return self._semi_major_axis
 
     @property
+    def semi_minor_axis(self) -> float:
+        return self._semi_minor_axis
+
+    @property
     def orbital_radius(self) -> float:
         if self._orbital_radius is None:
             self._orbital_radius = (
@@ -59,6 +66,17 @@ class Orbit:
                 / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
             )
         return self._orbital_radius
+
+    def _isset(self, *args):
+        return not (None in args)
+
+    def eccentricity(self) -> float:
+        if self._isset([self._semi_major_axis, self._semi_minor_axis]):
+            self._eccentricity = (
+                np.sqrt(self.semi_major_axis**2, self.semi_minor_axis**2)
+                / self.semi_major_axis
+            )
+        return self._eccentricity
 
 
 class GeodeticCoordinate:

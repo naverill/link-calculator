@@ -8,7 +8,7 @@ from link_calculator.components.antennas import (
     ParabolicAntenna,
     SquareHornAntenna,
 )
-from link_calculator.propagation.conversions import (
+from link_calculator.conversions import (
     decibel_to_watt,
     frequency_to_wavelength,
     watt_to_decibel,

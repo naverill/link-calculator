@@ -9,12 +9,13 @@ from link_calculator.components.communicators import GroundStation, Satellite
 from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_RADIUS
 from link_calculator.link_budget import Link, LinkBudget
 from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
-from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
 from link_calculator.signal_processing.conversions import (
     Hz_to_GHz,
     MHz_to_GHz,
     MHz_to_Hz,
+    decibel_to_watt,
     mbit_to_bit,
+    watt_to_decibel,
 )
 from link_calculator.signal_processing.modulation import (
     ConvolutionalCode,

@@ -4,9 +4,8 @@ import pandas as pd
 
 from link_calculator.components.antennas import Amplifier, Antenna
 from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_MU, EARTH_RADIUS
+from link_calculator.conversions import GHz_to_Hz, watt_to_decibel
 from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
-from link_calculator.propagation.conversions import watt_to_decibel
-from link_calculator.signal_processing.conversions import GHz_to_Hz
 
 
 class Communicator:
@@ -47,11 +46,11 @@ class Communicator:
                 power compared to increase in signal power
         """
         if self._noise_figure is None:
-            if self.receive.signal_to_noise is not None:
+            if self._isset(self.receive.signal_to_noise):
                 self.noise_figure = (
                     self.receive.signal_to_noise / self.transmit.signal_to_noise
                 )
-            elif self._noise_temperature is not None:
+            elif self._isset(self._noise_temperature):
                 self._noise_figure = 1 + (
                     self.equiv_noise_temp / self.noise_temperature
                 )
@@ -77,7 +76,7 @@ class Communicator:
         TODO
         """
         if self._equiv_noise_temp is None:
-            if self._noise_temperature is not None:
+            if self._isset(self._noise_temperature):
                 self._equiv_noise_temp = self.noise_temperature * (
                     self.noise_figure - 1
                 )
@@ -93,7 +92,7 @@ class Communicator:
     @property
     def combined_gain(self) -> float:
         if self._combined_gain is None:
-            if self.receive.amplifier is not None:
+            if self._isset(self.receive.amplifier):
                 self._combined_gain = self.receive.amplifier.gain * self.receive.gain
             else:
                 self._combined_gain = self.receive.gain
@@ -102,11 +101,11 @@ class Communicator:
     @property
     def gain_to_equiv_noise_temp(self) -> float:
         if self._gain_to_equiv_noise_temp is None:
-            if self._equiv_noise_temp is not None:
+            if self._isset(self._equiv_noise_temp):
                 self._gain_to_equiv_noise_temp = (
                     self.combined_gain / self.equiv_noise_temp
                 )
-            elif self._noise_density is not None:
+            elif self._isset(self._noise_density):
                 self._gain_to_equiv_noise_temp = (
                     self.carrier_power * BOLTZMANN_CONSTANT
                 ) / (self.noise_density * self.receive_carrier_power)
@@ -172,6 +171,9 @@ class Communicator:
         for _ in range(3):
             for var in type(self).__dict__:
                 getattr(self, var)
+
+    def _isset(self, *args) -> bool:
+        return not (None in args)
 
 
 class GroundStation(Communicator):
@@ -271,7 +273,7 @@ class Satellite(Communicator):
 
     def summary(self) -> pd.DataFrame:
         summary = super().summary()
-        if self.ground_coordinate is not None:
+        if self._isset(self.ground_coordinate):
             coordinate = self.ground_coordinate.summary()
             coordinate.index = "Sub-Satellite " + coordinate.index
             summary = pd.concat([summary, coordinate])

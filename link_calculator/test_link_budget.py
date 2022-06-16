@@ -4,10 +4,14 @@ import pandas as pd
 from link_calculator.components.antennas import Amplifier, Antenna
 from link_calculator.components.communicators import GroundStation, Satellite
 from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_RADIUS
+from link_calculator.conversions import (
+    MHz_to_GHz,
+    decibel_to_watt,
+    mbit_to_bit,
+    watt_to_decibel,
+)
 from link_calculator.link_budget import Link, LinkBudget
 from link_calculator.orbits.utils import GeodeticCoordinate, Orbit
-from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
-from link_calculator.signal_processing.conversions import MHz_to_GHz, mbit_to_bit
 from link_calculator.signal_processing.modulation import MPhaseShiftKeying
 
 pd.options.display.float_format = "{:,.2f}".format

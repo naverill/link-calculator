@@ -4,12 +4,12 @@ import numpy as np
 
 from link_calculator.components.antennas import Antenna
 from link_calculator.constants import EARTH_RADIUS
-from link_calculator.orbits.utils import central_angle_orbital_radius, slant_range
-from link_calculator.propagation.conversions import (
+from link_calculator.conversions import (
     decibel_to_watt,
     frequency_to_wavelength,
     watt_to_decibel,
 )
+from link_calculator.orbits.utils import central_angle_orbital_radius, slant_range
 from link_calculator.propagation.utils import (
     horizontal_reduction,
     rain_attenuation,

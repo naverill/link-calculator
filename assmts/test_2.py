@@ -10,20 +10,21 @@ from link_calculator.components.antennas import (
 )
 from link_calculator.components.communicators import GroundStation, Satellite
 from link_calculator.constants import EARTH_RADIUS, SPEED_OF_LIGHT
+from link_calculator.conversions import (
+    GHz_to_MHz,
+    MHz_to_GHz,
+    decibel_to_watt,
+    frequency_to_wavelength,
+    watt_to_decibel,
+    wavelength_to_frequency,
+)
 from link_calculator.orbits.utils import (
     GeodeticCoordinate,
     Orbit,
     central_angle_orbital_radius,
     slant_range,
 )
-from link_calculator.propagation.conversions import (
-    decibel_to_watt,
-    frequency_to_wavelength,
-    watt_to_decibel,
-    wavelength_to_frequency,
-)
 from link_calculator.propagation.utils import rain_attenuation
-from link_calculator.signal_processing.conversions import GHz_to_MHz, MHz_to_GHz
 from link_calculator.signal_processing.modulation import (
     BinaryPhaseShiftKeying,
     MPhaseShiftKeying,

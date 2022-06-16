@@ -1,6 +1,6 @@
 import numpy as np
 
-from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
+from link_calculator.conversions import decibel_to_watt, watt_to_decibel
 from link_calculator.signal_processing.modulation import ConvolutionalCode
 
 

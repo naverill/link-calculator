@@ -1,14 +1,15 @@
 import numpy as np
 
-from link_calculator.components.conversions import joules_to_decibel_joules
-from link_calculator.propagation.conversions import decibel_to_watt, watt_to_decibel
-from link_calculator.signal_processing.conversions import (
+from link_calculator.conversions import (
     GHz_to_Hz,
     GHz_to_MHz,
     Hz_to_MHz,
     MHz_to_GHz,
     bit_to_mbit,
+    decibel_to_watt,
+    joules_to_decibel_joules,
     mbit_to_bit,
+    watt_to_decibel,
 )
 from link_calculator.signal_processing.modulation import (
     BinaryPhaseShiftKeying,

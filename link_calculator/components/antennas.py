@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from link_calculator.constants import BOLTZMANN_CONSTANT
-from link_calculator.propagation.conversions import (
+from link_calculator.conversions import (
     frequency_to_wavelength,
     watt_to_decibel,
     wavelength_to_frequency,
@@ -193,9 +193,9 @@ class Antenna:
     @property
     def combined_loss(self) -> float:
         if self._combined_loss is None:
-            if self.amplifier is not None:
+            if self._isset(self.amplifier):
                 self._combined_loss = self.loss * self.amplifier.loss
-            elif self._eirp is not None:
+            elif self._isset(self._eirp):
                 self._combined_loss = self.eirp / (self.amplifier.power * self.gain)
         return self._combined_loss
 
@@ -297,9 +297,9 @@ class Antenna:
                 at the same distance in the direction of the receiving antenna
         """
         if self._gain is None:
-            if self._eirp is not None:
+            if self._isset(self._eirp):
                 self._gain = self.eirp / (self.amplifier.power * self.combined_loss)
-            elif self._efficiency is not None:
+            elif self._isset(self._efficiency):
                 self._gain = (
                     self.efficiency
                     * 4
@@ -348,7 +348,7 @@ class Antenna:
         TODO
         """
         if self._efficiency is None:
-            if self._gain is not None and self._cross_sect_area is not None:
+            if self._isset(self._gain, self._cross_sect_area):
                 self._efficiency = self.gain / (
                     4 * np.pi * self.cross_sect_area / self.wavelength**2
                 )
@@ -378,8 +378,8 @@ class Antenna:
                 in the range [0, 1]
         """
         if self._loss is None:
-            if self._combined_loss is not None:
-                if self.amplifier is not None:
+            if self._isset(self._combined_loss):
+                if self._isset(self.amplifier):
                     self._loss = self.combined_loss / self.amplifier.loss
                 else:
                     self._loss = self.combined_loss
@@ -452,10 +452,7 @@ class Antenna:
         B is receiver quivalent noise bandwidth
         """
         if self._signal_to_noise is None:
-            if (
-                self._gain_to_noise_temperature is not None
-                and self._power_density is not None
-            ):
+            if self._isset(self._gain_to_noise_temperature, self._power_density):
                 self._signal_to_noise = (
                     self.power_density
                     * (self.wavelength**2 / (4 * pi))
@@ -513,12 +510,12 @@ class Antenna:
         )
         summary.set_index("name", inplace=True)
 
-        if self.amplifier is not None:
+        if self._isset(self.amplifier):
             amplifier = self.amplifier.summary()
             amplifier.index = "Amplifier " + amplifier.index
             summary = pd.concat([summary, amplifier])
 
-        if self.modulation is not None:
+        if self._isset(self.modulation):
             modulation = self.modulation.summary()
             modulation.index = "Modulation " + modulation.index
             summary = pd.concat([summary, modulation])
@@ -528,6 +525,9 @@ class Antenna:
         for _ in range(3):
             for var in type(self).__dict__:
                 getattr(self, var)
+
+    def _isset(self, *args) -> bool:
+        return not (None in args)
 
 
 class HalfWaveDipole(Antenna):

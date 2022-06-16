@@ -7,9 +7,8 @@ from link_calculator.components.communicators import (
     Satellite,
 )
 from link_calculator.constants import BOLTZMANN_CONSTANT
+from link_calculator.conversions import GHz_to_Hz, watt_to_decibel
 from link_calculator.orbits.utils import slant_range
-from link_calculator.propagation.conversions import watt_to_decibel
-from link_calculator.signal_processing.conversions import GHz_to_Hz
 
 
 class Link:
@@ -59,14 +58,14 @@ class Link:
         self._carrier_to_noise_coded = None
         self.propagate_calculations()
 
-        if self._receiver.receive is not None:
+        if self._isset(self._receiver.receive):
             self._receiver.receive.power_density = (
                 self.receiver.receive.power_density_eirp(
                     self._slant_range, self._atmospheric_loss
                 )
             )
 
-            if self._receiver.receive.modulation is not None:
+            if self._isset(self._receiver.receive.modulation):
                 self._receiver.receive.modulation.carrier_power = (
                     self.receiver_carrier_power
                 )
@@ -74,11 +73,11 @@ class Link:
     @property
     def carrier_to_noise_density(self) -> float:
         if self._carrier_to_noise_density is None:
-            if self.receiver.equiv_noise_temp is not None:
+            if self._isset(self.receiver.equiv_noise_temp):
                 self._carrier_to_noise_density = (
                     self.receiver.combined_gain * self.receiver_carrier_power
                 ) / (BOLTZMANN_CONSTANT * self.receiver.equiv_noise_temp)
-            elif self.receiver.gain_to_equiv_noise_temp is not None:
+            elif self._isset(self.receiver.gain_to_equiv_noise_temp):
                 self._carrier_to_noise_density = (
                     self.transmitter.transmit.eirp
                     * self.path_loss
@@ -92,46 +91,44 @@ class Link:
     @property
     def eb_no(self) -> float:
         if self._eb_no is None:
-            if self._carrier_to_noise_density is not None:
+            if self._isset(self._carrier_to_noise_density):
                 self._eb_no = (
                     self.carrier_to_noise_density
                     / self.transmitter.transmit.modulation.bit_rate
                 )
-            elif self._carrier_to_noise is not None:
+            elif self._isset(self._carrier_to_noise):
                 self._eb_no = (
                     self.carrier_to_noise
                     * GHz_to_Hz(self.transmitter.transmit.modulation.bandwidth)
                     * self.transmitter.transmit.modulation.bit_rate
                 )
-            if self.transmitter.transmit.modulation.eb_no is not None:
+            if self._isset(self.transmitter.transmit.modulation.eb_no):
                 self._eb_no = self.transmitter.transmit.modulation.eb_no
         return self._eb_no
 
     @property
     def eb_no_coded(self) -> float:
-        if (
-            self.transmitter.transmit.modulation is not None
-            and self.transmitter.transmit.modulation.code is not None
-        ):
-            self._eb_no_coded = self.transmitter.transmit.modulation.eb_no_coded
-        elif self.transmitter.transmit.modulation is not None:
-            self._eb_no_coded = self.transmitter.transmit.modulation.eb_no
+        if self._eb_no_coded is None:
+            if self._isset(
+                self.transmitter.transmit.modulation,
+                self.transmitter.transmit.modulation.code,
+            ):
+                self._eb_no_coded = self.transmitter.transmit.modulation.eb_no_coded
+            elif self.transmitter.transmit.modulation is not None:
+                self._eb_no_coded = self.transmitter.transmit.modulation.eb_no
         return self._eb_no_coded
 
     @property
     def carrier_to_noise(self) -> float:
         if self._carrier_to_noise is None:
-            if self._eb_no is not None and self._bandwidth_to_bit_rate is not None:
+            if self._isset(self._eb_no, self._bandwidth_to_bit_rate):
                 self._carrier_to_noise = self.eb_no / self.bandwidth_to_bit_rate
         return self._carrier_to_noise
 
     @property
     def carrier_to_noise_coded(self) -> float:
         if self._carrier_to_noise_coded is None:
-            if (
-                self._eb_no_coded is not None
-                and self._bandwidth_to_bit_rate is not None
-            ):
+            if self._isset(self._eb_no_coded, self._bandwidth_to_bit_rate):
                 self._carrier_to_noise = self.eb_no_coded / self.bandwidth_to_bit_rate
         return self._carrier_to_noise
 
@@ -154,9 +151,8 @@ class Link:
 
     @property
     def central_angle(self) -> float:
-        if (
-            self.transmitter.ground_coordinate is not None
-            and self.receiver.ground_coordinate is not None
+        if self._isset(
+            self.transmitter.ground_coordinate, self.receiver.ground_coordinate
         ):
             return self.transmitter.ground_coordinate.central_angle(
                 self.receiver.ground_coordinate
@@ -205,7 +201,7 @@ class Link:
                 added by the amplifier
         """
         if self._noise_power is None:
-            if self._noise_density is not None:
+            if self._isset(self._noise_density):
                 self._noise_power = self.noise_density * GHz_to_Hz(
                     self.transmitter.transmit.modulation.bandwidth
                 )
@@ -221,7 +217,7 @@ class Link:
             noise_density (float, W/Hz): the total noise power, normalised to a 1-Hz bandwidth
         """
         if self._noise_density is None:
-            if self._noise_temperature is not None:
+            if self._isset(self._noise_temperature):
                 self._noise_density = BOLTZMANN_CONSTANT * self.noise_temperature
         return self._noise_density
 
@@ -234,7 +230,7 @@ class Link:
             noise_temperature (float, K): ambient temperature of the environment
         """
         if self._noise_temperature is None:
-            if self._noise_power is not None:
+            if self._isset(self._noise_power):
                 self._noise_temperature = (
                     self.noise_power
                     / GHz_to_Hz(self.transmitter.transmit.modulation.bandwidth)
@@ -295,9 +291,9 @@ class Link:
                 {"name": "Slant Range", "unit": "km", "value": self.slant_range},
             ]
         )
-        if (
-            self.transmitter.transmit.modulation is not None
-            and self.transmitter.transmit.modulation.code is not None
+        if self._isset(
+            self.transmitter.transmit.modulation,
+            self.transmitter.transmit.modulation.code,
         ):
             code = pd.DataFrame.from_records(
                 [
@@ -327,8 +323,10 @@ class Link:
     def propagate_calculations(self) -> float:
         for _ in range(3):
             for var in type(self).__dict__:
-                if not callable(var):
-                    getattr(self, var)
+                getattr(self, var)
+
+    def _isset(self, *args) -> bool:
+        return not (None in args)
 
 
 class LinkBudget:

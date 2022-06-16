@@ -11,9 +11,9 @@ from link_calculator.conversions import (
     mbit_to_bit,
     watt_to_decibel,
 )
+from link_calculator.signal_processing.frequency_modulation import FrequencyModulation
 from link_calculator.signal_processing.modulation import (
     BinaryPhaseShiftKeying,
-    FrequencyModulation,
     MPhaseShiftKeying,
     QuadraturePhaseShiftKeying,
     Waveform,

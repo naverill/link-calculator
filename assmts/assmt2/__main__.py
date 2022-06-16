@@ -4,6 +4,7 @@ from math import inf, pi
 import numpy as np
 import pandas as pd
 
+from link_calculator.coding import ConvolutionalCode
 from link_calculator.components.antennas import Amplifier, Antenna, ParabolicAntenna
 from link_calculator.components.communicators import GroundStation, Satellite
 from link_calculator.constants import BOLTZMANN_CONSTANT, EARTH_RADIUS
@@ -17,12 +18,7 @@ from link_calculator.signal_processing.conversions import (
     mbit_to_bit,
     watt_to_decibel,
 )
-from link_calculator.signal_processing.modulation import (
-    ConvolutionalCode,
-    MPhaseShiftKeying,
-)
-
-print("\n\n")
+from link_calculator.signal_processing.modulation import MPhaseShiftKeying
 
 ABS_PATH = pathlib.Path(__file__).parent.resolve()
 
@@ -281,7 +277,6 @@ def q2():
     }
     results = {}
     for name, params in codes.items():
-        print(decibel_to_watt(params["code_gain"]))
         code = ConvolutionalCode(
             coding_rate=params["code_rate"], coding_gain=params["code_gain"]
         )
@@ -469,7 +464,6 @@ def q3():
             atmospheric_loss=decibel_to_watt(-84.0),
             slant_range=Link.distance(kuiper, triton)
             - triton.ground_coordinate.altitude,
-            #            eb_no=decibel_to_watt(10.5),
         )
         downlink = Link(
             transmitter=kuiper,
@@ -477,7 +471,6 @@ def q3():
             atmospheric_loss=decibel_to_watt(-84.0),
             slant_range=Link.distance(kuiper, triton)
             - triton.ground_coordinate.altitude,
-            #           eb_no=decibel_to_watt(10.5),
         )
         link_budget = LinkBudget(uplink=uplink, downlink=downlink)
         link_summary = link_budget.summary()

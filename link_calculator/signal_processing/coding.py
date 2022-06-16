@@ -1,5 +1,71 @@
 from math import comb, factorial, log2, log10
 
+import pandas as pd
+
+from link_calculator.conversions import watt_to_decibel
+
+
+class ConvolutionalCode:
+    def __init__(
+        self,
+        coding_rate: float = None,
+        coding_gain: float = None,
+        min_distance: float = None,
+    ):
+        """
+        coding_rate (float, bps):
+        coding_gain (float, W):
+        """
+        self._coding_rate = coding_rate
+        self._coding_gain = coding_gain
+        self._min_distance = min_distance
+
+    @property
+    def coding_rate(self) -> float:
+        return self._coding_rate
+
+    @property
+    def coding_gain(self) -> float:
+        if self._coding_gain is None:
+            if self._min_distance is not None:
+                self._coding_gain = self.code_rate * self.min_distance
+        return self._coding_gain
+
+    @staticmethod
+    def coding_gain_eb_no(eb_no_coded: float, eb_no_uncoded: float) -> float:
+        """
+        calculate the difference in Eb/No required to produce the same error rate for coded and
+        uncoded signals
+
+        Parameters
+        ---------
+            eb_no_coded (float, W); the Eb/No of the coded signal
+            eb_no_coded (float, W): the Eb/No of the uncoded signal
+
+        Returns
+        -------
+          coding_gain (float, ):
+        """
+        return eb_no_uncoded / eb_no_coded
+
+    def summary(self) -> pd.DataFrame:
+        summary = pd.DataFrame.from_records(
+            [
+                {
+                    "name": "Coding Rate",
+                    "unit": "mbps",
+                    "value": self.coding_rate,
+                },
+                {
+                    "name": "Coding Gain",
+                    "unit": "dB",
+                    "value": watt_to_decibel(self.coding_gain),
+                },
+            ]
+        )
+        summary.set_index("name", inplace=True)
+        return summary
+
 
 def information_content(message_probability: float) -> float:
     """

@@ -281,10 +281,8 @@ class MPhaseShiftKeying(Modulation):
     @property
     def noise_power_density_coded(self) -> float:
         if self._noise_power_density_coded is None:
-            if (
-                self._symbol_rate is not None
-                and self._carrier_to_noise_coded is not None
-                and self._energy_per_symbol is not None
+            if self._isset(
+                self._symbol_rate, self._carrier_to_noise_coded, self._energy_per_symbol
             ):
                 self._noise_power_density_coded = self.symbol_rate / (
                     self.bandwidth

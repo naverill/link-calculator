@@ -105,7 +105,10 @@ class Link:
                     * self.transmitter.transmit.modulation.bit_rate
                 )
             if self.transmitter.transmit.modulation.eb_no is not None:
-                self._eb_no = self.transmitter.transmit.modulation.eb_no
+                if self.transmitter.transmit.modulation.code is not None:
+                    self._eb_no = self.transmitter.transmit.modulation.eb_no_coded
+                else:
+                    self._eb_no = self.transmitter.transmit.modulation.eb_no
         return self._eb_no
 
     @property

@@ -594,7 +594,7 @@ class MPhaseShiftKeying(Modulation):
         return summary
 
     def propagate_calculations(self) -> float:
-        for _ in range(3):
+        for _ in range(4):
             for var in type(self).__dict__:
                 getattr(self, var, None)
 

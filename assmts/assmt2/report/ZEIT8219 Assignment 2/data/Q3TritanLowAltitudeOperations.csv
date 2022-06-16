@@ -1,14 +1,14 @@
 ,Overall,Uplink,Downlink
 Eb/No Ratio (dB),7.023,10.530,9.588
-Carrier Power Density (dBW),,-205.945,-221.972
-Free-Space Path Loss (dB),,-177.445,-173.772
+Coded Eb/No Ratio (dB),13.523,17.030,16.088
+Carrier Power Density (dBW),,-206.183,-222.210
+Free-Space Path Loss (dB),,-177.683,-174.010
 Atmospheric Loss (dB),,-84.000,-84.000
 C/No Ratio (dB),,,
 Bandwidth to Bit Rate Ratio (dB),,-9.031,-3.010
 C/N Ratio (dB),,26.061,19.098
 Central Angle (°),,0.000,0.000
-Slant Range (km),,613.000,613.000
-Coded Eb/No Ratio (dB),,17.030,16.088
+Slant Range (km),,630.000,630.000
 Coded C/N Ratio (dB),,26.061,19.098
 Transmitter Noise Figure (),,,
 Transmitter Equivalent Noise Temperature (K),,,
@@ -41,7 +41,7 @@ Transmitter Modulation Coding Rate (mbps),,0.750,0.750
 Transmitter Modulation Coding Gain (dB),,6.500,6.500
 Transmitter Earth Station Latitude (°),,-3.746,
 Transmitter Earth Station Longitude (°),,124.401,
-Transmitter Earth Station Altitude (°),,17.000,
+Transmitter Earth Station Altitude (°),,0.000,
 Receiver Noise Figure (),,,
 Receiver Equivalent Noise Temperature (K),,,
 Receiver Noise Temperature (K),,,
@@ -79,4 +79,4 @@ Transmitter Sub-Satellite Longitude (°),,,124.401
 Transmitter Sub-Satellite Altitude (°),,,16.000
 Receiver Earth Station Latitude (°),,,-3.746
 Receiver Earth Station Longitude (°),,,124.401
-Receiver Earth Station Altitude (°),,,17.000
+Receiver Earth Station Altitude (°),,,0.000

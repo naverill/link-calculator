@@ -1,0 +1,469 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                           Document style
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[12pt]{article}
+
+% Importing report style and the first pages 
+\input{report.sty}
+
+% sections without numbers, but still in table of contents
+%\setcounter{secnumdepth}{0} % remove "%" to include
+
+%=================================================================
+%                           Summary
+%=================================================================
+% \addbibresource{citations.bib}
+\begin{document}
+
+% adding the first two pages 
+\FirstPage
+% \SecondPage
+\pagebreak
+
+% creating table of contents 
+\setlength{\parskip}{0em}
+\lhead{Contents} % section header
+\renewcommand{\baselinestretch}{0.95}\normalsize
+\tableofcontents
+\renewcommand{\baselinestretch}{1.0}\normalsize
+\setlength{\parskip}{1em}
+\newpage
+
+% adding the different sections
+\section{Mobile Satellite Service (MSS) Analysis}
+\lhead{MSS Link Budget Analysis} % section header
+
+\raggedright
+
+The following report will analyse a communications service network involving a fixed Earth station and two mobile Earth stations via a single geostationary (GEO) communications satellite. The analysis will consider both the upstream and downstream communications channels to determine the most suitable channel for a user of the service. The geographic coordinates of the Earth stations and the satellite are outlined in Table \ref{table:geo_coords}
+
+\begin{table}[H]
+\centering
+\caption{Geographic Coordinates of Network Node}
+\label{table:geo_coords}
+\begin{tabular}{lll}
+ \hline
+Station                           & Latitude (deg) & Longitude (deg) \\
+\hline
+GEO Satellite                     & 00°00'N        & 149°48'E        \\
+Fixed Earth Station               & 31°10'S        & 147°16'E        \\
+Mobile Earth Station A            & 19°05'S        & 178°05'E        \\
+Mobile Earth Station B            & 19°05'S        & 178°05'E         \\
+ \hline
+\end{tabular}
+\end{table}
+
+The GEO communications satellite has an uses the Ka frequency band for both uplink (30.5 GHz) and downlink (20.5 GHz) channels, and has a bandwidth of 50 MHz. This frequency band is appropriate for both FSS and MSS capabilitie, as it has a large bandwidth ideal for FSS systems, while reducing the degree of path loss associated with smaller low-gain mobile antennas. 
+
+Both uplink and downlink communication on the satellite is done using a single parabolic antenna with a circular diameter of 1m and an efficiency of 60\%. The fixed Earth station is fitted with a large parabolic antenna that has a circular diameter of 10.5m, an efficiency of 65\% and emits 500W of power. The associated feeder loss of the system is 2.5 dB.
+
+The code and equations used to generate the link budgets is defined in Appendix \ref{code:main} (lines 29:265) and in Appendix \ref{sect:link_eqn} respectively.
+
+%=================================================================
+%                           Constellation
+%=================================================================
+\subsection{Assumptions}
+
+A number of assumptions were made for the purposes of this analysis. 
+
+All antennas are assumed to have parabolic reflectors with varying degrees of efficiency and feeder losses. 
+
+All communication devices are assumed to be fitted with Low Noise Amplifiers (LNA), and any gain and back-off losses associated with these devices is already included in the stated power levels. Other system losses between the LNAs and parabolic reflectors, including coupling loss and branching losses, are assumed to be negligible for the purposes of this analysis and have been ignored. 
+
+The total atmospheric signal attenuation is described by the atmospheric loss that is assumed to be the same for all links, regardless of the slant range or elevation. This atmospheric loss therefore accounts for all beam-spreading, absorption, weather (rain), scintillation, and polarisation losses. The attenuation due to rain fade has also been omitted from the link budget analysis. 
+
+The environmental temperature for all Earth stations is defined to be 25°K. 
+
+Furthermore, all nodes in the network are assumed to use 8-PSK modulation with no channel coding. 
+
+
+\subsection{Mobile Earth Station A}
+
+Mobile Earth Station A is a parabolic antenna with a circular diameter of 1.2m and an efficiency of 55\%. The Earth station is fitted with an LNA that provides 40W of power. The associated feeder loss of the system is 1dB.
+
+\subsubsection{Upstream Channel}
+
+The upstream channel for Earth station A involves communication from the mobile station to the fixed Earth station, via the satellite. A preliminary link budget has been provided in Table \ref{table:a_upstream} using the system definition and assumptions outlined above. 
+
+\csvreader[
+longtable=lrrrr,
+table head= \caption{Earth Station A Upstream Link Budget}\label{table:a_upstream} \\ 
+\toprule\bfseries Name &\bfseries Overall & \bfseries Uplink & \bfseries Downlink \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q1EarthStationAUpstream.csv}{1=\Name, 2=\Overall, 3=\Uplink, 4=\Downlink}
+{\Name & \Overall & \Uplink & \Downlink}
+
+
+    
+\subsubsection{Downstream Channel}
+The downstream channel for Earth station A involves communication from the fixed Earth station to the mobile station, via the satellite. The link budget for both uplink and downlink channels is outlined in Table \ref{table:a_downstream}.
+
+\csvreader[
+longtable=lrrrr,
+table head= \caption{Earth Station A Downstream Link Budget}\label{table:a_downstream} \\ 
+\toprule\bfseries Name &\bfseries Overall & \bfseries Uplink & \bfseries Downlink \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q1EarthStationADownstream.csv}{1=\Name, 2=\Overall, 3=\Uplink, 4=\Downlink}
+{\Name & \Overall & \Uplink & \Downlink}
+
+\subsection{Mobile Earth Station B}
+
+Mobile Earth Station A is a parabolic antenna with a circular diameter of 0.8m and an efficiency of 60\%. The Earth station is fitted with an LNA that provides 80W of power. The associated feeder loss of the system is 1dB.
+
+\subsubsection{Upstream Channel}
+The link budget for the upstream channel for Earth station B is outlined in Table \label{table:b_upstream}.
+
+\csvreader[ 
+longtable=lrrrr,
+table head= \caption{Earth Station B Upstream Link Budget}\label{table:b_upstream} \\ \toprule\bfseries Name &\bfseries Overall & \bfseries Uplink & \bfseries Downlink \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q1EarthStationBUpstream.csv}{1=\Name, 2=\Overall, 3=\Uplink, 4=\Downlink}
+{\Name & \Overall & \Uplink & \Downlink}
+
+
+\subsubsection{Downstream Channel}
+The link budget for the upstream channel for Earth station B is outlined in Table \label{table:b_downstream}.
+
+\csvreader[
+longtable=lrrrr,
+table head= \caption{Earth Station B Downstream Link Budget}\label{table:b_downstream} \\ 
+\toprule\bfseries Name &\bfseries Overall & \bfseries Uplink & \bfseries Downlink \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q1EarthStationBDownstream.csv}{1=\Name, 2=\Overall, 3=\Uplink, 4=\Downlink}
+{\Name & \Overall & \Uplink & \Downlink}
+
+\subsection{Evaluation}
+
+Both mobile Earth stations are co-located, with roughly equivalent slant ranges, free-space path losses, and feeder losses. The difference in performance between the services provided by each mobile station can therefore be fully accounted for by the antenna and amplifier configuration. The performance of both stations will be compared in terms of their transmit and receive capabilities. 
+
+\subsubsection{Transmit Capabilities}
+
+Earth station B has both double the power output and a higher efficiency than Earth station A. This suggest that the station is a more efficient transmitter of power and, seeing as both antennas have equal losses, would the dominant factor affecting the EIRP of equivalent mobile Earth stations. However, Earth station  B has a significantly worse transmitter gain. This can be accounted for by the difference of 0.4 metres in the circular diameter between the two parabolic antennas, as the gain for parabolic antennas is a function of the efficiency and the cross-sectional areas of the reflector. A higher gain for Earth station A means that it has much better transmission directivity. For the overall uplink, this translates to an \(\frac{E_b}{N_0}\) difference of 0.133 dB, indicating that Earth station A has more efficient use of energy per bit transmitted. 
+
+\subsubsection{Receive Capabilities}
+The positive characteristics of Earth station A for transmit also applies to its receive capabilities. On the downlink of the downstream channels, Earth station A exhibits both a 3.15 dB higher receive gain, and 0.13 dB higher EIRP. The relative performance is lower when compared to the antenna's transmit capabilities as a result of Earth station A's higher receive noise figure, which results in amplified signal noise on the downlink, and a less efficient use of energy per bit. The resulting effect of this is a lower \(\frac{E_b}{N_0}\) ratio, though the ratio is still higher in comparison to Earth station B. 
+
+\subsubsection{Comparison}
+
+Overall, Earth station A performs better in terms of both its transmit capabilities for upstream services and receive capabilities, and is the preferred provider of service for a user in the specified location.
+
+%=================================================================
+%                           Channel Coding
+%=================================================================
+\newpage
+\section{Channel Coding Analysis}
+\lhead{Channel Coding} % section header
+The following will analyse the channel coding characteristics of a broadcast television service. The coding channel uses 8-PSK modulation, with a bandwidth of 50 MHz and a filter roll-off factor of 0.3. The service has defined a set of minimum standards required of the communication channel. The service must have a data rate of at least 60 Mbps and a Bit Error Rate (BER) of less than \(1e^{-9}\). The three code rates that are being considered are outlined in Table \ref{table:codes}. The code and equations used to generate the following tables in defined in Appendix \ref{code:main} (lines 258-35) and Appendix \ref{sect:code_eqn}. 
+
+\begin{table}[H]
+\centering
+\caption{Convolutional Code Definitions}
+\label{table:codes}
+\begin{tabular}{ll}
+ \hline
+Convolutional Code Rate         & Coding Gain (dB) \\
+\hline
+7/8                             & 2.5       \\
+3/4                             & 3         \\
+1/2                             & 3.5       \\
+ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Uplink}
+The minimum \(\frac{E_b}{N_0}\) ratio defined for uplink communication is defined as 33.2dB. Applying each of the coding rates to the communications channel defined above, we get the parameters defined in Tables \ref{table:7_8_mod}, \ref{table:3_4_mod}, and \ref{table:1_2_mod}.
+
+\csvreader[
+longtable=lrr,
+table head=\caption{7/8 Channel Summary}\label{table:7_8_mod} \\
+\toprule\bfseries Name &\bfseries Value \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q27-8Modulation.csv}{1=\Name, 2=\Value}
+{\Name & \Value }
+
+\csvreader[
+longtable=lrr,
+table head=\caption{3/4 Channel Summary}\label{table:3_4_mod} \\
+\toprule\bfseries Name &\bfseries Value \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q23-4Modulation.csv}{1=\Name, 2=\Value}
+{\Name & \Value }
+
+\csvreader[
+longtable=lrr,
+table head=\caption{1/2 Channel Summary}\label{table:1_2_mod} \\
+\toprule\bfseries Name &\bfseries Value \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q21-2Modulation.csv}{1=\Name, 2=\Value}
+{\Name & \Value }
+
+To achieve the most robust communication channels to errors while still maintaining the minimum data rate, the 3/4 convolutional code must be applied. Though the 1/2 channel provides the highest degree of redundancy, the data rate of 57.69 mbps is below the minimum requirement and therefore cannot be used. 
+
+\subsubsection{Overall}
+The 3/4 coding rate applies an overall coding gain of 3 dB to the communications channel. Assuming a minimum bit error rate of \(1e^{-9}\), we can then calculate the overall communication channel characteristics outlined in Table \ref{table:overall_mod}. 
+
+\csvreader[
+longtable=lrr,
+table head= \caption{Overall Channel Summary}\label{table:overall_mod} \\
+\toprule\bfseries Name &\bfseries Value \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q2OverallModulation.csv}{1=\Name, 2=\Value}
+{\Name & \Value }
+
+\subsubsection{Downlink}
+To calculate the minimum \(\frac{C}{N}\) ratio for the downlink channel, the uncoded \(\frac{E_b}{N_0}\) ratio must be calculated for the downlink channels. Using Equation 9-28 (Ryan, 2004) rearranged, this can be calculated as 16.11 dB, with a coded \(\frac{E_b}{N_0}\) of 19.11 dB. The coded and uncoded \(\frac{C}{N}\) ratios for the downlink can then be calculated from Equation 6-55 (Ryan, 2004) to be 22.741 dB and 19.741 dB respectively. The resultant coded and uncoded BERs can then be found to be \(7.026 \times 10^{-10}\) and \(8.907 \times 10^{-18}\). 
+
+\csvreader[
+longtable=lrr,
+table head=\caption{Downlink Modulation Summary}\label{table:up_mod} \\
+\toprule\bfseries Name &\bfseries Value \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q2DownlinkModulation.csv}{1=\Name, 2=\Value}
+{\Name & \Value }
+
+\subsection{Discussion}
+
+The coded system therefore performs significantly better than the uncoded system in most performance benchmarks. Though both the coded and uncoded signal have a BER above the minimum required for the service, this represents the optimal performance achievable by the system. Adverse transmission conditions can degrade the signal significantly and Broadcast Satellite Services (BSS) tend to require a high degree of reliability. The convolutional code therefore provides a significant safety margin above the minimum BER of \(1 \times 10^{-9}\). 
+
+However, though the convolutional code is optimal for conditions where the dominant source of errors is uniformally random errors, it may not effective for a channel that commonly experiences burst errors. Coding concatenation can then be considered, though this comes at the cost of a lower data rate. Switching to a higher convolutional coding rate may then be neccessary to ensure the data rate remains above 60 mbps.
+
+
+%=================================================================
+%                           Internet Analysis
+%=================================================================
+\newpage
+\raggedright
+\section{Satellite Internet Service Analysis}
+\lhead{Internet Service Analysis} % section header
+The following report will analyse the feasibility of global LEO satellite constellations to provide service to the fleet of MQ-4C Triton Unmanned Aircraft Systems (UAS) for high altitude, long endurance operations. A low-orbit internet service was selected as the primary communication provider due to the one-way propagation delay of up to 15 ms, which is comparable  to that of terrestrial links \cite{guolong}.  
+
+
+\subsection{Mission Summary}
+The MQ-4C Triton is a Remotely Piloted Aerial System that is design to perform extended maritime patrol and surveillance \cite{airforce}. The 2016 Defence White Paper stated that up to seven Tritan UAVs will be the Royal Australian Air Force \cite{generalreport}, with the intent to be operational by 2025-2026 \cite{defencegov}. 
+
+The operations centre for the fleet will be headquartered at RAAF Base Edinbrugh in South Australia, while the majority of flight operations will be conducted out of RAAF Base Tindal in the Northern Territory \cite{defencegov}. The Triton system is able to conduct missions for over 30 hours, with an operational range of roughly 15000 km \cite{northrop}. 
+The primary region of operations will therefore likely be the maritime border that Australia shares with Indonesia and other Pacific countries.
+
+The extensive range of operations means that the Triton systems will not always be in sight of the ground segment. The system will then conduct Beyond Line of Sight (BLOS) operations, transmitting sensor data via a broadband satellite link to ensure continuous situational awareness of the maritime environment. 
+
+\subsection{Network Design}
+
+\subsubsection{MQ-4C Triton \label{sect:triton}}
+The MQ-4C is High-Altitude Long Endurance (HALE) surveillance UAV designed for maritime operations. The vehicle is capable of fully autonomous operations, but can be supported by land-based command and control mission planners and sensor operators. The surveillance operations are enabled by a suite of 360° field of regard (FOR) sensors on the vehicle, including Synthetic Aperture Radar, Electro-Optical / Infrared (EO/IR) sensor, and an automatic identification system (AIS) receiver \cite{northropdatasheet}. 
+
+The Triton vehicles is a maritime derivative on the RQ-4B Global Hawk UAS system \cite{navyrecognition}, incorporating requirements from the US Navy. A number of assumptions about the Triton vehicles have therefore been derived from publicly available information on the Global Hawk system. The Global Hawk system has a similar mission goal and surveillance sensor suite to the MQ-4C Tritons, employing both EO/IR and SAR sensors to generate both wide area and spot imagery \cite{10.2307/resrep13763.8}. The Global Hawk system used Ku-band satellite communication wideband payload data downlink  to provide data rates of 40-360 Mbit/s. \cite{eoportal} to support a data volume of 274 Mbps \cite{griethe}. This figure aligns with a paper written by Griethe that estimated the uncompressed data rates for stream EO/IR to be 200-500 mbps, and SAR spot imagery to be 5-10 mbps. We can therefore assume the Triton to have similar data throughput requirements, with some additional margin to account for technological advances in the sensors and onboard computational ability\cite{griethe}.  
+
+The Triton system uses Ka band for both uplink and downklink channels \cite{thinkom}, allowing for smaller antennas and greater data throughput at the cost of greater susceptibility to atmospheric attenuation. 
+
+
+\paragraph{Requirements}
+
+The intent of fleet the provide real-time intelligence, surveillance and reconnaissance missions (ISR) over vast ocean and coastal regions. This will require rapid, continuous transmission of collected data. The vehicle should be in continuous contact with either the ground segment or the relay satellite. The satellite internet constellation must therefore provide continuous coverage over the area of operations. The antenna subsystem should also be designed to maintain a Bit Error Rate (BER) sufficient to ensure reliable transmission with minimal risk of data corruption from random errors or signal fading. The throughput of the satellite communications channel should also be sufficient for the transmission of both payload and TT\&C data. 
+
+\paragraph{Antenna Subsystem Parameters}
+
+The prototype Flying Test Bed (FTB) for the Triton vehicle used a ThinAir Ka2517 phased-array satellite antenna to provide BLOS connectivity \cite{moench}.  This is a commercial off-the-shelf antenna, and  link parameters can therefore be derived from the publicly available data sheet. These antenna parameters are outlined in Table \ref{table:triton_params}
+
+
+\begin{table}[H]
+\centering
+\caption{ThinAir Ka2517 Phased-Array Antenna Parameters}
+\label{table:triton_params}
+\begin{tabular}{ll}
+ \hline
+Parameter                       & Value \\
+\hline
+G/T (dB/K)                      & 18.5       \\
+EIRP (dBW)                      & 55.5        \\
+Tx band (GHz)                   & 27.5 to 31       \\
+Rx band (GHz)                   & 17.7 to 21.2       \\
+Uplink Throughput (mbps)        & 800       \\
+Downlink Throughput (mbps)      & 200       \\
+Spectral Efficiency (bits/s/Hz) & 4       \\
+Tx/Rx Power (W)                 & 35       \\
+Cross-Sectional Area (\(in^{-2})\) & 542.08       \\
+Uplink Center Frequency (GHz)   & 29       \\
+\hline
+\end{tabular}
+\end{table}
+
+With the uplink and downlink frequency bands centered around a major absorption band, the signal will be heavily attenuated by hydrometers, risking absorption and scattering by the atmosphere. Block coding will therefore required to protect against burst errors.  The uplink throughput is more than sufficient to cover the estimated data rates of the system.
+
+\subsubsection{Satellite Internet Constellation}
+\paragraph{Comparison of Available Services}
+A number of LEO broadband internet services are proposed or operational, the primary constellations being Telesat, OneWeb, Starlink (SpaceX) and Kuiper (Amazon). A paper by Pachler et. al estimated the maximum system throughput of all four constellation, taking into account publicly available information on the antenna configuration and orbit characteristics \cite{pachler}. Of the four providers, SpaceX and Amazon allowed for the highest average data rate per satellite of 6.16 Gbps and 16.5 Gbps respectively. 
+
+For each user terminal, the Starlink constellation has a data throughput of 100 mbps, and uplink and downlink frequency bands of 14.0-14.5 and 10.7-12.7 GHz respectively\cite{starlinkfcc}. This is incompatible with the Triton system and the constellation is therefore not feasible as a service provider.
+
+In comparison, the Kuiper constellation allows for a maximum throughput of 400 mbps, a value that is sufficient to cover the data rate requirements of the UAV with a large margin. The communication channels also have compatible uplink and downlink frequency bands of 27.5-30.0 GHz and 18.8-20.2 GHz respectively. This constellation has therefore been chosen as the primary communications service for the Triton fleet. 
+
+\paragraph{Constellation}
+
+The Kuiper constellation is a proposed constellation of 3,236 satellites in 98 orbital planes at altitudes of 590 km, 610 km, and 630 km. The proposed configuration allows for constant coverage over the latitudes of \(\pm56\degree\)N, a range that covers the RAAF fleet's full range of operations\cite{kuiperfcc}. The company intends the at least half of the constellation to be fully operational by 2026.
+
+\paragraph{Antenna Subsystem Parameters}
+Based on technical documents released by Amazon \cite{kuiperappendix}, the Kuiper constellation will have the following antenna parameters: 
+
+\begin{table}[H]
+\centering
+\caption{ThinAir Ka2517 Phased-Array Antenna Parameters}
+\label{table:triton_params}
+\begin{tabular}{ll}
+ \hline
+Parameter                       & Value \\
+\hline
+Gain (dBi)                      & 37       \\
+EIRP (dBW)                      & 35.8        \\
+Tx band (GHz)                   & 18.8 to 20.2     \\
+Rx band (GHz)                   & 27.5 to 31      \\
+Uplink Throughput (mbps)        & 400       \\
+Downlink Throughput (mbps)      & 400       \\
+Tx/Rx Power (W)                 & 38.7       \\
+Minimum Elevation (\degree)     & 20       \\
+Downlink Center Frequency (GHz)        & 19       \\
+ \hline
+\end{tabular}
+\end{table}
+
+The size of the antenna diameter is not specified but can be estimated to be in the range of 1-2.4 m based on similar systems \cite{pachler}. For the purposes of this analysis we have assumed the average antenna size of 1.6m. 
+
+
+\subsection{Link Analysis}
+ For this analysis, we will assume the Triton is located at a point 1500km from the aircraft base at RAAF Base Tindal, a distance that is near the extent of its operational range. At this location, the Triton will likely be conducting Beyond Line of Sight (BLOS) operations, and therefore relying on the SATCOM constellation for payload and TT\&C datalinks. We will consider two scenarios. The first considers operations from near sea-level, covering conditions of operations over launch and low-altitude operations. The second scenario will consider operations at the UAV's maximum operational altitude of 17 km \cite{navyrecognition}.  This analysis therefore covers the full range of operations for the Triton fleet and will consider a worst-case transmission environment to ensure the internet constellation is feasible for the mission. 
+ 
+ The Kuiper constellation requires an transmission bandwidth of 50 MHz for uplink, and 100 MHz for downlink, and constrains the available frequency ranges to 27.5-30.0 GHz and 18.8-20.2 GHz. The maximum data rate of the uplink channel is also constrained from 800 mbps allowed by the Triton antenna to 400 mbps. 
+
+\subsubsection{Assumptions}
+Assuming the fleet will conduct operations within the bounds of Australia's maritime borders, the area of operations for the UAV fleet is within the range of continuous coverage from the Kuiper constellation. It is therefore safe to assume that there will be a satellite within line of sight of the vehicle at all times. For the purposes of this analysis, we will assume the satellite is at the zenith above the UAV, at the maximum orbit altitude of 630 km. 
+
+The most significant atmospheric attenuation affects occurs close to the surface of the Earth, below an attitude of 2 km \cite{elecnotes}. The increased slant range for the low altitude operations will also increase the free-space path loss. However, for the purposes of this analysis, we will assume the difference to be negligible and will consider the atmospheric loss to be constant for both scenarios. Within the Ka band, we can estimate the rain attenuation at 0.01\% of the time to be 83 dB, cloud attenuation to be 1 dB and specific attenuation to be negligible\cite{alsaegh} for a total atmospheric attenuation of 84 dB. This attenuation is consistent for both uplink and downlink channels. This high attenuation from to hydrometers is consistent with the high humidity and frequent rainfall during the wet season that is associated with the equatorial region of operations.
+
+We will further assume the phase shifter losses of both parabolic antennas to be 6 dB, and the LNA connector loss to be 1 dB, for a total antenna loss of 7 dB \cite{Ahn2019}. 
+
+For defence applications, the reliability of the communications channel is critical, therefore the system will target an uplink bit error rate of \(1e^{-6}\) \cite{LI2019123} to ensure rapid dissemination of the surveillance data. The downlink channel, primarily used for command  and control, can tolerate a slightly lower BER due to the reliance on onboard autonomy. The downlink channel will therefore target a BER of \(1e^{-5}\).
+
+The user terminals for the Kuiper constellation use OFDM and QPSK modulation \cite{kuipernarrative}. To provide additional error resiliancy, the communications channel will use 3/4 convolution coding, resulting in a coding gain of approximately 6.5 dB \cite{10.5555/582818}. This will reduce the uplink data rate to 300 mbps but, as outlined in Section  \ref{sect:triton}, this still leaves an acceptable margin above the minimum required. The analysis will further assume a standard roll-off rate of 0.4.
+
+The code and equations used to generate the following tables in defined in Appendix \ref{code:main} (lines 348-387) and Appendix \ref{sect:link_eqn}. 
+
+\subsubsection{Case 1: Near-Ground Operations}
+The link analysis for the MQ-4C Tritin UAV during low-altitude operations is outlined in Table \ref{table:low_ops_link}.  
+
+\csvreader[
+longtable=lrrrr,
+table head=\caption{Low-Altitude Operations Link Budget}\label{table:low_ops_link}\\ 
+\toprule\bfseries Name &\bfseries Overall & \bfseries Uplink & \bfseries Downlink \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q3TritanLowAltitudeOperations.csv}{1=\Name, 2=\Overall, 3=\Uplink, 4=\Downlink}
+{\Name & \Overall & \Uplink & \Downlink}
+
+This uplink \(\frac{E_b}{N_0}\) aligns with the esimated value of 10.5 dB for OFDM modulation using QPSK, given a bit error rate of \(10e^{-6}\) \cite{simeon}.
+
+
+\subsubsection{Case 2: High-Altitude Operations}
+
+The link analysis for the MQ-4C Tritin UAV during high-altitude operations is outlined in Table \ref{table:high_ops_link}.  
+
+\csvreader[
+longtable=lrrrr,
+table head=\caption{High-Altitude Operations Link Budget}\label{table:high_ops_link}\\ 
+\toprule\bfseries Name &\bfseries Overall & \bfseries Uplink & \bfseries Downlink \\ 
+\midrule\endhead\bottomrule\endfoot,
+late after line=\\,
+before reading={\catcode`\#=12},after reading={\catcode`\#=6}
+]{data/Q3TritanHighAltitudeOperations.csv}{1=\Name, 2=\Overall, 3=\Uplink, 4=\Downlink}
+{\Name & \Overall & \Uplink & \Downlink}
+
+\subsubsection{Analysis}
+
+For both operational conditions, the link budget confirms that the proposed Kuiper constellation is feasible service provider. For low operational altitudes the system allows for a reasonable uplink \(\frac{E_b}{N_0}\) of 17 dB for a bit error rate of \(10e^{-6}\) and downlink \(\frac{E_b}{N_0}\) of 16 dB for a bit error rate of \(10e^{-5}\). For high operational altitudes the system has a similar \(\frac{E_b}{N_0}\) profile. The system allows for constant, reliable transmission of of payload and TT\&C data over the full range of operations. This holds for even worst-case transmission conditions of atmospheric attenuation. Further analysis at the extent of the possible slant range is recommended, to further evaluate the feasibility of the service in worst-case conditions. The use of the Kuniper constellation satisfies all of the requirement of the system with the current antenna configurations and will therefore be fast and cheap to integrate with the RAAF's existing ground segment. Overall, it is recommended that the RAAF explore the Kuiper constellation as a internet service provider.
+
+
+Word Count: 1895
+
+\newpage
+%=================================================================
+%                           List of Figures
+%=================================================================
+\section{Appendix}
+\lhead{Appendix} % section header
+\subsection{Equations}
+\subsubsection{Link Budget Equations \label{sect:link_eqn}}
+
+All equations referenced in this and the following section can be assumed to be sourced from Principles of Satellite Communications \cite{book} unless stated otherwise.
+
+\begin{table}[H]
+\centering
+\caption{Link Budget Equations}
+\label{table:link_eqn}
+\begin{tabular}{ll}
+ \hline
+Name                           & Equation Number \\
+\hline
+EIRP                            & 9-3      \\
+Carrier Power Density           & 9-1      \\
+Carrier-to-Noise Density        & 9-12      \\
+Energy per Bit-to-Noise         & 9-27      \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Channel Coding Equations \label{sect:code_eqn}}
+\begin{table}[H]
+\centering
+\caption{Link Budget Equations}
+\label{table:link_eqn}
+\begin{tabular}{ll}
+ \hline
+Name                           & Equation Number \\
+\hline
+BER                             & 6-59      \\
+Energy-per-Bit to Noise         & 9-28      \\
+Carrier to Noise                & 6-55      \\
+Bit Rate                        & 6-34      \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\newpage
+% \printbibliography
+\bibliography{citations.bib}
+
+\subsection{Python Code Samples}
+\lstinputlisting[language=Python, caption={main.py}, label={code:main}]{code/main.py}
+\lstinputlisting[language=Python, caption={link_budget.py}, label={code:link_budget}]{code/link_budget.py}
+\lstinputlisting[language=Python, caption={components/communicators.py}, label={code:communicators}]{code/components/communicators.py}
+\lstinputlisting[language=Python, caption={components/antennas.py}, label={code:antennas}]{code/components/antennas.py}
+\lstinputlisting[language=Python, caption={signal_processing/modulation.py}, label={code:modulation}]{code/signal_processing/modulation.py}
+\lstinputlisting[language=Python, caption={propagation/utils.py}, label={code:propagation}]{code/propagation/utils.py}
+\lstinputlisting[language=Python, caption={orbits/utils.py}, label={code:orbits}]{code/orbits/utils.py}
+\lstinputlisting[language=Python, caption={constants.py}, label={code:const}]{code/constants.py}
+\lstinputlisting[language=Python, caption={propagation/conversions.py}, label={code:propagation_conv}]{code/propagation/conversions.py}
+\lstinputlisting[language=Python, caption={signal_processing/conversions.py}, label={code:signal_conv}]{code/signal_processing/conversions.py}
+\lstinputlisting[language=Python, caption={components/conversions.py}, label={code:component_conv}]{code/components/conversions.py}
+\lstinputlisting[language=Python, caption={orbits/conversions.py}, label={code:orbit_conv}]{code/orbits/conversions.py}
+%=================================================================
+%                           End Document
+%=================================================================
+\end{document}

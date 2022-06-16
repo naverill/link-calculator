@@ -55,10 +55,10 @@ class Link:
         self._eb_no = eb_no
         self._noise_power = noise_power
         self._noise_density = noise_density
-        self._eb_no_coded = None
-        self._carrier_to_noise_coded = None
         self.propagate_calculations()
 
+        if self._transmitter.transmit.modulation is not None:
+            self._transmitter.transmit.modulation.eb_no = self.eb_no
         if self._receiver.receive is not None:
             self._receiver.receive.power_density = (
                 self.receiver.receive.power_density_eirp(
@@ -70,6 +70,7 @@ class Link:
                 self._receiver.receive.modulation.carrier_power = (
                     self.receiver_carrier_power
                 )
+                self._receiver.receive.modulation.eb_no = self.eb_no
 
     @property
     def carrier_to_noise_density(self) -> float:
@@ -104,35 +105,17 @@ class Link:
                     * self.transmitter.transmit.modulation.bit_rate
                 )
             if self.transmitter.transmit.modulation.eb_no is not None:
-                self._eb_no = self.transmitter.transmit.modulation.eb_no
+                if self.transmitter.transmit.modulation.code is not None:
+                    self._eb_no = self.transmitter.transmit.modulation.eb_no_coded
+                else:
+                    self._eb_no = self.transmitter.transmit.modulation.eb_no
         return self._eb_no
-
-    @property
-    def eb_no_coded(self) -> float:
-        if (
-            self.transmitter.transmit.modulation is not None
-            and self.transmitter.transmit.modulation.code is not None
-        ):
-            self._eb_no_coded = self.transmitter.transmit.modulation.eb_no_coded
-        elif self.transmitter.transmit.modulation is not None:
-            self._eb_no_coded = self.transmitter.transmit.modulation.eb_no
-        return self._eb_no_coded
 
     @property
     def carrier_to_noise(self) -> float:
         if self._carrier_to_noise is None:
             if self._eb_no is not None and self._bandwidth_to_bit_rate is not None:
                 self._carrier_to_noise = self.eb_no / self.bandwidth_to_bit_rate
-        return self._carrier_to_noise
-
-    @property
-    def carrier_to_noise_coded(self) -> float:
-        if self._carrier_to_noise_coded is None:
-            if (
-                self._eb_no_coded is not None
-                and self._bandwidth_to_bit_rate is not None
-            ):
-                self._carrier_to_noise = self.eb_no_coded / self.bandwidth_to_bit_rate
         return self._carrier_to_noise
 
     @property
@@ -295,25 +278,6 @@ class Link:
                 {"name": "Slant Range", "unit": "km", "value": self.slant_range},
             ]
         )
-        if (
-            self.transmitter.transmit.modulation is not None
-            and self.transmitter.transmit.modulation.code is not None
-        ):
-            code = pd.DataFrame.from_records(
-                [
-                    {
-                        "name": "Coded Eb/No Ratio",
-                        "unit": "dB",
-                        "value": watt_to_decibel(self.eb_no_coded),
-                    },
-                    {
-                        "name": "Coded C/N Ratio",
-                        "unit": "dB",
-                        "value": watt_to_decibel(self.carrier_to_noise_coded),
-                    },
-                ]
-            )
-            summary = pd.concat([summary, code])
         receiver = self.receiver.summary()
         receiver.index = "Receiver " + receiver.index
 
@@ -347,12 +311,6 @@ class LinkBudget:
         )
 
     @property
-    def eb_no_coded(self) -> float:
-        return (self.uplink.eb_no_coded * self.downlink.eb_no_coded) / (
-            self.uplink.eb_no_coded + self._downlink.eb_no_coded
-        )
-
-    @property
     def uplink(self) -> Link:
         return self._uplink
 
@@ -370,24 +328,6 @@ class LinkBudget:
                 },
             ]
         )
-
-        if (
-            self.uplink.transmitter.transmit.modulation is not None
-            and self.uplink.transmitter.transmit.modulation.code is not None
-        ) or (
-            self.downlink.transmitter.transmit.modulation is not None
-            and self.downlink.transmitter.transmit.modulation.code is not None
-        ):
-            code = pd.DataFrame.from_records(
-                [
-                    {
-                        "name": "Coded Eb/No Ratio",
-                        "unit": "dB",
-                        "value": watt_to_decibel(self.eb_no_coded),
-                    },
-                ]
-            )
-            summary = pd.concat([summary, code])
 
         uplink = self.uplink.summary()
         uplink.rename(columns={"value": "Uplink", "unit": "Uplink unit"}, inplace=True)

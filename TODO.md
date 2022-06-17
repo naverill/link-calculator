@@ -4,3 +4,4 @@
 - Add example questions text to unit tests
 - Add Space Operations calculations
 - Add unit tests for online tests
+- Add docstrings to all classes + functions

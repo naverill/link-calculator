@@ -4,12 +4,12 @@ from link_calculator.orbits.utils import (
     angle_sat_to_gs_orbital_radius,
     slant_range,
 )
+from link_calculator.propagation.attenuation import free_space_loss_db, receive_power
 from link_calculator.propagation.conversions import (
     decibel_to_watt,
     frequency_to_wavelength,
     watt_to_decibel,
 )
-from link_calculator.propagation.utils import free_space_loss_db, receive_power
 
 
 def test_receive_power(

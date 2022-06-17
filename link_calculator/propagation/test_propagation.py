@@ -10,7 +10,7 @@ from link_calculator.conversions import (
     watt_to_decibel,
 )
 from link_calculator.orbits.utils import central_angle_orbital_radius, slant_range
-from link_calculator.propagation.utils import (
+from link_calculator.propagation.attenuation import (
     horizontal_reduction,
     rain_attenuation,
     rain_specific_attenuation,

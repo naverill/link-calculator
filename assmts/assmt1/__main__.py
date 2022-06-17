@@ -3,16 +3,12 @@ import pandas as pd
 import plotly.express as px
 
 from link_calculator.components import Antenna, GroundStation, Satellite
-from link_calculator.orbits.utils import (
-    angle_sat_to_ground_station,
-    elevation_angle,
-    slant_range,
-)
-from link_calculator.propagation.conversions import (
+from link_calculator.conversions import (
     decibel_to_watt,
     frequency_to_wavelength,
     watt_to_decibel,
 )
+from link_calculator.orbits.utils import central_angle, elevation_angle, slant_range
 from link_calculator.propagation.utils import receive_power
 
 
@@ -26,7 +22,7 @@ def q2(
     for sat in satellites:
         for gs in ground_stations:
             report[f"{sat.name}.Earth.Gamma.{gs.name}"] = report.apply(
-                lambda row: angle_sat_to_ground_station(
+                lambda row: central_angle(
                     gs.latitude,
                     gs.longitude,
                     row[f"{sat.name}.Earth.Latitude"],

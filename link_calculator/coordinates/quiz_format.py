@@ -11,8 +11,8 @@ from link_calculator.orbits.utils import (
 
 
 def test_period(orbital_radius):
-    period = period(orbital_radius)
-    print("Period (s)", period)
+    p = period(orbital_radius)
+    print("Period (s)", p)
 
 
 def test_azimuth(gs_lat, gs_long, sat_long):

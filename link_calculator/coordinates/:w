@@ -46,8 +46,7 @@ class Orbit:
         self._mean_motion = mean_motion
         self.propagate_calculations()
 
-    @property
-    def period(self) -> float:
+    def period(self, mu: float = EARTH_MU) -> float:
         """
         Calculate the period of the satellite's orbit according to Kepler's third law
 
@@ -58,7 +57,7 @@ class Orbit:
             period (float, s): the time taken for the satellite to complete a revolution
         """
         if self._period is None:
-            self._period = 2 * pi * sqrt(self.semimajor_axis**3 / self.mu)
+            self._period = 2 * pi * sqrt(self.semimajor_axis**3 / mu)
         return self._period
 
     @property
@@ -401,31 +400,26 @@ class EllipticalOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._time_since_periapsis is None:
-            if self._isset(
-                self._mean_motion, self._eccentric_anomaly, self._eccentricity
-            ):
+            if self._isset(self._mean_motion, self._eccentric_anomaly, self._eccentricity):
                 # (2.34)
-                self._time_since_periapsis = (
-                    radians(self.eccentric_anomaly)
-                    - self.eccentricity * sin(radians(self.eccenric_anomaly))
-                ) / self.mean_motion
+                self._time_since_periapsis = (radians(self.eccentric_anomaly) - self.eccentricity * sin(radians(self.eccenric_anomaly))) / self.mean_motion
         return self._time_since_periapsis
 
     @property
     def eccentric_anomaly(self) -> float:
         """
-        The eccentric anomaly traces a point on a circle, with radius equal to a,
+        The eccentric anomaly traces a point on a circle, with radius equal to a, 
         that circumscribes the elliptical orbit.
 
         Equations from Spacecraft Mission Design (1998)
         """
         if self._eccentric_anomaly is None:
-            if self._isset(self._eccentricity, self._true_anomaly):
+            if self._isset(self_eccentricity, self._true_anomaly):
                 # (2.35)
                 self._eccentric_anomaly = degrees(
                     acos(
-                        (self.eccentricity + cos(radians(self.true_anomaly))) / 1
-                        + self.eccentricity * cos(radians(self.true_anomaly))
+                        (self.eccentricity + cos(radians(self.true_anomaly))) / 
+                        1 + self.eccentricity * cos(radians(self.true_anomaly))
                     )
                 )
         return self._eccentric_anomaly
@@ -853,16 +847,14 @@ class HyperbolicOrbit(Orbit):
                 )
             elif self._isset(self._orbital_radius, self._excess_velocity):
                 # (2.57)
-                self._velocity = sqrt(
-                    (2 * self.mu / self.orbital_radius + self.excess_velocity**2)
-                )
+                self._velocity = sqrt((2 * self.mu / self.orbital_radius + self.excess_velocity**2))
         return self._velocity
 
     @property
     def excess_velocity(self) -> float:
         """
         Voo is the velocity in excess of the escape velocity and is called the hyperbolic
-        excess velocity (VHE) when Earth escape is intended
+        excess velocity (VHE) when Earth escape is intended 
 
         Equations from Spacecraft Mission Design (1998)
         """

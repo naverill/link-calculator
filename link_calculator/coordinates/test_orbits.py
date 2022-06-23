@@ -1,9 +1,13 @@
 from math import isclose, radians
 
 from link_calculator.constants import EARTH_POLAR_RADIUS, EARTH_RADIUS, SIDEREAL_DAY_S
+from link_calculator.geodeitc import GeodeticCoordinate
 from link_calculator.orbits.utils import (
-    GeodeticCoordinate,
+    CircularOrbit,
+    EllipticalOrbit,
+    HyperbolicOrbit,
     Orbit,
+    ParabolicPrbit,
     azimuth_intermediate,
     central_angle_orbital_radius,
     elevation_angle,
@@ -12,19 +16,26 @@ from link_calculator.orbits.utils import (
 )
 
 
-def test_period():
+def test_circular_period():
     ht = [250, 500, 1000, 10000]  # height
     pd = [5370, 5677, 6307, 20860]  # period
 
     for h, T in zip(ht, pd):
-        coord = Orbit(semi_major_axis=h + EARTH_RADIUS)
-        assert isclose(coord.period(), T, rel_tol=0.5)
+        coord = CircularOrbit(semi_major_axis=h + EARTH_RADIUS)
+        assert isclose(coord.period, T, rel_tol=0.5)
 
 
-def test_period_1():
+def test_circular_period_1():
     h = 23200
-    coord = Orbit(semi_major_axis=h + EARTH_RADIUS)
-    assert isclose(coord.period(), 50625, rel_tol=0.5)
+    coord = CircularOrbit(semi_major_axis=h + EARTH_RADIUS)
+    assert isclose(coord.period, 50625, rel_tol=0.5)
+
+
+def test_circular_velocity():
+    h = 150 * 1.852
+    coord = CircularOrbit(orbital_radius=h + EARTH_RADIUS)
+    assert isclose(coord.velocity, 7.739, rel_tol=0.5)
+    assert isclose(coord.period, 5404, rel_tol=0.5)
 
 
 def test_percentage_of_coverage():

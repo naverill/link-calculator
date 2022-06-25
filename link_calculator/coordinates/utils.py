@@ -6,7 +6,7 @@ import pandas as pd
 from link_calculator.constants import EARTH_MU, EARTH_RADIUS
 
 
-def central_angle_orbital_radius(
+def central_angle_radius(
     orbital_radius: float, planet_radius: float = EARTH_RADIUS, elevation: float = 0
 ):
     """

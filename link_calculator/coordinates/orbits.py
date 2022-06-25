@@ -17,11 +17,17 @@ class Orbit:
         arg_of_periapsis: float = None,
         true_anomaly: float = None,
         period: float = None,
-        orbital_radius: float = None,
+        radius: float = None,
         specific_energy: float = None,
         velocity: float = None,
         escape_velocity: float = None,
         mean_motion: float = None,
+        flight_path_angle: float = None,
+        specific_momentum: float = None,
+        periapsis_radius: float = None,
+        apoapsis_radius: float = None,
+        eccentric_anomaly: float = None,
+        time_since_periapsis: float = None,
         mu: float = EARTH_MU,
     ):
         """
@@ -38,38 +44,29 @@ class Orbit:
         self._arg_of_periapsis = arg_of_periapsis
         self._true_anomaly = true_anomaly
         self._period = period
-        self._orbital_radius = orbital_radius
+        self._radius = radius
         self._mu = mu
         self._specific_energy = specific_energy
         self._velocity = velocity
+        self._specific_momentum = specific_momentum
         self._escape_velocity = escape_velocity
+        self._flight_path_angle = flight_path_angle
         self._mean_motion = mean_motion
+        self._periapsis_radius = periapsis_radius
+        self._apoapsis_radius = apoapsis_radius
+        self._time_since_periapsis = time_since_periapsis
+        self._eccentric_anomaly = eccentric_anomaly
         self.propagate_calculations()
-
-    @property
-    def period(self) -> float:
-        """
-        Calculate the period of the satellite's orbit according to Kepler's third law
-
-            mu (float, km^3/s^-2, optional): Kepler's gravitational constant
-
-        Returns
-        ------
-            period (float, s): the time taken for the satellite to complete a revolution
-        """
-        if self._period is None:
-            self._period = 2 * pi * sqrt(self.semimajor_axis**3 / self.mu)
-        return self._period
 
     @property
     def semimajor_axis(self) -> float:
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self._semimajor_axis is not None:
+        if self._semimajor_axis is None:
             if self._isset(self._specific_energy):
                 # (2.10)
-                self._semimajor_axis = -self._mu / (2 * self.specific_energy)
+                self._semimajor_axis = -self.mu / (2 * self.specific_energy)
         return self._semimajor_axis
 
     @property
@@ -81,28 +78,36 @@ class Orbit:
         return self._mu
 
     @property
-    def orbital_radius(self) -> float:
+    def flight_path_angle(self) -> float:
+        return self._flight_path_angle
+
+    @property
+    def radius(self) -> float:
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self._orbital_radius is None:
-            # (2.22)
-            self._orbital_radius = (
-                self.semimajor_axis
-                * (1 - self.eccentricity**2)
-                / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
-            )
-        return self._orbital_radius
+        if self._radius is None:
+            if self._isset(
+                self._eccentricity, self._true_anomaly, self._semimajor_axis
+            ):
+                # (2.22)
+                self._radius = (
+                    self.semimajor_axis
+                    * (1 - self.eccentricity**2)
+                    / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
+                )
+        return self._radius
 
+    @property
     def eccentricity(self) -> float:
         if self._eccentricity is None:
-            if self._isset(self._semimajor_axis, self._semiminor_axis):
-                self._eccentricity = (
-                    np.sqrt(self.semimajor_axis**2, self.semiminor_axis**2)
-                    / self.semimajor_axis
+            if self._isset(self._specific_momentum, self._semimajor_axis):
+                self._eccentricity = sqrt(
+                    1 - self.specific_momentum**2 / (self.mu * self.semimajor_axis)
                 )
         return self._eccentricity
 
+    @property
     def specific_energy(self) -> float:
         """
         Specific orbital energy (float, J/kg = m2⋅s−2): the constant sum
@@ -114,9 +119,7 @@ class Orbit:
         if self._specific_energy is None:
             if self._isset(self._velocity, self._radius):
                 # (2.8)
-                self._specific_energy = (
-                    self.velocity**2 / 2 - self.mu / self.orbital_radius
-                )
+                self._specific_energy = self.velocity**2 / 2 - self.mu / self.radius
             elif self._isset(self._semimajor_axis):
                 # (2.9)
                 self._specific_energy = -self.mu / (2 * self.semimajor_axis)
@@ -128,17 +131,26 @@ class Orbit:
         Equations from Spacecraft Mission Design (1998)
         """
         if self._velocity is None:
-            if self._isset(self._specific_energy, self._orbital_radius):
+            if self._isset(self._specific_energy, self._radius):
                 # (2.8)
                 self._velocity = sqrt(
-                    2 * (self.specific_energy + self.mu / self.orbital_radius)
+                    2 * (self.specific_energy + self.mu / self.radius)
                 )
-            elif self._isset(self._orbital_radius, self._semimajor_axis):
+            elif self._isset(self._radius, self._semimajor_axis):
                 # (2.14)
                 self._velocity = sqrt(
-                    (2 * self.mu / self.orbital_radius - self.mu / self.semimajor_axis)
+                    (2 * self.mu / self.radius - self.mu / self.semimajor_axis)
                 )
         return self._velocity
+
+    @property
+    def specific_momentum(self) -> float:
+        if self._specific_momentum is None:
+            if self._isset(self._radius, self._velocity, self._flight_path_angle):
+                self._specific_momentum = (
+                    self.radius * self.velocity * cos(radians(self.flight_path_angle))
+                )
+        return self._specific_momentum
 
     def propagate_calculations(self) -> float:
         for _ in range(3):
@@ -160,12 +172,16 @@ class EllipticalOrbit(Orbit):
         arg_of_periapsis: float = None,
         true_anomaly: float = None,
         period: float = None,
-        orbital_radius: float = None,
+        radius: float = None,
         specific_energy: float = None,
         velocity: float = None,
         periapsis_radius: float = None,
+        escape_velocity: float = None,
         apoapsis_radius: float = None,
+        flight_path_angle: float = None,
         mean_motion: float = None,
+        specific_momentum: float = None,
+        eccentric_anomaly: float = None,
         mu: float = EARTH_MU,
     ):
         super().__init__(
@@ -177,10 +193,16 @@ class EllipticalOrbit(Orbit):
             arg_of_periapsis=arg_of_periapsis,
             true_anomaly=true_anomaly,
             period=period,
-            orbital_radius=orbital_radius,
+            radius=radius,
             specific_energy=specific_energy,
             velocity=velocity,
             mean_motion=mean_motion,
+            escape_velocity=escape_velocity,
+            flight_path_angle=flight_path_angle,
+            specific_momentum=specific_momentum,
+            periapsis_radius=periapsis_radius,
+            apoapsis_radius=apoapsis_radius,
+            eccentric_anomaly=eccentric_anomaly,
             mu=mu,
         )
 
@@ -192,7 +214,7 @@ class EllipticalOrbit(Orbit):
         if self._eccentricity is None:
             if self._isset(self._semimajor_axis, self._semiminor_axis):
                 self._eccentricity = (
-                    np.sqrt(self.semimajor_axis**2, self.semiminor_axis**2)
+                    np.sqrt(self.semimajor_axis**2 - self.semiminor_axis**2)
                     / self.semimajor_axis
                 )
             elif self._isset(self._semimajor_axis, self._apoapsis_radius):
@@ -206,7 +228,24 @@ class EllipticalOrbit(Orbit):
                 self._eccentricity = (self.apoapsis_radius - self.periapsis_radius) / (
                     self.apoapsis_radius + self.periapsis_radius
                 )
+            elif self._isset(self._specific_momentum, self._semimajor_axis):
+                self._eccentricity = sqrt(
+                    1 - self.specific_momentum**2 / (self.mu * self.semimajor_axis)
+                )
         return self._eccentricity
+
+    @staticmethod
+    def transfer_eccentricity(
+        radius1: float, true_anomaly1: float, radius2: float, true_anomaly2: float
+    ) -> float:
+        """
+        Calculate the eccentricity of an elliptical orbit between two given
+        points
+        """
+        return (radius2 - radius1) / (
+            radius1 * cos(radians(true_anomaly1))
+            - radius2 * cos(radians(true_anomaly2))
+        )
 
     @property
     def flight_path_angle(self) -> float:
@@ -251,28 +290,28 @@ class EllipticalOrbit(Orbit):
         return self._period
 
     @property
-    def orbital_radius(self) -> float:
+    def radius(self) -> float:
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self._orbital_radius is None:
+        if self._radius is None:
             if self._isset(
                 self._semimajor_axis, self._eccentricity, self._true_anomaly
             ):
                 # (2.22)
-                self._orbital_radius = (
+                self._radius = (
                     self.semimajor_axis
                     * (1 - self.eccentricity**2)
                     / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
                 )
             elif self._isset(self._eccentricity, self._periapsis_radius):
                 # (2.23)
-                self._orbital_radius = (
+                self._radius = (
                     self.periapsis_radius
                     * (1 + self.eccentricity)
                     / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
                 )
-        return self._orbital_radius
+        return self._radius
 
     @property
     def apoapsis_radius(self) -> float:
@@ -286,10 +325,10 @@ class EllipticalOrbit(Orbit):
             elif self._isset(self._semimajor_axis, self._periapsis_radius):
                 # (2.42)
                 self._apoapsis_radius = 2 * self.semimajor_axis - self.periapsis_radius
-            elif self._isset(self._perigee_radius, self._eccentricity):
+            elif self._isset(self._periapsis_radius, self._eccentricity):
                 # (2.43)
                 self._apoapsis_radius = (
-                    self.perigee_radius
+                    self.periapsis_radius
                     * (1 + self.eccentricity)
                     / (1 - self.eccentricity)
                 )
@@ -314,16 +353,14 @@ class EllipticalOrbit(Orbit):
             elif self._isset(self._semimajor_axis, self._apoapsis_radius):
                 # (2.46)
                 self._periapsis_radius = 2 * self.semimajor_axis - self.apoasis_radius
-            elif self._isset(
-                self.orbital_radius, self._eccentricity, self._true_anomaly
-            ):
+            elif self._isset(self._radius, self._eccentricity, self._true_anomaly):
                 # (2.29)
                 self._periapsis_radius = (
-                    self.orbital_radius
+                    self.radius
                     * (1 + self.eccentricity * cos(radians(self.true_anomaly)))
                     / (1 + self.eccentricity)
                 )
-        return self._peiapsis_radius
+        return self._periapsis_radius
 
     @property
     def semimajor_axis(self) -> float:
@@ -336,17 +373,17 @@ class EllipticalOrbit(Orbit):
                 self._semimajor_axis = (
                     self.periapsis_radius + self.apoapsis_radius
                 ) / 2
-            elif self._isset(self._velocity, self._orbital_radius):
+            elif self._isset(self._velocity, self._radius):
                 # (2.47)
-                self._semimajor_axis = (self.mu * self.orbital_radius) / (
-                    2 * self.mu - self.velocity**2 * self.orbital_radius
+                self._semimajor_axis = (self.mu * self.radius) / (
+                    2 * self.mu - self.velocity**2 * self.radius
                 )
-            elif self.isset(self._periapsis_radius, self._eccentricity):
+            elif self._isset(self._periapsis_radius, self._eccentricity):
                 # (2.48)
-                self._semimajor_axis = self.periapsis_radius * (1 - self.eccenttricity)
+                self._semimajor_axis = self.periapsis_radius / (1 - self.eccentricity)
             elif self._isset(self._apoapsis_radius, self._eccentricity):
                 # (2.49)
-                self._semimajor_axis = self.apoapsis_radius * (1 + self.eccenticity)
+                self._semimajor_axis = self.apoapsis_radius / (1 + self.eccenticity)
         return self._semimajor_axis
 
     @property
@@ -355,15 +392,13 @@ class EllipticalOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._true_anomaly is None:
-            if self._isset(
-                self._periapsis_radius, self._eccentricity, self._orbital_radius
-            ):
+            if self._isset(self._periapsis_radius, self._eccentricity, self._radius):
                 # (2.24)
                 self._true_anomaly = degrees(
                     acos(
                         self.periapsis_radius
                         * (1 + self.eccentricity)
-                        / (self.orbital_radius * self.eccentricity)
+                        / (self.radius * self.eccentricity)
                         - (1 / self.eccentricity)
                     )
                 )
@@ -373,7 +408,7 @@ class EllipticalOrbit(Orbit):
                     acos(
                         self.semimajor_axis
                         * (1 - self.eccentricity**2)
-                        / (self.orbital_radius * self.eccentricity)
+                        / (self.radius * self.eccentricity)
                         - (1 / self.eccentricity)
                     )
                 )
@@ -385,10 +420,11 @@ class EllipticalOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._velocity is None:
-            if self._isset(self._orbital_radius, self._semimajor_axis):
+            if self._isset(self._radius, self._semimajor_axis):
                 # (2.14)
+                print(self.radius, self.mu, self.semimajor_axis)
                 self._velocity = sqrt(
-                    2 * self.mu / self.orbital_radius - self.mu / self.semimajor_axis
+                    2 * self.mu / self.radius - self.mu / self.semimajor_axis
                 )
         return self._velocity
 
@@ -407,7 +443,7 @@ class EllipticalOrbit(Orbit):
                 # (2.34)
                 self._time_since_periapsis = (
                     radians(self.eccentric_anomaly)
-                    - self.eccentricity * sin(radians(self.eccenric_anomaly))
+                    - self.eccentricity * sin(radians(self.eccentric_anomaly))
                 ) / self.mean_motion
         return self._time_since_periapsis
 
@@ -424,8 +460,8 @@ class EllipticalOrbit(Orbit):
                 # (2.35)
                 self._eccentric_anomaly = degrees(
                     acos(
-                        (self.eccentricity + cos(radians(self.true_anomaly))) / 1
-                        + self.eccentricity * cos(radians(self.true_anomaly))
+                        (self.eccentricity + cos(radians(self.true_anomaly)))
+                        / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
                     )
                 )
         return self._eccentric_anomaly
@@ -436,16 +472,18 @@ class CircularOrbit(EllipticalOrbit):
         self,
         semimajor_axis: float = None,
         semiminor_axis: float = None,
-        eccentricity: float = None,
+        eccentricity: float = 0,
         inclination: float = float,
         raan: float = None,
         arg_of_periapsis: float = None,
         true_anomaly: float = None,
         period: float = None,
-        orbital_radius: float = None,
+        radius: float = None,
         specific_energy: float = None,
         velocity: float = None,
         escape_velocity: float = None,
+        flight_path_angle: float = None,
+        specific_momentum: float = None,
         mu: float = EARTH_MU,
     ):
         super().__init__(
@@ -457,11 +495,13 @@ class CircularOrbit(EllipticalOrbit):
             arg_of_periapsis=arg_of_periapsis,
             true_anomaly=true_anomaly,
             period=period,
-            orbital_radius=orbital_radius,
+            radius=radius,
             specific_energy=specific_energy,
             velocity=velocity,
             mu=mu,
             escape_velocity=escape_velocity,
+            specific_momentum=specific_momentum,
+            flight_path_angle=flight_path_angle,
         )
 
     @property
@@ -470,9 +510,9 @@ class CircularOrbit(EllipticalOrbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._velocity is None:
-            if self._isset(self._orbital_radius):
+            if self._isset(self._radius):
                 # (2.6)
-                self._velocity = sqrt(self.mu / self.orbital_radius)
+                self._velocity = sqrt(self.mu / self.radius)
         return self._velocity
 
     @property
@@ -480,39 +520,26 @@ class CircularOrbit(EllipticalOrbit):
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self.__escape_velocity is None:
-            if self._isset(self._orbital_radius):
+        if self._escape_velocity is None:
+            if self._isset(self._radius):
                 # (2.15)
-                self.__escape_velocity = sqrt(2 * self.mu / self.orbital_radius)
+                self.__escape_velocity = sqrt(2 * self.mu / self.radius)
         return self._escape_velocity
 
     @property
-    def period(self) -> float:
+    def radius(self) -> float:
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self._period is not None:
-            if self._isset(self._orbital_radius):
-                # (2.7)
-                self._period = 2 * pi * sqrt(self.orbital_radius**3 / self.mu)
-        return self._period
-
-    @property
-    def orbital_radius(self) -> float:
-        """
-        Equations from Spacecraft Mission Design (1998)
-        """
-        if self._orbital_radius is None:
+        if self._radius is None:
             if self._isset(self._period):
                 # (2.51)
-                self._orbital_radius = (
-                    (self.period**2 * self.mu) / (4 * pi**2)
-                ) ** (1 / 3)
+                self._radius = ((self.period**2 * self.mu) / (4 * pi**2)) ** (1 / 3)
             elif self._isset(self._semimajor_axis):
-                self._orbital_radius = self._semimajor_axis
+                self._radius = self.semimajor_axis
             elif self._isset(self._semiminor_axis):
-                self._orbital_radius = self.semiminor_axis
-        return self._orbital_radius
+                self._radius = self.semiminor_axis
+        return self._radius
 
     @property
     def semimajor_axis(self) -> float:
@@ -520,8 +547,8 @@ class CircularOrbit(EllipticalOrbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._semimajor_axis is None:
-            if self._isset(self._orbital_radius):
-                self._semimajor_axis = self.orbital_radius
+            if self._isset(self._radius):
+                self._semimajor_axis = self.radius
             elif self._isset(self._semiminor_axis):
                 self._semimajor_axis = self.semiminor_axis
         return self._semimajor_axis
@@ -532,11 +559,29 @@ class CircularOrbit(EllipticalOrbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._semiminor_axis is None:
-            if self._isset(self._orbital_radius):
-                self._semiminor_axis = self.orbital_radius
+            if self._isset(self._radius):
+                self._semiminor_axis = self.radius
             elif self._isset(self._semimajor_axis):
                 self._semiminor_axis = self.semimajor_axis
         return self._semiminor_axis
+
+    @property
+    def period(self) -> float:
+        """
+        Calculate the period of the satellite's orbit according to Kepler's third law
+
+            mu (float, km^3/s^-2, optional): Kepler's gravitational constant
+
+        Returns
+        ------
+            period (float, s): the time taken for the satellite to complete a revolution
+
+        Equations from Spacecraft Mission Design (1998)
+        """
+        if self._period is None:
+            if self._isset(self._semimajor_axis):
+                self._period = 2 * pi * sqrt(self.semimajor_axis**3 / self.mu)
+        return self._period
 
 
 class ParabolicOrbit(Orbit):
@@ -550,10 +595,12 @@ class ParabolicOrbit(Orbit):
         arg_of_periapsis: float = None,
         true_anomaly: float = None,
         period: float = None,
-        orbital_radius: float = None,
+        radius: float = None,
         specific_energy: float = None,
         velocity: float = None,
         escape_velocity: float = None,
+        specific_momentum: float = None,
+        flight_path_angle: float = None,
         mu: float = EARTH_MU,
     ):
         super().__init__(
@@ -565,11 +612,13 @@ class ParabolicOrbit(Orbit):
             arg_of_periapsis=arg_of_periapsis,
             true_anomaly=true_anomaly,
             period=period,
-            orbital_radius=orbital_radius,
+            radius=radius,
             specific_energy=specific_energy,
             velocity=velocity,
             mu=mu,
+            specific_momentum=specific_momentum,
             escape_velocity=escape_velocity,
+            flight_path_angle=flight_path_angle,
         )
 
     @property
@@ -578,8 +627,8 @@ class ParabolicOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._velocity is None:
-            if self._isset(self._orbital_radius):
-                self._velocity = sqrt(self.mu / self.orbital_radius)
+            if self._isset(self._radius):
+                self._velocity = sqrt(self.mu / self.radius)
         return self._velocity
 
     @property
@@ -588,20 +637,18 @@ class ParabolicOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._period is not None:
-            if self._isset(self._orbital_radius):
-                self._period = 2 * pi * sqrt(self.orbital_radius**3 / self.mu)
+            if self._isset(self._radius):
+                self._period = 2 * pi * sqrt(self.radius**3 / self.mu)
         return self._period
 
     @property
-    def orbital_radius(self) -> float:
+    def radius(self) -> float:
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self._orbital_radius is None:
-            self._orbital_radius = ((self.period**2 * self.mu) / (4 * pi**2)) ** (
-                1 / 3
-            )
-        return self._orbital_radius
+        if self._radius is None:
+            self._radius = ((self.period**2 * self.mu) / (4 * pi**2)) ** (1 / 3)
+        return self._radius
 
 
 class HyperbolicOrbit(Orbit):
@@ -615,12 +662,14 @@ class HyperbolicOrbit(Orbit):
         arg_of_periapsis: float = None,
         true_anomaly: float = None,
         period: float = None,
-        orbital_radius: float = None,
+        radius: float = None,
         specific_energy: float = None,
         velocity: float = None,
         escape_velocity: float = None,
         angle_of_asymptote: float = None,
         asymptote_true_anomaly: float = None,
+        specific_momentum: float = None,
+        flight_path_angle: float = None,
         mu: float = EARTH_MU,
     ):
         self._angle_of_asymptote = self._angle_of_asymptote
@@ -634,11 +683,13 @@ class HyperbolicOrbit(Orbit):
             arg_of_periapsis=arg_of_periapsis,
             true_anomaly=true_anomaly,
             period=period,
-            orbital_radius=orbital_radius,
+            radius=radius,
             specific_energy=specific_energy,
             velocity=velocity,
+            specific_momentum=specific_momentum,
             mu=mu,
             escape_velocity=escape_velocity,
+            flight_path_angle=flight_path_angle,
         )
 
     @property
@@ -712,21 +763,21 @@ class HyperbolicOrbit(Orbit):
         return self._mean_motion
 
     @property
-    def orbital_radius(self) -> float:
+    def radius(self) -> float:
         """
         Equations from Spacecraft Mission Design (1998)
         """
-        if self._orbital_radius is None:
+        if self._radius is None:
             if self._isset(
                 self._semimajor_axis, self._eccentricity, self._true_anomaly
             ):
                 # (2.51)
-                self._orbital_radius = (
+                self._radius = (
                     self.semimajor_axis
                     * (self.eccentricity**2 - 1)
                     / (1 + self.eccentricity * cos(radians(self.true_anomaly)))
                 )
-        return self._orbital_radius
+        return self._radius
 
     @property
     def periapsis_radius(self) -> float:
@@ -812,14 +863,12 @@ class HyperbolicOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._true_anomaly is None:
-            if self._isset(
-                self._semimajor_axis, self._eccentricity, self._orbital_radius
-            ):
+            if self._isset(self._semimajor_axis, self._eccentricity, self._radius):
                 # (2.52)
                 self._true_anomaly = (
                     self.semimajor_axis
                     * (self.eccentricity**2 - 1)
-                    / (self.orbital_radius * self.eccentricity)
+                    / (self.radius * self.eccentricity)
                     - 1 / self.eccenricity
                 )
         return self._true_anomaly
@@ -846,15 +895,15 @@ class HyperbolicOrbit(Orbit):
         Equations from Spacecraft Mission Design (1998)
         """
         if self._velocity is None:
-            if self._isset(self._orbital_radius, self._semimajor_axis):
+            if self._isset(self._radius, self._semimajor_axis):
                 # (2.16)
                 self._velocity = sqrt(
-                    (2 * self.mu) / self.orbital_radius + self.mu / self.semimajor_axis
+                    (2 * self.mu) / self.radius + self.mu / self.semimajor_axis
                 )
-            elif self._isset(self._orbital_radius, self._excess_velocity):
+            elif self._isset(self._radius, self._excess_velocity):
                 # (2.57)
                 self._velocity = sqrt(
-                    (2 * self.mu / self.orbital_radius + self.excess_velocity**2)
+                    (2 * self.mu / self.radius + self.excess_velocity**2)
                 )
         return self._velocity
 
